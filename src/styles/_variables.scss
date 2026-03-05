@@ -1,0 +1,54 @@
+// ==========================================================================
+// IDENTIDAD VISUAL DE BIZCORE — Variables CSS globales
+// Concepto: Sala de trading meets cuaderno de contabilidad colombiano.
+// Densa en información, pero con jerarquía visual perfecta.
+// ==========================================================================
+
+:root {
+  // ── Fondos (escala de grises azulados, del más oscuro al más claro) ──
+  --color-bg-app:       #0F1117;  // fondo principal de la app (casi negro)
+  --color-bg-sidebar:   #161B27;  // sidebar — ligeramente más claro
+  --color-bg-surface:   #1E2435;  // tarjetas, tablas, formularios
+  --color-bg-elevated:  #252B3D;  // hover states, modales
+
+  // ── Acento ámbar — contrasta con el slate frío, no es genérico ──
+  --color-accent:       #F5A623;
+  --color-accent-hover: #E8951A;
+  --color-accent-dim:   rgba(245, 166, 35, 0.15); // fondos sutiles de alerta
+
+  // ── Texto ──
+  --color-text-primary: #E8ECF4;  // texto principal (no blanco puro — menos fatiga)
+  --color-text-muted:   #7A8499;  // labels, placeholders, metadata
+  --color-text-disabled:#4A5168;  // elementos deshabilitados
+
+  // ── Estados semánticos ──
+  --color-success:      #22C55E;  // stock OK, usuario activo, completado
+  --color-warning:      #F5A623;  // stock bajo, pendiente (= acento)
+  --color-danger:       #EF4444;  // error, cancelado, inactivo
+  --color-info:         #3B82F6;  // información neutral
+
+  // ── Bordes ──
+  --color-border:       rgba(255, 255, 255, 0.08); // bordes sutiles
+  --color-border-focus: #F5A623;  // borde de inputs en focus
+
+  // ── Tipografía ──
+  --font-display: 'Syne', sans-serif;           // h1, h2, logo
+  --font-ui:      'DM Sans', sans-serif;         // todo el resto de la UI
+  --font-data:    'JetBrains Mono', monospace;   // precios, IDs, fechas
+
+  // ── Espaciado base ──
+  --spacing-xs:  4px;
+  --spacing-sm:  8px;
+  --spacing-md:  16px;
+  --spacing-lg:  24px;
+  --spacing-xl:  32px;
+  --spacing-2xl: 48px;
+
+  // ── Radios de borde ──
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+
+  // ── Transiciones ──
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}

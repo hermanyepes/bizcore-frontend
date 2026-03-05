@@ -1,0 +1,43 @@
+// ==========================================================================
+// KEYFRAMES GLOBALES DE BIZCORE
+// Principio: una animación de impacto bien ejecutada vale más
+// que diez micro-interacciones genéricas.
+// ==========================================================================
+
+// Entrada de elementos (tablas, tarjetas) — sube suavemente desde abajo
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Transición entre páginas — fade simple al navegar entre módulos
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Clases de utilidad para aplicar las animaciones ──
+
+// Aplica slideIn a cualquier elemento que deba "entrar" en pantalla
+.animate-slide-in {
+  animation: slideIn 300ms var(--transition-base) both;
+}
+
+// Aplica fadeIn a páginas completas al navegar
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out both;
+}
+
+// Efecto "cortina" en filas de tabla — cada fila entra con un delay escalonado.
+// Uso: class="animate-stagger" con --stagger-index como variable CSS inline.
+// Ejemplo: <tr style="--stagger-index: 2">
+.animate-stagger {
+  animation: slideIn 300ms ease-out both;
+  animation-delay: calc(var(--stagger-index, 0) * 40ms);
+}

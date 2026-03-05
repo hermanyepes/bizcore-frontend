@@ -1,0 +1,42 @@
+// ==========================================================================
+// RESET CSS MÍNIMO
+// No reinventamos el wheel — solo neutralizamos los defaults del navegador
+// que más nos molestan. El resto lo maneja Angular Material.
+// ==========================================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;  // el padding no infla el tamaño del elemento
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  // Mejora el renderizado de fuentes en pantallas de alta densidad
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Las imágenes no se desbordan de su contenedor
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+// Los inputs heredan la fuente del body (el navegador NO lo hace por defecto)
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+// Elimina el estilo de lista cuando se usa lista como componente de UI
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}

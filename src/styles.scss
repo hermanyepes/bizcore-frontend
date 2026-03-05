@@ -1,0 +1,75 @@
+// ==========================================================================
+// ESTILOS GLOBALES DE BIZCORE
+// REGLA SASS: todos los @use deben ir PRIMERO, antes de cualquier otro código.
+// ==========================================================================
+
+// Dependencias externas
+@use '@angular/material' as mat;
+
+// Nuestros parciales (@use moderno, reemplaza el deprecado @import)
+@use 'styles/variables';
+@use 'styles/reset';
+@use 'styles/animations';
+
+// ── Tema de Angular Material ──
+// Material 3 con modo oscuro explícito.
+// mat.$azure-palette es un azul-gris neutral — buena base para nuestro slate.
+html {
+  height: 100%;
+
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$azure-palette,
+    ),
+    typography: 'DM Sans',
+    density: 0,
+  ));
+}
+
+// ── Estilos base de la app ──
+body {
+  // Modo oscuro explícito — no depende de las preferencias del sistema
+  color-scheme: dark;
+
+  // Usamos nuestros colores, no los de Material
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+  margin: 0;
+}
+
+// ── Tipografía de títulos ──
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+// ── Datos numéricos e IDs ──
+.data,
+code {
+  font-family: var(--font-data);
+}
+
+// ── Scrollbar personalizada (solo Chromium/WebKit) ──
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+
+  &:hover {
+    background: var(--color-text-disabled);
+  }
+}
