@@ -1,0 +1,139 @@
+<section class="login-page">
+
+  <div class="login-card">
+
+    <!-- Encabezado -->
+    <header class="login-card__header">
+      <h1 class="login-card__title">BizCore</h1>
+      <p class="login-card__subtitle">Ingresa tus credenciales para continuar</p>
+    </header>
+
+    <!--
+      [formGroup]="form"   → conecta este <form> con el FormGroup definido en el TS
+      (ngSubmit)           → cuando el usuario hace submit, llama onSubmit() del TS
+                             (funciona con Enter y con clic en el botón de tipo submit)
+    -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="login-card__form">
+
+      <!-- ---------------------------------------------------------------- -->
+      <!-- Campo: Email                                                      -->
+      <!-- ---------------------------------------------------------------- -->
+      <div class="form-field">
+        <label for="email" class="form-field__label">Correo electrónico</label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-field__input"
+          [class.form-field__input--error]="emailControl.invalid && emailControl.touched"
+          placeholder="admin@bizcore.com"
+          autocomplete="email"
+        />
+
+        <!--
+          Mensajes de error — solo visibles cuando el campo fue tocado Y tiene error.
+          emailControl.errors?.['required']  → el error específico del validador Required
+          emailControl.errors?.['email']     → el error del validador Email
+          El operador ?. evita un crash si errors es null (cuando no hay errores)
+        -->
+        @if (emailControl.touched) {
+          @if (emailControl.errors?.['required']) {
+            <span class="form-field__error">El correo es obligatorio.</span>
+          } @else if (emailControl.errors?.['email']) {
+            <span class="form-field__error">Escribe un correo válido.</span>
+          }
+        }
+      </div>
+
+      <!-- ---------------------------------------------------------------- -->
+      <!-- Campo: Contraseña                                                 -->
+      <!-- ---------------------------------------------------------------- -->
+      <div class="form-field">
+        <label for="password" class="form-field__label">Contraseña</label>
+
+        <div class="form-field__input-wrapper">
+          <!--
+            [type] es un binding dinámico: cambia entre "password" y "text"
+            según el signal showPassword() — eso alterna la visibilidad
+          -->
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            class="form-field__input"
+            [class.form-field__input--error]="passwordControl.invalid && passwordControl.touched"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+
+          <!-- Botón para mostrar/ocultar contraseña -->
+          <button
+            type="button"
+            class="form-field__toggle"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <!-- Ojo abierto cuando la contraseña está oculta, ojo cerrado cuando visible -->
+            @if (showPassword()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+          </button>
+        </div>
+
+        @if (passwordControl.touched) {
+          @if (passwordControl.errors?.['required']) {
+            <span class="form-field__error">La contraseña es obligatoria.</span>
+          } @else if (passwordControl.errors?.['minlength']) {
+            <span class="form-field__error">Mínimo 8 caracteres.</span>
+          }
+        }
+      </div>
+
+      <!-- ---------------------------------------------------------------- -->
+      <!-- Error global — fallo de red o credenciales incorrectas           -->
+      <!-- ---------------------------------------------------------------- -->
+      @if (errorMessage()) {
+        <div class="login-card__alert" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- ---------------------------------------------------------------- -->
+      <!-- Botón de submit                                                   -->
+      <!-- ---------------------------------------------------------------- -->
+      <!--
+        [disabled]="isLoading()"  → desactiva el botón mientras espera la respuesta
+        Esto evita que el usuario envíe la petición dos veces seguidas
+      -->
+      <button
+        type="submit"
+        class="login-card__submit"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner" aria-hidden="true"></span>
+          Ingresando...
+        } @else {
+          Ingresar
+        }
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
