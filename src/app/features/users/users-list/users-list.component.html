@@ -1,0 +1,130 @@
+<!-- Bloque BEM raíz: users-list -->
+<div class="users-list">
+
+  <!-- Encabezado de la sección -->
+  <div class="users-list__header">
+    <h1 class="users-list__title">Usuarios</h1>
+    <span class="users-list__count">
+      @if (!isLoading()) {
+        {{ totalItems() }} registros
+      }
+    </span>
+  </div>
+
+  <!-- Estado: cargando -->
+  @if (isLoading()) {
+    <div class="users-list__loading">
+      <span>Cargando usuarios...</span>
+    </div>
+  }
+
+  <!-- Estado: datos disponibles -->
+  @if (!isLoading()) {
+    <div class="users-list__table-wrapper">
+      <table class="users-list__table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- @for es la nueva sintaxis de Angular 17+ (reemplaza *ngFor) -->
+          @for (user of users(); track user.document_id) {
+            <tr class="users-list__row">
+
+              <!-- Nombre + documento -->
+              <td class="users-list__cell users-list__cell--name">
+                <span class="users-list__full-name">{{ user.full_name }}</span>
+                <span class="users-list__doc-id">{{ user.document_id }}</span>
+              </td>
+
+              <!-- Email -->
+              <td class="users-list__cell">{{ user.email }}</td>
+
+              <!-- Rol — badge con color según el valor -->
+              <td class="users-list__cell">
+                <span
+                  class="users-list__badge"
+                  [class.users-list__badge--admin]="user.role === 'Administrador'"
+                  [class.users-list__badge--employee]="user.role === 'Empleado'"
+                >
+                  {{ user.role }}
+                </span>
+              </td>
+
+              <!-- Estado activo/inactivo -->
+              <td class="users-list__cell">
+                <span
+                  class="users-list__status"
+                  [class.users-list__status--active]="user.is_active"
+                  [class.users-list__status--inactive]="!user.is_active"
+                >
+                  {{ user.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <!-- Link a la vista de detalle -->
+              <td class="users-list__cell">
+                <a
+                  class="users-list__link"
+                  [routerLink]="['/users', user.document_id]"
+                >
+                  Ver detalle
+                </a>
+              </td>
+
+            </tr>
+          } @empty {
+            <!-- @empty se muestra cuando el array está vacío -->
+            <tr>
+              <td colspan="5" class="users-list__empty">
+                No se encontraron usuarios.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginador — solo visible si hay más de una página -->
+    @if (totalPages() > 1) {
+      <div class="users-list__pagination">
+
+        <button
+          class="users-list__page-btn"
+          type="button"
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)"
+        >
+          ‹
+        </button>
+
+        @for (n of pageNumbers(); track n) {
+          <button
+            class="users-list__page-btn"
+            type="button"
+            [class.users-list__page-btn--active]="n === currentPage()"
+            (click)="goToPage(n)"
+          >
+            {{ n }}
+          </button>
+        }
+
+        <button
+          class="users-list__page-btn"
+          type="button"
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)"
+        >
+          ›
+        </button>
+
+      </div>
+    }
+  }
+
+</div>

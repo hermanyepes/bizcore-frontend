@@ -24,6 +24,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
+      // Módulo de usuarios — lista
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/users/users-list/users-list.component').then(m => m.UsersListComponent),
+      },
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',
