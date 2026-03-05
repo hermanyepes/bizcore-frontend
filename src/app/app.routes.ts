@@ -30,6 +30,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/users/users-list/users-list.component').then(m => m.UsersListComponent),
       },
+      // Módulo de usuarios — detalle de un usuario por document_id
+      // :id es el parámetro dinámico; ActivatedRoute lo lee en el componente
+      {
+        path: 'users/:id',
+        loadComponent: () =>
+          import('./features/users/user-detail/user-detail.component').then(m => m.UserDetailComponent),
+      },
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',
