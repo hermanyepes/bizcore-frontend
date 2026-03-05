@@ -1,0 +1,70 @@
+<!-- Contenedor raíz del shell.
+     La clase layout--collapsed se activa via Signal cuando el sidebar está colapsado.
+     Usamos CSS Grid en el SCSS: sidebar | main (navbar + content). -->
+<div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+
+    <!-- Marca: logo + nombre de la app -->
+    <div class="sidebar__brand">
+      <span class="sidebar__logo">B</span>
+      <span class="sidebar__label">BizCore</span>
+    </div>
+
+    <!-- Navegación principal.
+         routerLinkActive agrega la clase CSS cuando la ruta está activa. -->
+    <nav class="sidebar__nav">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="sidebar__link--active"
+        class="sidebar__link"
+        title="Dashboard"
+      >
+        <span class="sidebar__icon" aria-hidden="true">⊞</span>
+        <span class="sidebar__text">Dashboard</span>
+      </a>
+
+      <!-- Módulos futuros — se agregarán en fases 8.5+ -->
+    </nav>
+
+  </aside>
+
+  <!-- ===== ZONA DERECHA: navbar + contenido ===== -->
+  <div class="layout__main">
+
+    <!-- Navbar superior -->
+    <header class="navbar">
+
+      <!-- Botón para colapsar / expandir el sidebar -->
+      <button
+        class="navbar__toggle"
+        type="button"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="sidebarCollapsed() ? 'Expandir menú' : 'Colapsar menú'"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+
+      <!-- Info del usuario logueado + botón de logout -->
+      <div class="navbar__user">
+        <div class="navbar__user-info">
+          <span class="navbar__username">{{ currentUser()?.sub }}</span>
+          <span class="navbar__role">{{ currentUser()?.role }}</span>
+        </div>
+        <button class="navbar__logout" type="button" (click)="logout()">
+          Salir
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Contenido del módulo activo.
+         router-outlet renderiza aquí el hijo correspondiente a la URL actual. -->
+    <main class="layout__content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

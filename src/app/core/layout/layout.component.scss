@@ -1,0 +1,230 @@
+// Variables locales — complementan las CSS custom properties de _variables.scss
+$sidebar-width-expanded:  240px;
+$sidebar-width-collapsed:  64px;
+$navbar-height:            60px;
+$transition-speed:        0.25s;
+
+// ─── LAYOUT RAÍZ ────────────────────────────────────────────────────────────
+// CSS Grid de dos columnas: sidebar | zona-principal
+// La primera columna cambia de ancho según el estado del Signal
+
+.layout {
+  display: grid;
+  grid-template-columns: $sidebar-width-expanded 1fr;
+  height: 100vh;
+  background-color: var(--color-bg-base, #0f172a);
+  transition: grid-template-columns $transition-speed ease;
+
+  // Cuando el sidebar está colapsado, la primera columna se estrecha
+  &--collapsed {
+    grid-template-columns: $sidebar-width-collapsed 1fr;
+  }
+}
+
+// ─── SIDEBAR ────────────────────────────────────────────────────────────────
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-surface, #1e293b);
+  border-right: 1px solid var(--color-border, #334155);
+  overflow: hidden;           // Oculta el texto cuando está colapsado
+  transition: width $transition-speed ease;
+
+  // Marca: logo circular + nombre de la app
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--color-border, #334155);
+    min-height: $navbar-height;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: var(--color-amber-500, #f59e0b);
+    color: #0f172a;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;             // El logo nunca se encoge
+  }
+
+  &__label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text-primary, #f1f5f9);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity $transition-speed ease;
+
+    // Cuando el layout está colapsado, el texto del brand se oculta
+    .layout--collapsed & {
+      opacity: 0;
+    }
+  }
+
+  // Contenedor de links de navegación
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 0.5rem;
+    flex: 1;
+  }
+
+  // Link individual de navegación
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-text-secondary, #94a3b8);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-bg-hover, #334155);
+      color: var(--color-text-primary, #f1f5f9);
+    }
+
+    // Clase agregada por routerLinkActive cuando la ruta está activa
+    &--active {
+      background-color: var(--color-amber-500, #f59e0b);
+      color: #0f172a;
+      font-weight: 600;
+
+      &:hover {
+        background-color: var(--color-amber-400, #fbbf24);
+        color: #0f172a;
+      }
+    }
+  }
+
+  // Icono del link — tamaño fijo para que no cause saltos al colapsar
+  &__icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  // Texto del link — se oculta cuando el sidebar está colapsado
+  &__text {
+    opacity: 1;
+    transition: opacity $transition-speed ease;
+
+    .layout--collapsed & {
+      opacity: 0;
+    }
+  }
+}
+
+// ─── ZONA PRINCIPAL (navbar + contenido) ────────────────────────────────────
+
+.layout__main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// ─── NAVBAR SUPERIOR ────────────────────────────────────────────────────────
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $navbar-height;
+  padding: 0 1.5rem;
+  background-color: var(--color-bg-surface, #1e293b);
+  border-bottom: 1px solid var(--color-border, #334155);
+  flex-shrink: 0;
+
+  // Botón de hamburguesa para colapsar/expandir el sidebar
+  &__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-secondary, #94a3b8);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-bg-hover, #334155);
+      color: var(--color-text-primary, #f1f5f9);
+    }
+  }
+
+  // Contenedor derecho: info del usuario + logout
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+  }
+
+  &__username {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f1f5f9);
+  }
+
+  &__role {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--color-amber-400, #fbbf24);
+    text-transform: capitalize;
+  }
+
+  // Botón de logout
+  &__logout {
+    padding: 0.375rem 0.875rem;
+    border: 1px solid var(--color-border, #334155);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-secondary, #94a3b8);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-amber-500, #f59e0b);
+      color: var(--color-amber-400, #fbbf24);
+      background-color: rgba(245, 158, 11, 0.08);
+    }
+  }
+}
+
+// ─── CONTENIDO PRINCIPAL ────────────────────────────────────────────────────
+
+.layout__content {
+  flex: 1;
+  overflow-y: auto;           // Scroll solo en el contenido, no en toda la página
+  padding: 2rem;
+  background-color: var(--color-bg-base, #0f172a);
+}

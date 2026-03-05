@@ -9,15 +9,32 @@ export const routes: Routes = [
       import('./features/login/login.component').then(m => m.LoginComponent),
   },
 
-  // Ruta raíz — redirige al dashboard si hay sesión, o al login si no
+  // Ruta shell — el "edificio" protegido por authGuard.
+  // LayoutComponent es el contenedor (navbar + sidebar + router-outlet).
+  // Todas las rutas hijas heredan la protección del guard automáticamente.
   {
     path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./core/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      // Dashboard — primera "oficina" dentro del edificio
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      // Ruta raíz vacía — redirige al dashboard
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+    ],
   },
 
-  // Ruta comodín — cualquier URL desconocida redirige al dashboard
-  // (el guard se encargará de redirigir al login si no hay sesión)
+  // Comodín — cualquier URL desconocida vuelve al dashboard
+  // (el guard interceptará si no hay sesión)
   {
     path: '**',
     redirectTo: 'dashboard',
