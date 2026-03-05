@@ -6,10 +6,9 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
-import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors }      from '@angular/common/http';
+import { routes }          from './app.routes';
+import { authInterceptor } from './core/auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,11 +19,9 @@ export const appConfig: ApplicationConfig = {
     // ruta directamente como @Input() en los componentes (Angular 16+)
     provideRouter(routes, withComponentInputBinding()),
 
-    // Cliente HTTP para llamar al backend FastAPI
-    // withInterceptorsFromDi habilita el interceptor de auth que crearemos en Phase 8.2
-    provideHttpClient(withInterceptorsFromDi()),
-
-    // Animaciones de Angular Material cargadas de forma asíncrona (mejor performance)
-    provideAnimationsAsync(),
+    // Cliente HTTP con el interceptor de auth registrado.
+    // withInterceptors([]) acepta interceptores funcionales (Angular 17+).
+    // El interceptor adjunta automáticamente el Bearer token a cada request.
+    provideHttpClient(withInterceptors([authInterceptor])),
   ],
 };
