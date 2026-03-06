@@ -1,0 +1,254 @@
+<div class="form-page animate-slide-in">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <!-- El link de regreso depende del modo: editar vuelve al detalle, crear al listado -->
+    @if (isEditMode) {
+      <a [routerLink]="['/users', documentId]" class="back-link">← Volver al detalle</a>
+    } @else {
+      <a [routerLink]="['/users']" class="back-link">← Volver a usuarios</a>
+    }
+    <h1 class="page-title">{{ isEditMode ? 'Editar usuario' : 'Nuevo usuario' }}</h1>
+  </div>
+
+  <!-- ── Estado: cargando datos del usuario (solo modo editar) ──────────────── -->
+  @if (isLoading()) {
+    <div class="state-card">
+      <div class="spinner" aria-label="Cargando usuario"></div>
+      <p class="state-text">Cargando datos…</p>
+    </div>
+  }
+
+  <!-- ── Formulario: visible cuando no está cargando ────────────────────────── -->
+  @if (!isLoading()) {
+
+    <!--
+      [formGroup] conecta este <form> con el FormGroup definido en el componente.
+      (ngSubmit) se dispara cuando el usuario hace submit (Enter o click en el botón).
+      Usar (ngSubmit) en vez de (click) en el botón es la práctica correcta:
+      captura el evento nativo del formulario y evita recargas de página.
+    -->
+    <form [formGroup]="form" (ngSubmit)="save()" class="user-form" novalidate>
+
+      <!-- ── Sección: Identificación (solo modo CREAR) ────────────────────── -->
+      @if (!isEditMode) {
+        <fieldset class="form-section">
+          <legend class="form-section__title">Identificación</legend>
+
+          <div class="form-row">
+
+            <!-- Tipo de documento -->
+            <div class="form-field">
+              <label class="form-label" for="document_type">Tipo de documento</label>
+              <!--
+                formControlName conecta este <select> con el FormControl 'document_type'.
+                Angular escucha los cambios y actualiza form.value automáticamente.
+              -->
+              <select id="document_type" formControlName="document_type" class="form-select"
+                      [class.form-select--error]="form.get('document_type')!.invalid && form.get('document_type')!.touched">
+                <option value="" disabled>Selecciona…</option>
+                <option value="CC">Cédula de Ciudadanía</option>
+                <option value="CE">Cédula de Extranjería</option>
+                <option value="TI">Tarjeta de Identidad</option>
+                <option value="PA">Pasaporte</option>
+              </select>
+              @if (form.get('document_type')!.invalid && form.get('document_type')!.touched) {
+                <span class="form-error">El tipo de documento es obligatorio.</span>
+              }
+            </div>
+
+            <!-- Número de documento -->
+            <div class="form-field">
+              <label class="form-label" for="document_id">Número de documento</label>
+              <input
+                id="document_id"
+                type="text"
+                formControlName="document_id"
+                class="form-input"
+                [class.form-input--error]="form.get('document_id')!.invalid && form.get('document_id')!.touched"
+                placeholder="Ej. 1234567890"
+                autocomplete="off"
+              />
+              @if (form.get('document_id')!.hasError('required') && form.get('document_id')!.touched) {
+                <span class="form-error">El número de documento es obligatorio.</span>
+              }
+              @if (form.get('document_id')!.hasError('maxlength')) {
+                <span class="form-error">Máximo 20 caracteres.</span>
+              }
+            </div>
+
+          </div><!-- /form-row -->
+
+          <!-- Correo electrónico -->
+          <div class="form-field">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
+              placeholder="usuario@empresa.com"
+              autocomplete="email"
+            />
+            @if (form.get('email')!.hasError('required') && form.get('email')!.touched) {
+              <span class="form-error">El correo es obligatorio.</span>
+            }
+            @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
+              <span class="form-error">Ingresa un correo válido.</span>
+            }
+          </div>
+
+        </fieldset>
+      }
+
+      <!-- ── Sección: Datos personales (ambos modos) ──────────────────────── -->
+      <fieldset class="form-section">
+        <legend class="form-section__title">Datos personales</legend>
+
+        <!-- Nombre completo -->
+        <div class="form-field">
+          <label class="form-label" for="full_name">Nombre completo</label>
+          <input
+            id="full_name"
+            type="text"
+            formControlName="full_name"
+            class="form-input"
+            [class.form-input--error]="form.get('full_name')!.invalid && form.get('full_name')!.touched"
+            placeholder="Nombre y apellidos"
+            autocomplete="name"
+          />
+          @if (form.get('full_name')!.hasError('required') && form.get('full_name')!.touched) {
+            <span class="form-error">El nombre es obligatorio.</span>
+          }
+          @if (form.get('full_name')!.hasError('maxlength')) {
+            <span class="form-error">Máximo 80 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-row">
+
+          <!-- Teléfono (opcional) -->
+          <div class="form-field">
+            <label class="form-label" for="phone">
+              Teléfono <span class="form-label--optional">(opcional)</span>
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              formControlName="phone"
+              class="form-input"
+              placeholder="Ej. 3001234567"
+              autocomplete="tel"
+            />
+          </div>
+
+          <!-- Ciudad (opcional) -->
+          <div class="form-field">
+            <label class="form-label" for="city">
+              Ciudad <span class="form-label--optional">(opcional)</span>
+            </label>
+            <input
+              id="city"
+              type="text"
+              formControlName="city"
+              class="form-input"
+              placeholder="Ej. Bogotá"
+              autocomplete="address-level2"
+            />
+          </div>
+
+        </div><!-- /form-row -->
+
+      </fieldset>
+
+      <!-- ── Sección: Rol y acceso (ambos modos) ──────────────────────────── -->
+      <fieldset class="form-section">
+        <legend class="form-section__title">Rol y acceso</legend>
+
+        <div class="form-row">
+
+          <!-- Rol -->
+          <div class="form-field">
+            <label class="form-label" for="role">Rol</label>
+            <select id="role" formControlName="role" class="form-select">
+              <option value="Empleado">Empleado</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+          </div>
+
+          <!-- Estado activo/inactivo — solo en modo EDITAR -->
+          @if (isEditMode) {
+            <div class="form-field">
+              <label class="form-label" for="is_active">Estado</label>
+              <select id="is_active" formControlName="is_active" class="form-select">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+            </div>
+          }
+
+        </div><!-- /form-row -->
+
+        <!-- Contraseña -->
+        <div class="form-field">
+          <label class="form-label" for="password">
+            Contraseña
+            @if (!isEditMode) {
+              <!-- En crear: obligatoria, lo indicamos visualmente -->
+            } @else {
+              <span class="form-label--optional">(dejar vacío para no cambiar)</span>
+            }
+          </label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="form-input"
+            [class.form-input--error]="form.get('password')!.invalid && form.get('password')!.touched"
+            [placeholder]="isEditMode ? '••••••••' : 'Mínimo 8 caracteres'"
+            autocomplete="new-password"
+          />
+          @if (form.get('password')!.hasError('required') && form.get('password')!.touched) {
+            <span class="form-error">La contraseña es obligatoria.</span>
+          }
+          @if (form.get('password')!.hasError('minlength') && form.get('password')!.touched) {
+            <span class="form-error">Mínimo 8 caracteres.</span>
+          }
+        </div>
+
+      </fieldset>
+
+      <!-- ── Error del servidor ────────────────────────────────────────────── -->
+      @if (serverError()) {
+        <div class="server-error" role="alert">
+          ⚠ {{ serverError() }}
+        </div>
+      }
+
+      <!-- ── Acciones ──────────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <!-- Botón cancelar: navega atrás sin guardar -->
+        @if (isEditMode) {
+          <a [routerLink]="['/users', documentId]" class="btn-secondary">Cancelar</a>
+        } @else {
+          <a [routerLink]="['/users']" class="btn-secondary">Cancelar</a>
+        }
+
+        <!--
+          [disabled] bloquea el botón si el formulario es inválido O si ya está guardando.
+          Esto previene doble-envío y da feedback visual inmediato al usuario.
+        -->
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="form.invalid || isSaving()"
+        >
+          {{ isSaving() ? 'Guardando…' : (isEditMode ? 'Guardar cambios' : 'Crear usuario') }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

@@ -9,9 +9,31 @@
   // ── Encabezado ──────────────────────────────────────────────────────────
   &__header {
     display:         flex;
-    align-items:     baseline;
-    gap:             var(--spacing-md);
+    align-items:     center;
+    justify-content: space-between;
     margin-bottom:   var(--spacing-xl);
+  }
+
+  // Agrupa título + contador a la izquierda del encabezado
+  &__header-left {
+    display:     flex;
+    align-items: baseline;
+    gap:         var(--spacing-md);
+  }
+
+  // Botón "Nuevo usuario" — acento ámbar, coherente con el design system
+  &__btn-new {
+    font-family:     var(--font-ui);
+    font-size:       0.875rem;
+    font-weight:     600;
+    padding:         0.5rem 1.125rem;
+    border-radius:   8px;
+    background:      var(--color-accent);
+    color:           #0F1117;
+    text-decoration: none;
+    transition:      background 0.15s;
+
+    &:hover { background: var(--color-accent-hover); }
   }
 
   &__title {

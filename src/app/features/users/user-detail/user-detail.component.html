@@ -3,7 +3,15 @@
   <!-- ── Encabezado de sección con botón de regreso ─────────────────────── -->
   <div class="page-header">
     <a [routerLink]="['/users']" class="back-link">← Volver a usuarios</a>
-    <h1 class="page-title">Detalle de usuario</h1>
+    <div class="page-header__row">
+      <h1 class="page-title">Detalle de usuario</h1>
+      <!-- Botón de edición: solo visible cuando los datos ya cargaron -->
+      @if (!isLoading() && !isNotFound()) {
+        <a [routerLink]="['/users', user()!.document_id, 'edit']" class="btn-primary">
+          Editar
+        </a>
+      }
+    </div>
   </div>
 
   <!-- ── Estado: cargando ─────────────────────────────────────────────────── -->

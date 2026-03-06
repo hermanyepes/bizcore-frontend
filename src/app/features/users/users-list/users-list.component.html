@@ -3,12 +3,18 @@
 
   <!-- Encabezado de la sección -->
   <div class="users-list__header">
-    <h1 class="users-list__title">Usuarios</h1>
-    <span class="users-list__count">
-      @if (!isLoading()) {
-        {{ totalItems() }} registros
-      }
-    </span>
+    <div class="users-list__header-left">
+      <h1 class="users-list__title">Usuarios</h1>
+      <span class="users-list__count">
+        @if (!isLoading()) {
+          {{ totalItems() }} registros
+        }
+      </span>
+    </div>
+    <!-- Botón para crear un nuevo usuario — navega a /users/new -->
+    <a [routerLink]="['/users/new']" class="users-list__btn-new">
+      + Nuevo usuario
+    </a>
   </div>
 
   <!-- Estado: cargando -->
