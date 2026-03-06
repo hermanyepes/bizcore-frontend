@@ -14,6 +14,34 @@ export interface UserListParams {
   role?:      'Administrador' | 'Empleado';
 }
 
+// Datos necesarios para crear un usuario nuevo.
+// Espejo de UserCreate en app/schemas/user.py
+// phone y city son opcionales (el backend los acepta como null).
+export interface UserCreatePayload {
+  document_id:   string;
+  document_type: string;
+  full_name:     string;
+  phone?:        string | null;
+  email:         string;
+  city?:         string | null;
+  role:          'Administrador' | 'Empleado';
+  password:      string;
+}
+
+// Datos actualizables de un usuario existente. Todos son opcionales:
+// el cliente puede enviar solo los campos que quiere cambiar.
+// Espejo de UserUpdate en app/schemas/user.py
+// Nota: document_id, document_type y email NO están aquí — el backend no
+// permite cambiarlos una vez creados.
+export interface UserUpdatePayload {
+  full_name?: string | null;
+  phone?:     string | null;
+  city?:      string | null;
+  role?:      'Administrador' | 'Empleado' | null;
+  password?:  string | null;
+  is_active?: boolean | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsersService {
 
@@ -54,5 +82,23 @@ export class UsersService {
   // -------------------------------------------------------------------------
   getUser(documentId: string): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/${documentId}`);
+  }
+
+  // -------------------------------------------------------------------------
+  // createUser — crea un usuario nuevo
+  // POST /api/v1/users
+  // Devuelve el User creado tal como el backend lo guarda (con created_at, etc.)
+  // -------------------------------------------------------------------------
+  createUser(payload: UserCreatePayload): Observable<User> {
+    return this.http.post<User>(this.baseUrl + '/', payload);
+  }
+
+  // -------------------------------------------------------------------------
+  // updateUser — actualiza campos de un usuario existente
+  // PUT /api/v1/users/{document_id}
+  // Solo se envían los campos que se quieren cambiar (payload parcial).
+  // -------------------------------------------------------------------------
+  updateUser(documentId: string, payload: UserUpdatePayload): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/${documentId}`, payload);
   }
 }

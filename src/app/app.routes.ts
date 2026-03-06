@@ -30,12 +30,29 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/users/users-list/users-list.component').then(m => m.UsersListComponent),
       },
+      // Formulario de usuario — modo CREAR
+      // IMPORTANTE: debe estar ANTES de 'users/:id'. Angular evalúa rutas
+      // en orden; si 'users/:id' fuera primero, "new" se leería como el id
+      // y se cargaría UserDetailComponent en vez del formulario.
+      {
+        path: 'users/new',
+        loadComponent: () =>
+          import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent),
+      },
       // Módulo de usuarios — detalle de un usuario por document_id
       // :id es el parámetro dinámico; ActivatedRoute lo lee en el componente
       {
         path: 'users/:id',
         loadComponent: () =>
           import('./features/users/user-detail/user-detail.component').then(m => m.UserDetailComponent),
+      },
+      // Formulario de usuario — modo EDITAR
+      // Usa el mismo componente que /users/new. El componente detecta el modo
+      // leyendo si existe el parámetro :id en la URL.
+      {
+        path: 'users/:id/edit',
+        loadComponent: () =>
+          import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent),
       },
       // Ruta raíz vacía — redirige al dashboard
       {
