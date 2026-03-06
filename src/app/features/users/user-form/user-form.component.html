@@ -32,8 +32,8 @@
 
       <!-- ── Sección: Identificación (solo modo CREAR) ────────────────────── -->
       @if (!isEditMode) {
-        <fieldset class="form-section">
-          <legend class="form-section__title">Identificación</legend>
+        <div class="form-section">
+          <p class="form-section__title">Identificación</p>
 
           <div class="form-row">
 
@@ -99,12 +99,12 @@
             }
           </div>
 
-        </fieldset>
+        </div>
       }
 
       <!-- ── Sección: Datos personales (ambos modos) ──────────────────────── -->
-      <fieldset class="form-section">
-        <legend class="form-section__title">Datos personales</legend>
+      <div class="form-section">
+        <p class="form-section__title">Datos personales</p>
 
         <!-- Nombre completo -->
         <div class="form-field">
@@ -160,11 +160,11 @@
 
         </div><!-- /form-row -->
 
-      </fieldset>
+      </div>
 
       <!-- ── Sección: Rol y acceso (ambos modos) ──────────────────────────── -->
-      <fieldset class="form-section">
-        <legend class="form-section__title">Rol y acceso</legend>
+      <div class="form-section">
+        <p class="form-section__title">Rol y acceso</p>
 
         <div class="form-row">
 
@@ -217,7 +217,7 @@
           }
         </div>
 
-      </fieldset>
+      </div>
 
       <!-- ── Error del servidor ────────────────────────────────────────────── -->
       @if (serverError()) {

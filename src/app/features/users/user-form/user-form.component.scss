@@ -77,14 +77,13 @@
   margin:        0; // resetea el margin por defecto del navegador
 
   &__title {
-    font-family:  var(--font-display);
-    font-size:    0.8125rem;
-    font-weight:  600;
-    color:        var(--color-text-muted);
+    font-family:    var(--font-display);
+    font-size:      0.8125rem;
+    font-weight:    600;
+    color:          var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 1.25rem;
-    padding:      0; // resetea el padding de <legend>
+    margin:         0 0 1.25rem 0;
   }
 }
 
