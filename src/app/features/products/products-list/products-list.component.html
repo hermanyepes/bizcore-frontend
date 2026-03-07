@@ -1,0 +1,112 @@
+<section class="products-list animate-fade-in">
+
+  <!-- ── Cabecera ─────────────────────────────────────────────────────────── -->
+  <div class="list-header">
+    <div class="list-header__title">
+      <h1>Productos</h1>
+      @if (!isLoading()) {
+        <span class="list-header__count">{{ totalItems() }} registros</span>
+      }
+    </div>
+    <a routerLink="/products/new" class="btn btn--primary">+ Nuevo producto</a>
+  </div>
+
+  <!-- ── Filtros ──────────────────────────────────────────────────────────── -->
+  <div class="filters">
+    <select class="filter-select" (change)="filterByCategory($any($event.target).value)">
+      <option value="">Todas las categorías</option>
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ cat }}</option>
+      }
+    </select>
+
+    <select class="filter-select" (change)="filterByStatus($any($event.target).value)">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+  </div>
+
+  <!-- ── Estado de carga ──────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-state">Cargando productos…</div>
+  }
+
+  <!-- ── Tabla ────────────────────────────────────────────────────────────── -->
+  @if (!isLoading()) {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th class="col-price">Precio</th>
+            <th class="col-stock">Stock</th>
+            <th>Estado</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product.id; let i = $index) {
+            <tr class="animate-stagger" [style.--stagger-index]="i">
+              <td class="cell--mono">{{ product.id }}</td>
+              <td class="cell--name">{{ product.name }}</td>
+              <td>
+                @if (product.category) {
+                  <span class="category-badge">{{ product.category }}</span>
+                } @else {
+                  <span class="cell--muted">—</span>
+                }
+              </td>
+              <!-- Precio en font-data (JetBrains Mono) según design guide -->
+              <td class="cell--price">{{ formatPrice(product.price) }}</td>
+              <td class="cell--mono">{{ product.stock }}</td>
+              <td>
+                <span class="status-badge"
+                      [class.status-badge--active]="product.is_active"
+                      [class.status-badge--inactive]="!product.is_active">
+                  {{ product.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="cell-actions">
+                <a [routerLink]="['/products', product.id]" class="action-link">Ver</a>
+                <a [routerLink]="['/products', product.id, 'edit']" class="action-link action-link--edit">Editar</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-state">No hay productos registrados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="pagination__btn"
+                (click)="goToPage(currentPage() - 1)"
+                [disabled]="currentPage() === 1">
+          ‹
+        </button>
+
+        @for (n of pageNumbers(); track n) {
+          <button class="pagination__btn"
+                  [class.pagination__btn--active]="n === currentPage()"
+                  (click)="goToPage(n)">
+            {{ n }}
+          </button>
+        }
+
+        <button class="pagination__btn"
+                (click)="goToPage(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()">
+          ›
+        </button>
+      </div>
+    }
+  }
+
+</section>

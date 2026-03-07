@@ -54,6 +54,33 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent),
       },
+      // Módulo de productos — lista paginada
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/products/products-list/products-list.component').then(m => m.ProductsListComponent),
+      },
+      // Formulario de producto — modo CREAR
+      // IMPORTANTE: debe estar ANTES de 'products/:id' por la misma razón
+      // que 'users/new': si ':id' fuera primero, "new" se leería como el id.
+      {
+        path: 'products/new',
+        loadComponent: () =>
+          import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+      },
+      // Detalle de un producto por su id numérico
+      {
+        path: 'products/:id',
+        loadComponent: () =>
+          import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent),
+      },
+      // Formulario de producto — modo EDITAR
+      {
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+      },
+
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',

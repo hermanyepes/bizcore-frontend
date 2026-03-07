@@ -1,0 +1,259 @@
+.products-list {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// ── Cabecera ──────────────────────────────────────────────────────────────────
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+  }
+
+  &__count {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+}
+
+// ── Filtros ───────────────────────────────────────────────────────────────────
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.filter-select {
+  background:    var(--color-bg-surface);
+  color:         var(--color-text-primary);
+  border:        1px solid var(--color-border);
+  border-radius: 6px;
+  padding:       0.4rem 0.75rem;
+  font-family:   var(--font-ui);
+  font-size:     0.85rem;
+  cursor:        pointer;
+  transition:    border-color 200ms;
+
+  &:focus {
+    outline:      none;
+    border-color: var(--color-border-focus);
+  }
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+
+.table-wrapper {
+  background:    var(--color-bg-surface);
+  border:        1px solid var(--color-border);
+  border-radius: 8px;
+  overflow:      hidden;
+}
+
+.data-table {
+  width:           100%;
+  border-collapse: collapse;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+
+  thead tr {
+    background: var(--color-bg-elevated);
+  }
+
+  th {
+    padding:    0.75rem 1rem;
+    text-align: left;
+    color:      var(--color-text-muted);
+    font-weight: 500;
+    font-size:  0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding:       0.75rem 1rem;
+    color:         var(--color-text-primary);
+    border-top:    1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 200ms;
+
+    &:hover {
+      background: var(--color-bg-elevated);
+    }
+  }
+}
+
+// Columnas de ancho fijo
+.col-price   { width: 120px; }
+.col-stock   { width: 80px;  }
+.col-actions { width: 110px; }
+
+// Celdas especiales
+.cell--mono {
+  font-family: var(--font-data);
+  font-size:   0.8rem;
+  color:       var(--color-text-muted);
+}
+
+.cell--price {
+  font-family: var(--font-data);   // JetBrains Mono — obligatorio por design guide
+  font-size:   0.875rem;
+  color:       var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.cell--name  { font-weight: 500; }
+.cell--muted { color: var(--color-text-muted); }
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+
+.category-badge {
+  background:    var(--color-accent-dim);
+  color:         var(--color-accent);
+  border-radius: 4px;
+  padding:       0.15rem 0.5rem;
+  font-size:     0.75rem;
+  font-weight:   500;
+  white-space:   nowrap;
+}
+
+.status-badge {
+  display:       inline-block;
+  border-radius: 4px;
+  padding:       0.15rem 0.5rem;
+  font-size:     0.75rem;
+  font-weight:   500;
+
+  &--active {
+    background: rgba(34, 197, 94, 0.15);
+    color:      var(--color-success);
+  }
+
+  &--inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color:      var(--color-danger);
+  }
+}
+
+// ── Acciones ──────────────────────────────────────────────────────────────────
+
+.cell-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-link {
+  font-size:       0.8rem;
+  color:           var(--color-text-muted);
+  text-decoration: none;
+  padding:         0.2rem 0.5rem;
+  border-radius:   4px;
+  transition:      all 200ms;
+
+  &:hover {
+    background: var(--color-bg-elevated);
+    color:      var(--color-text-primary);
+  }
+
+  &--edit {
+    color: var(--color-accent);
+
+    &:hover {
+      background: var(--color-accent-dim);
+      color:      var(--color-accent);
+    }
+  }
+}
+
+// ── Estados vacío / carga ─────────────────────────────────────────────────────
+
+.loading-state,
+.empty-state {
+  text-align:  center;
+  padding:     3rem;
+  color:       var(--color-text-muted);
+  font-family: var(--font-ui);
+}
+
+// ── Botón primario ────────────────────────────────────────────────────────────
+
+.btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.4rem;
+  padding:         0.5rem 1rem;
+  border-radius:   6px;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+  font-weight:     500;
+  text-decoration: none;
+  border:          none;
+  cursor:          pointer;
+  transition:      background 200ms;
+
+  &--primary {
+    background: var(--color-accent);
+    color:      #0F1117;
+
+    &:hover {
+      background: var(--color-accent-hover);
+    }
+  }
+}
+
+// ── Paginador ─────────────────────────────────────────────────────────────────
+
+.pagination {
+  display:     flex;
+  gap:         0.35rem;
+  align-items: center;
+  justify-content: center;
+
+  &__btn {
+    background:    var(--color-bg-surface);
+    color:         var(--color-text-muted);
+    border:        1px solid var(--color-border);
+    border-radius: 6px;
+    padding:       0.35rem 0.65rem;
+    font-family:   var(--font-ui);
+    font-size:     0.8rem;
+    cursor:        pointer;
+    transition:    all 200ms;
+    min-width:     32px;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-accent);
+      color:        var(--color-accent);
+    }
+
+    &--active {
+      background:   var(--color-accent);
+      color:        #0F1117;
+      border-color: var(--color-accent);
+      font-weight:  600;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor:  not-allowed;
+    }
+  }
+}
