@@ -1,0 +1,105 @@
+<div class="detail-page animate-slide-in">
+
+  <!-- ── Encabezado ───────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <a [routerLink]="['/products']" class="back-link">← Volver a productos</a>
+    <div class="page-header__row">
+      <h1 class="page-title">Detalle de producto</h1>
+      @if (!isLoading() && !isNotFound()) {
+        <a [routerLink]="['/products', product()!.id, 'edit']" class="btn-primary">
+          Editar
+        </a>
+      }
+    </div>
+  </div>
+
+  <!-- ── Estado: cargando ─────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="state-card">
+      <div class="spinner" aria-label="Cargando producto"></div>
+      <p class="state-text">Cargando producto…</p>
+    </div>
+  }
+
+  <!-- ── Estado: no encontrado / error ────────────────────────────────────── -->
+  @else if (isNotFound()) {
+    <div class="state-card state-card--error">
+      <span class="state-icon">⚠</span>
+      <p class="state-text">Producto no encontrado.</p>
+      <a [routerLink]="['/products']" class="btn-primary">Volver al listado</a>
+    </div>
+  }
+
+  <!-- ── Estado: datos listos ─────────────────────────────────────────────── -->
+  @else {
+    <div class="profile-card">
+
+      <!-- Cabecera: nombre y badges -->
+      <div class="profile-header">
+        <div class="profile-avatar">
+          {{ product()!.name | slice:0:2 | uppercase }}
+        </div>
+
+        <div class="profile-identity">
+          <h2 class="profile-name">{{ product()!.name }}</h2>
+
+          <!-- ID del producto en fuente monoespaciada -->
+          <p class="profile-id">
+            ID &nbsp;<span class="mono">{{ product()!.id }}</span>
+          </p>
+
+          <div class="profile-badges">
+            @if (product()!.category) {
+              <span class="badge badge--category">{{ product()!.category }}</span>
+            }
+            <span class="badge"
+                  [class.badge--active]="product()!.is_active"
+                  [class.badge--inactive]="!product()!.is_active">
+              {{ product()!.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuerpo: campos del producto -->
+      <div class="profile-body">
+
+        <div class="field-group field-group--full">
+          <span class="field-label">Descripción</span>
+          <span class="field-value">{{ product()!.description ?? '—' }}</span>
+        </div>
+
+        <!-- Precio en font-data — obligatorio por design guide -->
+        <div class="field-group">
+          <span class="field-label">Precio</span>
+          <span class="field-value mono field-value--price">
+            {{ formatPrice(product()!.price) }}
+          </span>
+        </div>
+
+        <!-- Stock en font-data — es un dato numérico -->
+        <div class="field-group">
+          <span class="field-label">Stock</span>
+          <span class="field-value mono">{{ product()!.stock }} unidades</span>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Categoría</span>
+          <span class="field-value">{{ product()!.category ?? '—' }}</span>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Creado</span>
+          <span class="field-value mono">{{ product()!.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Última actualización</span>
+          <span class="field-value mono">{{ (product()!.updated_at | date:'dd/MM/yyyy HH:mm') ?? '—' }}</span>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

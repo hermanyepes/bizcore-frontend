@@ -1,0 +1,141 @@
+<div class="form-page animate-slide-in">
+
+  <!-- ── Encabezado ───────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <a [routerLink]="isEditMode ? ['/products', productId] : ['/products']" class="back-link">
+      {{ isEditMode ? '← Volver al producto' : '← Volver a productos' }}
+    </a>
+    <h1 class="page-title">
+      {{ isEditMode ? 'Editar producto' : 'Nuevo producto' }}
+    </h1>
+  </div>
+
+  <!-- ── Estado: cargando datos (solo modo editar) ─────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-state">Cargando datos del producto…</div>
+  }
+
+  <!-- ── Formulario ───────────────────────────────────────────────────────── -->
+  @if (!isLoading()) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="product-form" novalidate>
+
+      <!-- ── Error del servidor ─────────────────────────────────────────── -->
+      @if (serverError()) {
+        <div class="server-error" role="alert">{{ serverError() }}</div>
+      }
+
+      <!-- ── Sección: información básica ──────────────────────────────── -->
+      <div class="form-section">
+        <p class="form-section__title">Información básica</p>
+
+        <div class="field">
+          <label class="field__label" for="name">Nombre *</label>
+          <input id="name"
+                 type="text"
+                 class="field__input"
+                 formControlName="name"
+                 placeholder="Ej: Café Premium 500g"
+                 [class.field__input--error]="form.get('name')!.invalid && form.get('name')!.touched">
+          @if (form.get('name')!.invalid && form.get('name')!.touched) {
+            <span class="field__error">El nombre es obligatorio (máx. 120 caracteres).</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="description">Descripción</label>
+          <textarea id="description"
+                    class="field__input field__input--textarea"
+                    formControlName="description"
+                    placeholder="Descripción opcional del producto"
+                    rows="3"></textarea>
+        </div>
+
+      </div>
+
+      <!-- ── Sección: precio y stock ────────────────────────────────────── -->
+      <div class="form-section">
+        <p class="form-section__title">Precio y stock</p>
+
+        <div class="form-row">
+
+          <div class="field">
+            <label class="field__label" for="price">Precio (COP) *</label>
+            <input id="price"
+                   type="number"
+                   class="field__input field__input--mono"
+                   formControlName="price"
+                   placeholder="Ej: 15000"
+                   min="1"
+                   [class.field__input--error]="form.get('price')!.invalid && form.get('price')!.touched">
+            @if (form.get('price')!.invalid && form.get('price')!.touched) {
+              <span class="field__error">El precio es obligatorio y debe ser mayor a 0.</span>
+            }
+          </div>
+
+          <!-- Stock: siempre deshabilitado — solo se modifica desde Inventario -->
+          <div class="field">
+            <label class="field__label" for="stock">
+              Stock
+              <span class="field__hint">(se gestiona desde Inventario)</span>
+            </label>
+            <input id="stock"
+                   type="number"
+                   class="field__input field__input--mono field__input--readonly"
+                   formControlName="stock"
+                   tabindex="-1">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Sección: clasificación ─────────────────────────────────────── -->
+      <div class="form-section">
+        <p class="form-section__title">Clasificación</p>
+
+        <div class="form-row">
+
+          <div class="field">
+            <label class="field__label" for="category">Categoría</label>
+            <select id="category"
+                    class="field__input field__select"
+                    formControlName="category">
+              <option [value]="null">Sin categoría</option>
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- is_active: solo relevante en modo editar -->
+          @if (isEditMode) {
+            <div class="field">
+              <label class="field__label" for="is_active">Estado</label>
+              <select id="is_active"
+                      class="field__input field__select"
+                      formControlName="is_active">
+                <option [value]="true">Activo</option>
+                <option [value]="false">Inactivo</option>
+              </select>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- ── Acciones ───────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <a [routerLink]="isEditMode ? ['/products', productId] : ['/products']"
+           class="btn btn--secondary">
+          Cancelar
+        </a>
+        <button type="submit"
+                class="btn btn--primary"
+                [disabled]="form.invalid || isSaving()">
+          {{ isSaving() ? 'Guardando…' : (isEditMode ? 'Guardar cambios' : 'Crear producto') }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>
