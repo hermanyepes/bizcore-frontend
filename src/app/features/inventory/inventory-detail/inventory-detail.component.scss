@@ -1,0 +1,200 @@
+// ─── Contenedor principal ─────────────────────────────────────────────────────
+
+.inventory-detail {
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+  max-width:      720px;   // limita el ancho — un detalle no necesita toda la pantalla
+}
+
+// ─── Encabezado ───────────────────────────────────────────────────────────────
+
+.inventory-detail__header {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+}
+
+.inventory-detail__title {
+  font-family: var(--font-display);
+  font-size:   1.5rem;
+  color:       var(--color-text-primary);
+  margin:      0;
+  display:     flex;
+  align-items: baseline;
+  gap:         0.5rem;
+}
+
+.inventory-detail__id {
+  font-family: var(--font-data);   // JetBrains Mono — los IDs siempre en mono
+  font-size:   1.1rem;
+  color:       var(--color-text-muted);
+}
+
+.inventory-detail__subtitle {
+  font-family: var(--font-ui);
+  font-size:   0.8rem;
+  color:       var(--color-text-muted);
+  margin:      0.25rem 0 0;
+  font-style:  italic;
+}
+
+// ─── Tarjeta de datos ─────────────────────────────────────────────────────────
+
+.detail-card {
+  background:    var(--color-bg-surface);
+  border:        1px solid var(--color-border);
+  border-radius: 8px;
+  padding:       1.5rem;
+  display:       flex;
+  flex-direction: column;
+  gap:           1.25rem;
+}
+
+// Fila superior con el badge de tipo
+.detail-card__type-row {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+}
+
+.detail-card__type-label {
+  font-family: var(--font-ui);
+  font-size:   1rem;
+  font-weight: 600;
+  color:       var(--color-text-primary);
+}
+
+// Línea divisora entre el tipo y los campos
+.detail-card__divider {
+  height:     1px;
+  background: var(--color-border);
+}
+
+// ─── Lista de campos (dl / dt / dd) ───────────────────────────────────────────
+
+.detail-card__fields {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;  // dos columnas: label | valor
+  gap:                   1rem 2rem;
+  margin:                0;
+  padding:               0;
+}
+
+.detail-field {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+}
+
+.detail-field__label {
+  font-family:    var(--font-ui);
+  font-size:      0.75rem;
+  color:          var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin:         0;
+}
+
+.detail-field__value {
+  font-family: var(--font-ui);
+  font-size:   0.95rem;
+  color:       var(--color-text-primary);
+  margin:      0;
+
+  // Variante mono — IDs, cantidades, fechas
+  &--mono {
+    font-family: var(--font-data);
+    font-size:   0.875rem;
+  }
+}
+
+// ─── Badges (reutilizados del list) ───────────────────────────────────────────
+
+.badge {
+  display:       inline-block;
+  border-radius: 4px;
+  padding:       0.2rem 0.6rem;
+  font-size:     0.8rem;
+  font-weight:   600;
+  letter-spacing: 0.03em;
+
+  &--entrada {
+    background: rgba(34, 197, 94, 0.15);
+    color:      var(--color-success);
+  }
+
+  &--salida {
+    background: rgba(239, 68, 68, 0.15);
+    color:      var(--color-danger);
+  }
+
+  &--ajuste {
+    background: var(--color-accent-dim);
+    color:      var(--color-accent);
+  }
+}
+
+// ─── Botones ──────────────────────────────────────────────────────────────────
+
+.btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.4rem;
+  padding:         0.5rem 1rem;
+  border-radius:   6px;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+  font-weight:     500;
+  text-decoration: none;
+  border:          none;
+  cursor:          pointer;
+  transition:      all 200ms;
+  white-space:     nowrap;
+
+  &--secondary {
+    background: var(--color-bg-elevated);
+    color:      var(--color-text-muted);
+    border:     1px solid var(--color-border);
+
+    &:hover {
+      color:        var(--color-text-primary);
+      border-color: var(--color-text-muted);
+    }
+  }
+}
+
+// ─── Estados: cargando / error / no encontrado ────────────────────────────────
+
+.inventory-detail__feedback {
+  text-align:     center;
+  padding:        3rem;
+  color:          var(--color-text-muted);
+  font-family:    var(--font-ui);
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            1rem;
+
+  &--error {
+    color: var(--color-danger);
+  }
+}
+
+// ─── Spinner ──────────────────────────────────────────────────────────────────
+
+.spinner {
+  display:       inline-block;
+  width:         32px;
+  height:        32px;
+  border:        3px solid var(--color-border);
+  border-top:    3px solid var(--color-accent);
+  border-radius: 50%;
+  animation:     spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

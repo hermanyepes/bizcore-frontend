@@ -1,0 +1,108 @@
+<!-- ===== INVENTARIO — DETALLE DE MOVIMIENTO ================================= -->
+<div class="inventory-detail">
+
+  <!-- ===== ESTADO: CARGANDO =============================================== -->
+  @if (loadState() === 'loading') {
+    <div class="inventory-detail__feedback">
+      <span class="spinner" aria-label="Cargando movimiento"></span>
+    </div>
+  }
+
+  <!-- ===== ESTADO: NO ENCONTRADO ========================================== -->
+  @if (loadState() === 'not-found') {
+    <div class="inventory-detail__feedback inventory-detail__feedback--error">
+      <p>Movimiento no encontrado.</p>
+      <a routerLink="/inventory" class="btn btn--secondary">
+        ← Volver al historial
+      </a>
+    </div>
+  }
+
+  <!-- ===== ESTADO: ERROR ================================================== -->
+  @if (loadState() === 'error') {
+    <div class="inventory-detail__feedback inventory-detail__feedback--error">
+      <p>No se pudo cargar el movimiento. Intenta de nuevo.</p>
+      <a routerLink="/inventory" class="btn btn--secondary">
+        ← Volver al historial
+      </a>
+    </div>
+  }
+
+  <!-- ===== ESTADO: DATOS CARGADOS ========================================= -->
+  @if (loadState() === 'loaded' && movement(); as mov) {
+
+    <!-- Encabezado: título + botón volver -->
+    <div class="inventory-detail__header">
+      <div>
+        <h1 class="inventory-detail__title">
+          Movimiento
+          <span class="inventory-detail__id">#{{ mov.id }}</span>
+        </h1>
+        <p class="inventory-detail__subtitle">
+          Registro inmutable — no se puede editar ni eliminar
+        </p>
+      </div>
+      <a routerLink="/inventory" class="btn btn--secondary">
+        ← Volver al historial
+      </a>
+    </div>
+
+    <!-- Tarjeta de datos -->
+    <div class="detail-card">
+
+      <!-- Tipo de movimiento — destacado arriba -->
+      <div class="detail-card__type-row">
+        <span class="badge" [class]="badgeClass(mov.movement_type)">
+          {{ mov.movement_type }}
+        </span>
+        <span class="detail-card__type-label">
+          {{ movementLabel(mov.movement_type) }}
+        </span>
+      </div>
+
+      <div class="detail-card__divider"></div>
+
+      <!-- Campos del movimiento -->
+      <dl class="detail-card__fields">
+
+        <div class="detail-field">
+          <dt class="detail-field__label">ID del movimiento</dt>
+          <dd class="detail-field__value detail-field__value--mono">{{ mov.id }}</dd>
+        </div>
+
+        <div class="detail-field">
+          <dt class="detail-field__label">Producto (ID)</dt>
+          <dd class="detail-field__value detail-field__value--mono">{{ mov.product_id }}</dd>
+        </div>
+
+        <div class="detail-field">
+          <dt class="detail-field__label">Cantidad</dt>
+          <dd class="detail-field__value detail-field__value--mono">{{ mov.quantity }} unidades</dd>
+        </div>
+
+        <div class="detail-field">
+          <dt class="detail-field__label">Notas</dt>
+          <dd class="detail-field__value">{{ mov.notes ?? 'Sin notas' }}</dd>
+        </div>
+
+        <div class="detail-field">
+          <dt class="detail-field__label">Registrado por</dt>
+          <dd class="detail-field__value detail-field__value--mono">
+            {{ mov.created_by_id ?? 'Usuario eliminado' }}
+          </dd>
+        </div>
+
+        <div class="detail-field">
+          <dt class="detail-field__label">Fecha de registro</dt>
+          <dd class="detail-field__value detail-field__value--mono">
+            {{ formatDate(mov.created_at) }}
+          </dd>
+        </div>
+
+      </dl>
+
+    </div>
+
+  }
+
+</div>

@@ -81,6 +81,27 @@ export const routes: Routes = [
           import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
       },
 
+      // Módulo de inventario — historial de movimientos
+      {
+        path: 'inventory',
+        loadComponent: () =>
+          import('./features/inventory/inventory-list/inventory-list.component').then(m => m.InventoryListComponent),
+      },
+      // Formulario de inventario — registrar nuevo movimiento
+      // IMPORTANTE: debe estar ANTES de 'inventory/:id' por la misma razón
+      // que 'products/new': si ':id' fuera primero, "new" se leería como el id.
+      {
+        path: 'inventory/new',
+        loadComponent: () =>
+          import('./features/inventory/inventory-form/inventory-form.component').then(m => m.InventoryFormComponent),
+      },
+      // Detalle de un movimiento — solo lectura (inmutable)
+      {
+        path: 'inventory/:id',
+        loadComponent: () =>
+          import('./features/inventory/inventory-detail/inventory-detail.component').then(m => m.InventoryDetailComponent),
+      },
+
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',

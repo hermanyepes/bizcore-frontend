@@ -1,0 +1,140 @@
+<!-- ===== INVENTARIO — REGISTRAR MOVIMIENTO ================================= -->
+<div class="inventory-form">
+
+  <!-- Encabezado -->
+  <div class="inventory-form__header">
+    <div>
+      <h1 class="inventory-form__title">Nuevo movimiento</h1>
+      <p class="inventory-form__subtitle">
+        El movimiento quedará registrado de forma permanente
+      </p>
+    </div>
+    <a routerLink="/inventory" class="btn btn--secondary">
+      ← Cancelar
+    </a>
+  </div>
+
+  <!-- Formulario -->
+  <form class="form-card" [formGroup]="form" (ngSubmit)="submit()">
+
+    <!-- ── Producto ─────────────────────────────────────────────────────── -->
+    <div class="form-section">
+      <p class="form-section__title">Producto</p>
+
+      <div class="field">
+        <label class="field__label" for="product_id">ID del producto</label>
+        <input
+          id="product_id"
+          type="number"
+          class="field__input"
+          [class.field__input--error]="hasError('product_id', 'required') || hasError('product_id', 'min')"
+          formControlName="product_id"
+          placeholder="Ej: 5"
+          min="1"
+        />
+        @if (hasError('product_id', 'required')) {
+          <span class="field__error">El ID del producto es obligatorio.</span>
+        }
+        @if (hasError('product_id', 'min')) {
+          <span class="field__error">El ID debe ser mayor a 0.</span>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── Tipo de movimiento ───────────────────────────────────────────── -->
+    <div class="form-section">
+      <p class="form-section__title">Tipo de movimiento</p>
+
+      <div class="field">
+        <label class="field__label" for="movement_type">Tipo</label>
+        <select
+          id="movement_type"
+          class="field__select"
+          [class.field__input--error]="hasError('movement_type', 'required')"
+          formControlName="movement_type"
+        >
+          <option value="">Selecciona un tipo...</option>
+          @for (opt of movementTypeOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        @if (hasError('movement_type', 'required')) {
+          <span class="field__error">Debes seleccionar un tipo de movimiento.</span>
+        }
+        <!-- Hint dinámico: explica el efecto del tipo seleccionado -->
+        @if (currentHint) {
+          <span class="field__hint">{{ currentHint }}</span>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── Cantidad ─────────────────────────────────────────────────────── -->
+    <div class="form-section">
+      <p class="form-section__title">Cantidad</p>
+
+      <div class="field">
+        <label class="field__label" for="quantity">Unidades</label>
+        <input
+          id="quantity"
+          type="number"
+          class="field__input field__input--short"
+          [class.field__input--error]="hasError('quantity', 'required') || hasError('quantity', 'min')"
+          formControlName="quantity"
+          placeholder="Ej: 50"
+          min="1"
+        />
+        @if (hasError('quantity', 'required')) {
+          <span class="field__error">La cantidad es obligatoria.</span>
+        }
+        @if (hasError('quantity', 'min')) {
+          <span class="field__error">La cantidad mínima es 1 unidad.</span>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── Notas ────────────────────────────────────────────────────────── -->
+    <div class="form-section">
+      <p class="form-section__title">Notas <span class="form-section__optional">(opcional)</span></p>
+
+      <div class="field">
+        <label class="field__label" for="notes">Contexto del movimiento</label>
+        <textarea
+          id="notes"
+          class="field__textarea"
+          [class.field__input--error]="hasError('notes', 'maxlength')"
+          formControlName="notes"
+          placeholder="Ej: Compra a proveedor ABC, pedido #1042"
+          rows="3"
+        ></textarea>
+        @if (hasError('notes', 'maxlength')) {
+          <span class="field__error">Las notas no pueden superar 300 caracteres.</span>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── Error del servidor ───────────────────────────────────────────── -->
+    @if (serverError()) {
+      <div class="form-server-error">
+        {{ serverError() }}
+      </div>
+    }
+
+    <!-- ── Acciones ─────────────────────────────────────────────────────── -->
+    <div class="form-actions">
+      <a routerLink="/inventory" class="btn btn--secondary">Cancelar</a>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="isSaving()"
+      >
+        {{ isSaving() ? 'Registrando...' : 'Registrar movimiento' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>
