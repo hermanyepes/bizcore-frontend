@@ -1,0 +1,211 @@
+// ─── Contenedor principal ─────────────────────────────────────────────────────
+
+.inventory-form {
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+  max-width:      640px;
+}
+
+// ─── Encabezado ───────────────────────────────────────────────────────────────
+
+.inventory-form__header {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+}
+
+.inventory-form__title {
+  font-family: var(--font-display);
+  font-size:   1.5rem;
+  color:       var(--color-text-primary);
+  margin:      0;
+}
+
+.inventory-form__subtitle {
+  font-family: var(--font-ui);
+  font-size:   0.8rem;
+  color:       var(--color-text-muted);
+  margin:      0.25rem 0 0;
+  font-style:  italic;
+}
+
+// ─── Tarjeta del formulario ───────────────────────────────────────────────────
+
+.form-card {
+  background:    var(--color-bg-surface);
+  border:        1px solid var(--color-border);
+  border-radius: 8px;
+  padding:       1.5rem;
+  display:       flex;
+  flex-direction: column;
+  gap:           1.5rem;
+}
+
+// ─── Secciones del formulario ─────────────────────────────────────────────────
+
+.form-section {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+
+  &__title {
+    font-family: var(--font-ui);
+    font-size:   0.75rem;
+    font-weight: 600;
+    color:       var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin:      0;
+  }
+
+  &__optional {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color:       var(--color-text-disabled);
+  }
+}
+
+// ─── Campos individuales ──────────────────────────────────────────────────────
+
+.field {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+
+  &__label {
+    font-family: var(--font-ui);
+    font-size:   0.85rem;
+    color:       var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    background:    var(--color-bg-elevated);
+    color:         var(--color-text-primary);
+    border:        1px solid var(--color-border);
+    border-radius: 6px;
+    padding:       0.6rem 0.75rem;
+    font-family:   var(--font-ui);
+    font-size:     0.9rem;
+    transition:    border-color 200ms;
+    width:         100%;
+    box-sizing:    border-box;
+
+    &::placeholder {
+      color: var(--color-text-disabled);
+    }
+
+    &:focus {
+      outline:      none;
+      border-color: var(--color-border-focus);
+    }
+
+    // Estado error — borde rojo
+    &--error {
+      border-color: var(--color-danger);
+
+      &:focus {
+        border-color: var(--color-danger);
+      }
+    }
+  }
+
+  // El campo de cantidad no necesita ancho completo
+  &__input--short {
+    max-width: 160px;
+  }
+
+  &__textarea {
+    resize:     vertical;  // solo se puede redimensionar verticalmente
+    min-height: 80px;
+  }
+
+  &__error {
+    font-family: var(--font-ui);
+    font-size:   0.78rem;
+    color:       var(--color-danger);
+  }
+
+  // Hint: descripción del tipo seleccionado
+  &__hint {
+    font-family: var(--font-ui);
+    font-size:   0.8rem;
+    color:       var(--color-text-muted);
+    font-style:  italic;
+    padding:     0.35rem 0.5rem;
+    background:  var(--color-accent-dim);
+    border-left: 2px solid var(--color-accent);
+    border-radius: 0 4px 4px 0;
+  }
+}
+
+// ─── Error del servidor ───────────────────────────────────────────────────────
+
+.form-server-error {
+  background:    rgba(239, 68, 68, 0.1);
+  border:        1px solid var(--color-danger);
+  border-radius: 6px;
+  padding:       0.75rem 1rem;
+  font-family:   var(--font-ui);
+  font-size:     0.875rem;
+  color:         var(--color-danger);
+}
+
+// ─── Acciones ─────────────────────────────────────────────────────────────────
+
+.form-actions {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             0.75rem;
+  padding-top:     0.5rem;
+  border-top:      1px solid var(--color-border);
+}
+
+// ─── Botones ──────────────────────────────────────────────────────────────────
+
+.btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.4rem;
+  padding:         0.5rem 1.25rem;
+  border-radius:   6px;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+  font-weight:     500;
+  text-decoration: none;
+  border:          none;
+  cursor:          pointer;
+  transition:      all 200ms;
+  white-space:     nowrap;
+
+  &--primary {
+    background: var(--color-accent);
+    color:      #0F1117;
+
+    &:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor:  not-allowed;
+    }
+  }
+
+  &--secondary {
+    background: var(--color-bg-elevated);
+    color:      var(--color-text-muted);
+    border:     1px solid var(--color-border);
+
+    &:hover {
+      color:        var(--color-text-primary);
+      border-color: var(--color-text-muted);
+    }
+  }
+}

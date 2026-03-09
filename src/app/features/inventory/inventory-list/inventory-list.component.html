@@ -1,0 +1,135 @@
+<!-- ===== INVENTARIO — HISTORIAL DE MOVIMIENTOS ============================= -->
+<div class="inventory-list">
+
+  <!-- Encabezado: título + botón para registrar nuevo movimiento -->
+  <div class="inventory-list__header">
+    <div>
+      <h1 class="inventory-list__title">Inventario</h1>
+      <p class="inventory-list__subtitle">
+        Historial de movimientos de stock
+      </p>
+    </div>
+    <a routerLink="/inventory/new" class="btn btn--primary">
+      + Nuevo movimiento
+    </a>
+  </div>
+
+  <!-- ===== FILTROS ========================================================= -->
+  <div class="inventory-list__filters">
+
+    <!-- Filtro por tipo de movimiento -->
+    <div class="filter-group">
+      <label class="filter-group__label" for="filterType">Tipo</label>
+      <select
+        id="filterType"
+        class="filter-group__select"
+        [ngModel]="filterType()"
+        (ngModelChange)="filterType.set($event); onFilterChange()"
+      >
+        @for (opt of movementTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+  </div>
+
+  <!-- ===== ESTADO: CARGANDO =============================================== -->
+  @if (loadState() === 'loading') {
+    <div class="inventory-list__feedback">
+      <span class="spinner" aria-label="Cargando movimientos"></span>
+    </div>
+  }
+
+  <!-- ===== ESTADO: ERROR ================================================== -->
+  @if (loadState() === 'error') {
+    <div class="inventory-list__feedback inventory-list__feedback--error">
+      No se pudo cargar el historial. Intenta de nuevo.
+    </div>
+  }
+
+  <!-- ===== ESTADO: DATOS CARGADOS ========================================= -->
+  @if (loadState() === 'loaded') {
+
+    <!-- Contador de resultados -->
+    <p class="inventory-list__count">
+      {{ totalItems() }} movimiento{{ totalItems() !== 1 ? 's' : '' }} encontrado{{ totalItems() !== 1 ? 's' : '' }}
+    </p>
+
+    <!-- Tabla de movimientos -->
+    @if (movements().length > 0) {
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Notas</th>
+              <th>Registrado por</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (mov of movements(); track mov.id; let i = $index) {
+              <tr
+                class="table__row animate-stagger"
+                [style.--stagger-index]="i"
+                (click)="onRowClick(mov.id)"
+                role="button"
+                tabindex="0"
+                [attr.aria-label]="'Ver detalle del movimiento ' + mov.id"
+              >
+                <td class="table__cell--mono">{{ mov.id }}</td>
+                <td>
+                  <span class="badge" [class]="badgeClass(mov.movement_type)">
+                    {{ mov.movement_type }}
+                  </span>
+                </td>
+                <td class="table__cell--mono">{{ mov.product_id }}</td>
+                <td class="table__cell--mono">{{ mov.quantity }}</td>
+                <td class="table__cell--muted">{{ mov.notes ?? '—' }}</td>
+                <td class="table__cell--mono">{{ mov.created_by_id ?? '—' }}</td>
+                <td class="table__cell--muted">{{ formatDate(mov.created_at) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginador -->
+      <div class="paginator">
+        <button
+          class="paginator__btn"
+          [disabled]="currentPage() === 1"
+          (click)="onPageChange(-1)"
+          aria-label="Página anterior"
+        >
+          ← Anterior
+        </button>
+
+        <span class="paginator__info">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <button
+          class="paginator__btn"
+          [disabled]="currentPage() === totalPages()"
+          (click)="onPageChange(1)"
+          aria-label="Página siguiente"
+        >
+          Siguiente →
+        </button>
+      </div>
+
+    } @else {
+      <!-- Tabla vacía -->
+      <div class="inventory-list__empty">
+        No hay movimientos registrados para los filtros seleccionados.
+      </div>
+    }
+
+  }
+
+</div>
