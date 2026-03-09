@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit }          from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators,
          ReactiveFormsModule }                         from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
@@ -24,6 +24,7 @@ import { ProductsService, ProductCreatePayload,
 @Component({
   selector:    'app-product-form',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports:     [ReactiveFormsModule, RouterLink],
   templateUrl: './product-form.component.html',
   styleUrl:    './product-form.component.scss',

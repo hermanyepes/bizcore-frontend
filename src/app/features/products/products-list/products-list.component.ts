@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal }                            from '@angular/core/rxjs-interop';
 import { toObservable }                        from '@angular/core/rxjs-interop';
 import { RouterLink }                          from '@angular/router';
@@ -10,6 +10,7 @@ import { Product }                                                 from '../../.
 @Component({
   selector:    'app-products-list',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports:     [RouterLink],
   templateUrl: './products-list.component.html',
   styleUrl:    './products-list.component.scss',

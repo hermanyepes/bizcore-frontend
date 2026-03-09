@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '../auth/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-layout',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   // RouterOutlet: renderiza el componente hijo activo (dashboard, productos, etc.)
   // RouterLink / RouterLinkActive: navegación declarativa en el sidebar
   imports: [RouterOutlet, RouterLink, RouterLinkActive],

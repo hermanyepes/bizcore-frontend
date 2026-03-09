@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal }                            from '@angular/core/rxjs-interop';
 import { RouterLink }                          from '@angular/router';
 import { switchMap }                           from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { User }                         from '../../../core/models/user.model';
 @Component({
   selector: 'app-users-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   templateUrl: './users-list.component.html',
   styleUrl:    './users-list.component.scss',

@@ -1,4 +1,4 @@
-import { Component, inject, signal }        from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router }                            from '@angular/router';
 
@@ -7,6 +7,7 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   // ReactiveFormsModule: necesario para usar [formGroup] y formControlName en el template
   imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
