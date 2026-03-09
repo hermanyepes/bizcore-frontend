@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit }          from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators,
          ReactiveFormsModule }                         from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
@@ -25,6 +25,7 @@ import { UsersService, UserCreatePayload,
 @Component({
   selector:    'app-user-form',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports:     [ReactiveFormsModule, RouterLink],
   templateUrl: './user-form.component.html',
   styleUrl:    './user-form.component.scss',

@@ -3,28 +3,13 @@
 // REGLA SASS: todos los @use deben ir PRIMERO, antes de cualquier otro código.
 // ==========================================================================
 
-// Dependencias externas
-@use '@angular/material' as mat;
-
 // Nuestros parciales (@use moderno, reemplaza el deprecado @import)
 @use 'styles/variables';
 @use 'styles/reset';
 @use 'styles/animations';
 
-// ── Tema de Angular Material ──
-// Material 3 con modo oscuro explícito.
-// mat.$azure-palette es un azul-gris neutral — buena base para nuestro slate.
 html {
   height: 100%;
-
-  @include mat.theme((
-    color: (
-      theme-type: dark,
-      primary: mat.$azure-palette,
-    ),
-    typography: 'DM Sans',
-    density: 0,
-  ));
 }
 
 // ── Estilos base de la app ──

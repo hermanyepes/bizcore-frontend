@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal }                     from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink }   from '@angular/router';
 import { SlicePipe, UpperCasePipe, DatePipe } from '@angular/common';
@@ -11,6 +11,7 @@ import { User }         from '../../../core/models/user.model';
 @Component({
   selector:    'app-user-detail',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports:     [RouterLink, SlicePipe, UpperCasePipe, DatePipe],
   templateUrl: './user-detail.component.html',
   styleUrl:    './user-detail.component.scss',

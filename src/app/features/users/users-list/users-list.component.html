@@ -103,6 +103,7 @@
         <button
           class="users-list__page-btn"
           type="button"
+          aria-label="Página anterior"
           [disabled]="currentPage() === 1"
           (click)="goToPage(currentPage() - 1)"
         >
@@ -113,6 +114,8 @@
           <button
             class="users-list__page-btn"
             type="button"
+            [attr.aria-label]="'Ir a página ' + n"
+            [attr.aria-current]="n === currentPage() ? 'page' : null"
             [class.users-list__page-btn--active]="n === currentPage()"
             (click)="goToPage(n)"
           >
@@ -123,6 +126,7 @@
         <button
           class="users-list__page-btn"
           type="button"
+          aria-label="Página siguiente"
           [disabled]="currentPage() === totalPages()"
           (click)="goToPage(currentPage() + 1)"
         >
