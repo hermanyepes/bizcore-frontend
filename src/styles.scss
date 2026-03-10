@@ -7,6 +7,7 @@
 @use 'styles/variables';
 @use 'styles/reset';
 @use 'styles/animations';
+@use 'styles/textures';  // capas atmosféricas — siempre al final del grupo de @use
 
 html {
   height: 100%;
