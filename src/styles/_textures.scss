@@ -1,0 +1,77 @@
+// ==========================================================================
+// SISTEMA DE TEXTURAS Y ATMÓSFERA — BizCore
+//
+// Principio: el ojo humano percibe "profundidad" cuando hay imperfecciones
+// sutiles. Un fondo 100% sólido y limpio se lee como "artificial". Estas
+// capas agregan la imperfección controlada que lo hace sentir real.
+//
+// ARQUITECTURA: todo vive en pseudo-elementos de body (::before / ::after).
+// No se toca ningún componente. No se cambia ningún HTML.
+// ==========================================================================
+
+// ── CAPA 1: Gradiente atmosférico ─────────────────────────────────────────
+// Simula una fuente de luz lejana en la esquina superior izquierda.
+// Opacidad: 0.06 — apenas perceptible, pero el ojo lo siente.
+// pointer-events: none — las capas no bloquean clics ni hover.
+body::before {
+  content: '';
+  position: fixed;          // fixed: se queda quieto aunque el usuario scrollee
+  inset: 0;                 // shorthand para top/right/bottom/left: 0
+  pointer-events: none;     // invisible para el mouse — solo visual
+  z-index: 0;               // debajo de todo el contenido (app-root está en z-index auto)
+
+  // Gradiente radial: el centro brilla (muy levemente) y los bordes se oscurecen.
+  // Esto es una viñeta invertida — luz al centro, sombra al borde.
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 20% 10%,       // elipse grande, anclada arriba-izquierda
+      rgba(245, 166, 35, 0.06) 0%,       // ámbar muy tenue en el origen de la "luz"
+      transparent 60%                    // desaparece antes de llegar al centro
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 80% 90%,        // segundo gradiente — abajo-derecha
+      rgba(59, 130, 246, 0.04) 0%,       // azul frío muy tenue (complementario al ámbar)
+      transparent 50%
+    );
+}
+
+// ── CAPA 2: Ruido (noise) + viñeta ────────────────────────────────────────
+// El SVG data:URI con feTurbulence genera grano sintético.
+// Es el mismo truco que usan Figma, Linear y Vercel en sus fondos oscuros.
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  // Dos capas en background-image (se apilan, la primera está encima):
+  // 1. Viñeta: radial oscuro en los bordes — enfoca la atención al centro.
+  // 2. Noise: SVG con feTurbulence — el "grano de película" digital.
+  background-image:
+    radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 40%,                   // centro: transparente (no tapa nada)
+      rgba(0, 0, 0, 0.35) 100%           // borde: oscuro — la viñeta
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+
+  // El noise se repite en tile (como papel tapiz) para cubrir toda la pantalla.
+  background-size: auto, 200px 200px;
+  background-repeat: no-repeat, repeat;
+
+  // mix-blend-mode overlay: hace que el grano interactúe con el color de fondo
+  // en vez de simplemente taparse encima. Resultado: más natural.
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+
+// ── Asegurar que el contenido de la app esté encima de las capas ──────────
+// app-root es el componente raíz de Angular. Debe quedar por encima de
+// los pseudo-elementos del body (z-index 0) para ser visible e interactuable.
+app-root {
+  position: relative;
+  z-index: 1;               // encima de ::before (z:0) y ::after (z:0)
+  display: block;
+  height: 100%;
+}

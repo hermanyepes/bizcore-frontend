@@ -51,4 +51,34 @@
 
   // ── Transiciones ──
   --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ── Sombras dramáticas ──
+  // Filosofía: dos capas — una sombra larga difusa (ambiente) + una corta nítida (contacto).
+  // Igual que en fotografía de estudio: la luz de relleno + la sombra dura.
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4),  0 1px 2px rgba(0,0,0,0.6);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.7);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.8);
+  --shadow-xl:  0 20px 60px rgba(0,0,0,0.7), 0 8px 16px rgba(0,0,0,0.9);
+
+  // ── Glow ámbar ──
+  // Simula un LED detrás del elemento — brilla hacia afuera, no hacia adentro.
+  // Capas: glow difuso amplio + halo nítido cercano + sombra base oscura.
+  --glow-accent:      0 0 20px rgba(245, 166, 35, 0.35), 0 0 6px rgba(245, 166, 35, 0.5);
+  --glow-accent-sm:   0 0 10px rgba(245, 166, 35, 0.25), 0 0 3px rgba(245, 166, 35, 0.4);
+  --glow-accent-strong: 0 0 40px rgba(245, 166, 35, 0.45), 0 0 12px rgba(245, 166, 35, 0.6);
+
+  // ── Gradientes atmosféricos ──
+  // No son fondos — son capas encima del fondo.
+  // _textures.scss los usa para crear profundidad sin cambiar el color base.
+  --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+  --gradient-sidebar: linear-gradient(180deg, rgba(245,166,35,0.04) 0%, transparent 40%);
+  --gradient-amber-border: linear-gradient(90deg, transparent, rgba(245,166,35,0.4), transparent);
+  --gradient-amber-border-v: linear-gradient(180deg, transparent, rgba(245,166,35,0.3), transparent);
+
+  // ── Colores de borde enriquecidos ──
+  --color-border-subtle:  rgba(255, 255, 255, 0.05);  // bordes casi invisibles
+  --color-border-medium:  rgba(255, 255, 255, 0.10);  // bordes de tarjetas
+  --color-border-strong:  rgba(255, 255, 255, 0.18);  // bordes en focus/hover
+  --color-border-accent:  rgba(245, 166, 35, 0.35);   // borde ámbar — sidebar activo
 }

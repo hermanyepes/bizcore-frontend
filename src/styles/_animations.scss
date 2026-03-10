@@ -4,7 +4,10 @@
 // que diez micro-interacciones genéricas.
 // ==========================================================================
 
-// Entrada de elementos (tablas, tarjetas) — sube suavemente desde abajo
+
+// ── KEYFRAMES DE ENTRADA ──────────────────────────────────────────────────
+
+// Entrada estándar — sube suavemente desde abajo con fade
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -22,11 +25,78 @@
   to   { opacity: 1; }
 }
 
-// ── Clases de utilidad para aplicar las animaciones ──
+// Entrada con escala — el elemento crece desde el 95% al 100%.
+// Más dramático que slideIn. Para cards de detalle y secciones hero.
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
-// Aplica slideIn a cualquier elemento que deba "entrar" en pantalla
+// Entrada desde la izquierda — para el sidebar al cargar la app.
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+// ── KEYFRAMES DE ESTADO (loops) ───────────────────────────────────────────
+
+// Pulso de brillo ámbar — late suavemente como un LED en standby.
+// Para badges activos y el logo del sidebar.
+// Alterna entre el glow tenue y el glow fuerte.
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(245, 166, 35, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(245, 166, 35, 0.5), 0 0 6px rgba(245, 166, 35, 0.7);
+  }
+}
+
+// Shimmer — un reflejo de luz que cruza el elemento de izquierda a derecha.
+// Técnica: un pseudo-elemento con gradiente blanco se mueve con translateX.
+// La clase .shimmer-host gestiona el overflow y posición (ver abajo).
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
+}
+
+// Parpadeo suave — para indicadores de carga o elementos "en vivo"
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+
+// ── CLASES DE UTILIDAD — ENTRADAS ─────────────────────────────────────────
+
+// Entrada estándar para filas de tabla, items de lista
 .animate-slide-in {
-  animation: slideIn 300ms var(--transition-base) both;
+  animation: slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+// Entrada con escala para cards y secciones de detalle
+.animate-scale-in {
+  animation: scaleIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  // cubic-bezier(0.34, 1.56, 0.64, 1) = spring — llega al 100% con un
+  // micro-rebote (va al 102% y vuelve). Más vivo que ease-out puro.
+}
+
+// Entrada desde izquierda para el sidebar
+.animate-slide-in-left {
+  animation: slideInLeft 350ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 // Aplica fadeIn a páginas completas al navegar
@@ -40,4 +110,55 @@
 .animate-stagger {
   animation: slideIn 300ms ease-out both;
   animation-delay: calc(var(--stagger-index, 0) * 40ms);
+}
+
+// Delays explícitos — para escalonar sin JS cuando el índice es fijo
+.animate-delay-1 { animation-delay: 40ms; }
+.animate-delay-2 { animation-delay: 80ms; }
+.animate-delay-3 { animation-delay: 120ms; }
+.animate-delay-4 { animation-delay: 160ms; }
+.animate-delay-5 { animation-delay: 200ms; }
+
+
+// ── CLASES DE UTILIDAD — ESTADO ───────────────────────────────────────────
+
+// LED ámbar pulsante — para badges de estado "activo" o "en línea"
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+// Parpadeo para indicadores de carga
+.animate-blink {
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+// Contenedor de shimmer — el pseudo-elemento con el reflejo de luz.
+// El elemento padre necesita overflow: hidden para que el reflejo no se salga.
+// Uso típico: agregar .shimmer-host al botón de acción principal.
+.shimmer-host {
+  position: relative;
+  overflow: hidden;
+
+  // El reflejo de luz: un gradiente blanco semi-transparente inclinado.
+  // Se dispara en hover del .shimmer-host — no es un loop automático.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);   // empieza fuera de la izquierda
+    transition: none;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    animation: shimmer 500ms ease-out forwards;
+    // forwards: al terminar, se queda en la posición final (translateX(200%))
+    // — fuera de la pantalla a la derecha. No vuelve visiblemente.
+  }
 }

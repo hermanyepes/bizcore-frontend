@@ -9,26 +9,60 @@
 // --------------------------------------------------------------------------
 .login-page {
   display: flex;
-  align-items: center;       // centra verticalmente
-  justify-content: center;   // centra horizontalmente
-  min-height: 100vh;         // ocupa toda la altura de la ventana
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   background-color: var(--color-bg-app);
   padding: var(--spacing-md);
+  // position: relative permite que ::before se posicione dentro de este bloque
+  position: relative;
+  overflow: hidden;           // el patrón no se escapa de la pantalla
+
+  // Patrón geométrico de fondo — líneas diagonales en cuadrícula.
+  // Un SVG data:URI con <line> es más limpio que un background-image
+  // con CSS gradient: se ve exactamente igual en todos los navegadores.
+  // Opacidad: 0.07 — presente pero no compite con la card.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 60L60 0M-15 15L15 -15M45 75L75 45' stroke='rgba(245,166,35,0.07)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 60px 60px;
+    // El patrón se desvanece en los bordes para que la card tenga protagonismo
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    mask-image:         radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
 }
 
 // --------------------------------------------------------------------------
-// login-card — la tarjeta blanca (en nuestro caso slate) del formulario
+// login-card — la tarjeta del formulario
 // --------------------------------------------------------------------------
 .login-card {
   width: 100%;
-  max-width: 420px;          // la tarjeta no crece más allá de 420px
+  max-width: 420px;
   background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
+  // El "capuchón" ámbar: borde superior de 2px en color de acento.
+  // Técnica clásica de diseño editorial — una línea de color que ancla la card
+  // y la conecta con la identidad de marca. Como el lomo de un libro.
+  border-top: 2px solid var(--color-accent);
+  border-right: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+  border-left: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl) var(--spacing-xl);
-
-  // Animación de entrada: la tarjeta aparece deslizándose desde abajo
-  animation: slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  // Sombra dramática de tres capas:
+  //   1. Sombra ambiente grande: da "altura" en el espacio
+  //   2. Sombra de contacto cercana: ancla la card contra el fondo
+  //   3. Halo ámbar muy difuso: conecta la card con el acento de marca
+  box-shadow:
+    var(--shadow-xl),
+    0 0 0 1px rgba(255, 255, 255, 0.04),   // borde interior sutil — profundidad
+    0 0 80px rgba(245, 166, 35, 0.08);      // halo ámbar amplísimo
+  // Posición relative para que el glow de la card no afecte a otros elementos
+  position: relative;
+  // Animación de entrada con spring — más viva que ease-out puro
+  animation: scaleIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
   // ── Encabezado ──
   &__header {
@@ -40,9 +74,14 @@
     font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 800;
-    color: var(--color-accent);  // el logo en ámbar — identidad de marca
+    color: var(--color-accent);
     letter-spacing: -0.02em;
     margin: 0 0 var(--spacing-xs);
+    // Glow en el texto — el nombre de la app "emite" luz ámbar.
+    // Dos capas: halo cercano brillante + halo difuso amplísimo.
+    text-shadow:
+      0 0 20px rgba(245, 166, 35, 0.5),
+      0 0 60px rgba(245, 166, 35, 0.2);
   }
 
   &__subtitle {
@@ -56,12 +95,12 @@
   &__form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);    // espacio entre cada campo del formulario
+    gap: var(--spacing-lg);
   }
 
-  // ── Alerta de error global (credenciales incorrectas, sin red) ──
+  // ── Alerta de error global ──
   &__alert {
-    background-color: rgba(239, 68, 68, 0.1);  // rojo muy sutil de fondo
+    background-color: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: var(--radius-md);
     color: var(--color-danger);
@@ -69,7 +108,6 @@
     font-size: 0.875rem;
     padding: var(--spacing-sm) var(--spacing-md);
     text-align: center;
-    // Animación breve para que la alerta llame la atención al aparecer
     animation: slideIn 200ms ease both;
   }
 
@@ -81,24 +119,49 @@
     gap: var(--spacing-sm);
     width: 100%;
     padding: var(--spacing-sm) var(--spacing-md);
-    height: 44px;             // altura fija para que no "salte" al mostrar spinner
+    height: 44px;
 
     background-color: var(--color-accent);
-    color: #0F1117;           // texto oscuro sobre fondo ámbar — mejor contraste
+    color: #0F1117;
     font-family: var(--font-ui);
     font-size: 0.9375rem;
     font-weight: 600;
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background-color var(--transition-base),
-                opacity var(--transition-base);
+    // overflow: hidden permite que el shimmer no se salga del botón
+    overflow: hidden;
+    position: relative;
+    transition:
+      background-color var(--transition-base),
+      box-shadow var(--transition-slow),
+      opacity var(--transition-base);
+
+    // El reflejo de luz (shimmer) — se dispara en hover
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 70%
+      );
+      transform: translateX(-100%);
+      pointer-events: none;
+    }
 
     &:hover:not(:disabled) {
       background-color: var(--color-accent-hover);
+      // Glow en el botón al hover — como si el ámbar se intensificara
+      box-shadow: var(--glow-accent);
+
+      &::after {
+        animation: shimmer 500ms ease-out forwards;
+      }
     }
 
-    // Estado deshabilitado mientras isLoading = true
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
@@ -121,7 +184,6 @@
     color: var(--color-text-muted);
   }
 
-  // Wrapper necesario para posicionar el botón del ojo encima del input
   &__input-wrapper {
     position: relative;
     display: flex;
@@ -133,17 +195,16 @@
     height: 42px;
     padding: 0 var(--spacing-md);
     background-color: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-medium);
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-family: var(--font-ui);
     font-size: 0.9375rem;
     outline: none;
-    transition: border-color var(--transition-base),
-                box-shadow var(--transition-base);
+    transition:
+      border-color var(--transition-base),
+      box-shadow var(--transition-base);
 
-    // Cuando el input está dentro del wrapper (campo contraseña),
-    // dejamos espacio a la derecha para el botón del ojo
     .form-field__input-wrapper & {
       padding-right: 44px;
     }
@@ -152,13 +213,12 @@
       color: var(--color-text-disabled);
     }
 
-    // Estado focus — borde ámbar + sombra sutil
+    // Focus — borde ámbar + glow interior sutil
     &:focus {
       border-color: var(--color-border-focus);
-      box-shadow: 0 0 0 3px var(--color-accent-dim);
+      box-shadow: 0 0 0 3px var(--color-accent-dim), var(--glow-accent-sm);
     }
 
-    // Modificador de error — borde rojo cuando el campo tiene error y fue tocado
     &--error {
       border-color: rgba(239, 68, 68, 0.6);
 
@@ -169,7 +229,6 @@
     }
   }
 
-  // Botón de mostrar/ocultar contraseña — posicionado sobre el input
   &__toggle {
     position: absolute;
     right: var(--spacing-sm);
@@ -190,12 +249,11 @@
     }
   }
 
-  // Mensaje de error debajo del input
   &__error {
     font-family: var(--font-ui);
-    font-size: 0.8125rem;    // 13px — ligeramente más pequeño que el label
+    font-size: 0.8125rem;
     color: var(--color-danger);
-    animation: slideIn 150ms ease both;  // aparece con una micro-animación
+    animation: slideIn 150ms ease both;
   }
 }
 
@@ -205,14 +263,12 @@
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(15, 17, 23, 0.3);  // anillo base semi-transparente
-  border-top-color: #0F1117;                 // el arco visible que gira
+  border: 2px solid rgba(15, 17, 23, 0.3);
+  border-top-color: #0F1117;
   border-radius: 50%;
   animation: spin 600ms linear infinite;
 }
 
-// Keyframe de rotación del spinner
-// (slideIn y fadeIn ya están definidos en src/styles/_animations.scss)
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
