@@ -1,0 +1,117 @@
+<div class="form-page animate-slide-in">
+
+  <!-- ── Encabezado ───────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <a routerLink="/suppliers" class="back-link">← Volver a proveedores</a>
+    <h1 class="page-title">
+      {{ isEditMode ? 'Editar proveedor' : 'Nuevo proveedor' }}
+    </h1>
+  </div>
+
+  <!-- ── Estado: cargando datos (solo modo editar) ─────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-state">Cargando datos del proveedor…</div>
+  }
+
+  <!-- ── Formulario ───────────────────────────────────────────────────────── -->
+  @if (!isLoading()) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="supplier-form" novalidate>
+
+      <!-- ── Error del servidor ─────────────────────────────────────────── -->
+      @if (serverError()) {
+        <div class="server-error" role="alert">{{ serverError() }}</div>
+      }
+
+      <!-- ── Sección: información básica ───────────────────────────────── -->
+      <div class="form-section">
+        <p class="form-section__title">Información básica</p>
+
+        <div class="field">
+          <label class="field__label" for="name">Nombre *</label>
+          <input id="name"
+                 type="text"
+                 class="field__input"
+                 formControlName="name"
+                 placeholder="Ej: Distribuidora Colombia S.A."
+                 [class.field__input--error]="form.get('name')!.invalid && form.get('name')!.touched">
+          @if (form.get('name')!.invalid && form.get('name')!.touched) {
+            <span class="field__error">El nombre es obligatorio (máx. 150 caracteres).</span>
+          }
+        </div>
+
+      </div>
+
+      <!-- ── Sección: contacto ──────────────────────────────────────────── -->
+      <div class="form-section">
+        <p class="form-section__title">Información de contacto</p>
+
+        <div class="form-row">
+
+          <div class="field">
+            <label class="field__label" for="contact_email">Email de contacto</label>
+            <input id="contact_email"
+                   type="email"
+                   class="field__input"
+                   formControlName="contact_email"
+                   placeholder="Ej: ventas@proveedor.com"
+                   [class.field__input--error]="form.get('contact_email')!.invalid && form.get('contact_email')!.touched">
+            @if (form.get('contact_email')!.invalid && form.get('contact_email')!.touched) {
+              <span class="field__error">Ingresa un email válido o deja el campo vacío.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="phone">Teléfono</label>
+            <input id="phone"
+                   type="text"
+                   class="field__input"
+                   formControlName="phone"
+                   placeholder="Ej: +57 310 555 1234">
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="address">Dirección</label>
+          <input id="address"
+                 type="text"
+                 class="field__input"
+                 formControlName="address"
+                 autocomplete="off"
+                 placeholder="Ej: Calle 10 # 5-20, Bogotá">
+        </div>
+
+      </div>
+
+      <!-- ── Sección: estado (solo modo editar) ────────────────────────── -->
+      @if (isEditMode) {
+        <div class="form-section">
+          <p class="form-section__title">Estado</p>
+
+          <div class="field field--narrow">
+            <label class="field__label" for="is_active">Estado del proveedor</label>
+            <select id="is_active"
+                    class="field__input field__select"
+                    formControlName="is_active">
+              <option [value]="true">Activo</option>
+              <option [value]="false">Inactivo</option>
+            </select>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── Acciones ───────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <a routerLink="/suppliers" class="btn btn--secondary">Cancelar</a>
+        <button type="submit"
+                class="btn btn--primary"
+                [disabled]="form.invalid || isSaving()">
+          {{ isSaving() ? 'Guardando…' : (isEditMode ? 'Guardar cambios' : 'Crear proveedor') }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

@@ -1,0 +1,146 @@
+<section class="suppliers-list animate-fade-in">
+
+  <!-- ── Cabecera ──────────────────────────────────────────────────────────── -->
+  <div class="list-header">
+    <div class="list-header__title">
+      <h1>Proveedores</h1>
+      @if (loadState() === 'loaded') {
+        <span class="list-header__count">{{ totalItems() }} registros</span>
+      }
+    </div>
+    <a routerLink="/suppliers/new" class="btn btn--primary">+ Nuevo proveedor</a>
+  </div>
+
+  <!-- ── Filtro activo/inactivo ─────────────────────────────────────────────── -->
+  <div class="filters">
+    <select class="filter-select"
+            [value]="filterActive()"
+            (change)="onFilterChange($any($event.target).value)">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+  </div>
+
+  <!-- ── Estado: cargando ───────────────────────────────────────────────────── -->
+  @if (loadState() === 'loading') {
+    <div class="loading-state">Cargando proveedores…</div>
+  }
+
+  <!-- ── Estado: error ──────────────────────────────────────────────────────── -->
+  @if (loadState() === 'error') {
+    <div class="error-state">
+      No se pudo cargar la lista. Intenta de nuevo.
+    </div>
+  }
+
+  <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+  @if (loadState() === 'loaded') {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Registrado</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (supplier of suppliers(); track supplier.id; let i = $index) {
+            <tr class="animate-stagger" [style.--stagger-index]="i">
+
+              <td class="cell--mono">{{ supplier.id }}</td>
+
+              <td class="cell--name">{{ supplier.name }}</td>
+
+              <!-- Email: si no hay, mostramos un guion suave -->
+              <td>
+                @if (supplier.contact_email) {
+                  {{ supplier.contact_email }}
+                } @else {
+                  <span class="cell--muted">—</span>
+                }
+              </td>
+
+              <!-- Teléfono: igual, opcional -->
+              <td>
+                @if (supplier.phone) {
+                  {{ supplier.phone }}
+                } @else {
+                  <span class="cell--muted">—</span>
+                }
+              </td>
+
+              <!-- Dirección: igual, opcional -->
+              <td>
+                @if (supplier.address) {
+                  {{ supplier.address }}
+                } @else {
+                  <span class="cell--muted">—</span>
+                }
+              </td>
+
+              <td>
+                <span class="status-badge"
+                      [class.status-badge--active]="supplier.is_active"
+                      [class.status-badge--inactive]="!supplier.is_active">
+                  {{ supplier.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="cell--mono">{{ formatDate(supplier.created_at) }}</td>
+
+              <!-- Acciones: editar siempre visible; desactivar solo si está activo -->
+              <td class="cell-actions">
+                <a [routerLink]="['/suppliers', supplier.id, 'edit']"
+                   class="action-link action-link--edit">
+                  Editar
+                </a>
+                @if (supplier.is_active) {
+                  <button class="action-link action-link--danger"
+                          (click)="deactivate(supplier)">
+                    Desactivar
+                  </button>
+                }
+              </td>
+
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-state">No hay proveedores registrados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="pagination__btn"
+                aria-label="Página anterior"
+                (click)="onPageChange(-1)"
+                [disabled]="currentPage() === 1">
+          ‹
+        </button>
+
+        <span class="pagination__info">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <button class="pagination__btn"
+                aria-label="Página siguiente"
+                (click)="onPageChange(1)"
+                [disabled]="currentPage() === totalPages()">
+          ›
+        </button>
+      </div>
+    }
+  }
+
+</section>
