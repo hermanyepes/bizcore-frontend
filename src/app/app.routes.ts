@@ -102,6 +102,27 @@ export const routes: Routes = [
           import('./features/inventory/inventory-detail/inventory-detail.component').then(m => m.InventoryDetailComponent),
       },
 
+      // Módulo de proveedores — lista paginada
+      {
+        path: 'suppliers',
+        loadComponent: () =>
+          import('./features/suppliers/suppliers-list/suppliers-list.component').then(m => m.SuppliersListComponent),
+      },
+      // Formulario de proveedor — modo CREAR
+      // IMPORTANTE: debe estar ANTES de 'suppliers/:id' por la misma razón
+      // que 'products/new': si ':id' fuera primero, "new" se leería como el id.
+      {
+        path: 'suppliers/new',
+        loadComponent: () =>
+          import('./features/suppliers/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
+      },
+      // Formulario de proveedor — modo EDITAR
+      {
+        path: 'suppliers/:id/edit',
+        loadComponent: () =>
+          import('./features/suppliers/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
+      },
+
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',
