@@ -1,0 +1,240 @@
+<div class="form-page animate-slide-in">
+
+  <!-- ── Encabezado de página ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <a routerLink="/orders" class="back-link">← Volver a pedidos</a>
+    <h1 class="page-title">
+      {{ isEditMode ? 'Editar pedido #' + orderId : 'Nuevo pedido' }}
+    </h1>
+  </div>
+
+  <!-- ── Estado: cargando datos (solo modo editar) ─────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-state">Cargando datos del pedido…</div>
+  }
+
+  <!-- ── Formulario ────────────────────────────────────────────────────────── -->
+  @if (!isLoading()) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="order-form" novalidate>
+
+      <!-- ── Error del servidor ───────────────────────────────────────────── -->
+      @if (serverError()) {
+        <div class="server-error" role="alert">{{ serverError() }}</div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           SECCIÓN 1 — Encabezado del pedido
+           Proveedor + notas. En modo editar el proveedor es solo lectura.
+      ══════════════════════════════════════════════════════════════════════ -->
+      <div class="form-section">
+        <p class="form-section__title">Encabezado del pedido</p>
+
+        <!-- Proveedor — solo en modo CREAR (en editar es inmutable) -->
+        @if (!isEditMode) {
+          <div class="field">
+            <label class="field__label" for="supplier_id">Proveedor *</label>
+            <select id="supplier_id"
+                    class="field__input field__select"
+                    formControlName="supplier_id">
+              <option [value]="null" disabled selected>Selecciona un proveedor…</option>
+              @for (supplier of suppliers(); track supplier.id) {
+                <option [value]="supplier.id">{{ supplier.name }}</option>
+              }
+            </select>
+            @if (form.get('supplier_id')!.invalid && form.get('supplier_id')!.touched) {
+              <span class="field__error">Selecciona un proveedor.</span>
+            }
+          </div>
+        }
+
+        <!-- En modo EDITAR mostramos el proveedor como texto — no se puede cambiar -->
+        @if (isEditMode && loadedOrder()) {
+          <div class="field">
+            <label class="field__label">Proveedor</label>
+            <p class="field__readonly">{{ getSupplierName(loadedOrder()!.supplier_id) }}</p>
+          </div>
+        }
+
+        <!-- Notas — editables en ambos modos -->
+        <div class="field">
+          <label class="field__label" for="notes">Notas (opcional)</label>
+          <textarea id="notes"
+                    class="field__input field__textarea"
+                    formControlName="notes"
+                    rows="2"
+                    placeholder="Ej: Compra mensual de insumos básicos…"
+                    [class.field__input--error]="form.get('notes')!.invalid && form.get('notes')!.touched">
+          </textarea>
+          @if (form.get('notes')!.invalid && form.get('notes')!.touched) {
+            <span class="field__error">Las notas no pueden superar 300 caracteres.</span>
+          }
+        </div>
+
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           SECCIÓN 2A — Ítems del pedido (solo modo CREAR)
+           FormArray: tabla dinámica donde el usuario agrega/elimina filas.
+      ══════════════════════════════════════════════════════════════════════ -->
+      @if (!isEditMode) {
+        <div class="form-section">
+          <div class="items-header">
+            <p class="form-section__title">Ítems del pedido</p>
+            <button type="button" class="btn btn--secondary btn--sm" (click)="addItem()">
+              + Agregar producto
+            </button>
+          </div>
+
+          <!-- Tabla dinámica — una fila por FormGroup del FormArray -->
+          <div class="items-table">
+
+            <!-- Encabezados de la tabla -->
+            <div class="items-table__head">
+              <span>Producto *</span>
+              <span>Cantidad *</span>
+              <span>Precio unit.</span>
+              <span>Subtotal</span>
+              <span></span>
+            </div>
+
+            <!-- Filas dinámicas — formArrayName enlaza el FormArray -->
+            <div formArrayName="items">
+              @for (item of items.controls; track $index) {
+                <!-- [formGroupName]="$index" enlaza la fila con el FormGroup en esa posición -->
+                <div class="items-table__row" [formGroupName]="$index">
+
+                  <!-- Dropdown de producto -->
+                  <div class="field field--inline">
+                    <select class="field__input field__select"
+                            formControlName="product_id"
+                            [class.field__input--error]="item.get('product_id')!.invalid && item.get('product_id')!.touched">
+                      <option [value]="null" disabled selected>Selecciona…</option>
+                      @for (product of products(); track product.id) {
+                        <!-- [ngValue] preserva el tipo number — [value] lo convertiría a string -->
+                        <option [ngValue]="product.id">{{ product.name }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <!-- Campo de cantidad -->
+                  <div class="field field--inline">
+                    <input type="number"
+                           class="field__input"
+                           formControlName="quantity"
+                           min="1"
+                           placeholder="0"
+                           [class.field__input--error]="item.get('quantity')!.invalid && item.get('quantity')!.touched">
+                  </div>
+
+                  <!-- Precio unitario — calculado en memoria, solo lectura -->
+                  <div class="cell--price">
+                    @if (getProductPrice($index) !== null) {
+                      {{ formatPrice(getProductPrice($index)!) }}
+                    } @else {
+                      <span class="cell--muted">—</span>
+                    }
+                  </div>
+
+                  <!-- Subtotal — precio × cantidad, calculado en tiempo real -->
+                  <div class="cell--price">
+                    @if (getSubtotal($index) !== null) {
+                      {{ formatPrice(getSubtotal($index)!) }}
+                    } @else {
+                      <span class="cell--muted">—</span>
+                    }
+                  </div>
+
+                  <!-- Botón eliminar fila — deshabilitado si solo queda una -->
+                  <button type="button"
+                          class="btn-remove"
+                          [disabled]="items.length <= 1"
+                          (click)="removeItem($index)"
+                          aria-label="Eliminar ítem">
+                    ×
+                  </button>
+
+                </div>
+              }
+            </div>
+
+            <!-- Fila de total -->
+            <div class="items-table__total">
+              <span>TOTAL</span>
+              <span class="total-value">{{ formatPrice(getFormTotal()) }}</span>
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           SECCIÓN 2B — Ítems históricos (solo modo EDITAR)
+           Los ítems son inmutables: se muestran en modo lectura.
+      ══════════════════════════════════════════════════════════════════════ -->
+      @if (isEditMode && loadedOrder()) {
+        <div class="form-section">
+          <p class="form-section__title">Ítems del pedido (histórico — no editables)</p>
+
+          <div class="items-table">
+            <div class="items-table__head">
+              <span>Producto</span>
+              <span>Cantidad</span>
+              <span>Precio unit.</span>
+              <span>Subtotal</span>
+              <span></span>
+            </div>
+
+            @for (item of loadedOrder()!.items; track item.id) {
+              <div class="items-table__row items-table__row--readonly">
+                <span class="cell--name">{{ getProductName(item.product_id) }}</span>
+                <span class="cell--center">{{ item.quantity }}</span>
+                <span class="cell--price">{{ formatPrice(item.unit_price) }}</span>
+                <span class="cell--price">{{ formatPrice(item.subtotal) }}</span>
+                <span></span>
+              </div>
+            }
+
+            <div class="items-table__total">
+              <span>TOTAL</span>
+              <span class="total-value">{{ formatPrice(getLoadedOrderTotal()) }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════
+           SECCIÓN 3 — Estado (solo modo EDITAR)
+           En modo crear el backend siempre asigna PENDIENTE automáticamente.
+      ══════════════════════════════════════════════════════════════════════ -->
+      @if (isEditMode) {
+        <div class="form-section">
+          <p class="form-section__title">Estado del pedido</p>
+
+          <div class="field field--narrow">
+            <label class="field__label" for="status">Estado</label>
+            <select id="status"
+                    class="field__input field__select"
+                    formControlName="status">
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="COMPLETADO">Completado</option>
+              <option value="CANCELADO">Cancelado</option>
+            </select>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── Acciones ───────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <a routerLink="/orders" class="btn btn--secondary">Cancelar</a>
+        <button type="submit"
+                class="btn btn--primary"
+                [disabled]="form.invalid || isSaving()">
+          {{ isSaving() ? 'Guardando…' : (isEditMode ? 'Guardar cambios' : 'Crear pedido') }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

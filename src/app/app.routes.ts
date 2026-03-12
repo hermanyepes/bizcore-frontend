@@ -123,6 +123,27 @@ export const routes: Routes = [
           import('./features/suppliers/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
       },
 
+      // Módulo de pedidos — lista paginada
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/orders/orders-list/orders-list.component').then(m => m.OrdersListComponent),
+      },
+      // Formulario de pedido — modo CREAR
+      // IMPORTANTE: debe estar ANTES de 'orders/:id' para que "new"
+      // no se interprete como el id de un pedido.
+      {
+        path: 'orders/new',
+        loadComponent: () =>
+          import('./features/orders/order-form/order-form.component').then(m => m.OrderFormComponent),
+      },
+      // Formulario de pedido — modo EDITAR (solo status + notes)
+      {
+        path: 'orders/:id/edit',
+        loadComponent: () =>
+          import('./features/orders/order-form/order-form.component').then(m => m.OrderFormComponent),
+      },
+
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',

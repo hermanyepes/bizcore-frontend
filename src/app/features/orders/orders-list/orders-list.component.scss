@@ -1,0 +1,297 @@
+.orders-list {
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+}
+
+// ── Cabecera ──────────────────────────────────────────────────────────────────
+
+.list-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+
+  &__title {
+    display:     flex;
+    align-items: baseline;
+    gap:         0.75rem;
+
+    h1 {
+      font-family: var(--font-display);
+      font-size:   1.5rem;
+      color:       var(--color-text-primary);
+      margin:      0;
+    }
+  }
+
+  &__count {
+    font-size: 0.8rem;
+    color:     var(--color-text-muted);
+  }
+}
+
+// ── Filtros ───────────────────────────────────────────────────────────────────
+// Dos selectores en fila: estado del pedido + proveedor
+
+.filters {
+  display: flex;
+  gap:     0.75rem;
+}
+
+.filter-select {
+  background:    var(--color-bg-surface);
+  color:         var(--color-text-primary);
+  border:        1px solid var(--color-border);
+  border-radius: 6px;
+  padding:       0.4rem 0.75rem;
+  font-family:   var(--font-ui);
+  font-size:     0.85rem;
+  cursor:        pointer;
+  transition:    border-color 200ms;
+
+  &:focus {
+    outline:      none;
+    border-color: var(--color-border-focus);
+  }
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+
+.table-wrapper {
+  background:    var(--color-bg-surface);
+  border:        1px solid var(--color-border-medium);
+  border-radius: 8px;
+  overflow:      hidden;
+  box-shadow:    var(--shadow-md);
+}
+
+.data-table {
+  width:           100%;
+  border-collapse: collapse;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+
+  thead tr {
+    background: var(--color-bg-elevated);
+  }
+
+  th {
+    padding:        0.75rem 1rem;
+    text-align:     left;
+    color:          var(--color-text-muted);
+    font-weight:    500;
+    font-size:      0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space:    nowrap;
+  }
+
+  td {
+    padding:        0.75rem 1rem;
+    color:          var(--color-text-primary);
+    border-top:     1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 200ms, box-shadow 200ms;
+
+    &:hover {
+      background: var(--color-bg-elevated);
+      box-shadow: inset 3px 0 0 var(--color-accent);
+    }
+  }
+}
+
+// Columnas de ancho fijo
+.col-actions { width: 140px; }
+
+// Celdas especiales
+.cell--mono {
+  font-family: var(--font-data);
+  font-size:   0.8rem;
+  color:       var(--color-text-muted);
+}
+
+.cell--name    { font-weight: 500; }
+.cell--muted   { color: var(--color-text-muted); }
+.cell--center  { text-align: center; }
+
+// Notas: texto largo que puede truncarse
+.cell--notes {
+  max-width:    200px;
+  overflow:     hidden;
+  text-overflow: ellipsis;
+  white-space:  nowrap;
+  color:        var(--color-text-muted);
+  font-size:    0.8rem;
+}
+
+// ── Badge de estado — tres variantes para Orders ──────────────────────────────
+// PENDIENTE  → ámbar  (warning)
+// COMPLETADO → verde  (success)
+// CANCELADO  → rojo   (danger)
+
+.status-badge {
+  display:       inline-block;
+  border-radius: 4px;
+  padding:       0.15rem 0.5rem;
+  font-size:     0.75rem;
+  font-weight:   500;
+
+  &--warning {
+    background: rgba(245, 158, 11, 0.15);
+    color:      var(--color-warning);
+    border:     1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  &--success {
+    background: rgba(34, 197, 94, 0.15);
+    color:      var(--color-success);
+    border:     1px solid rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.1);
+  }
+
+  &--danger {
+    background: rgba(239, 68, 68, 0.15);
+    color:      var(--color-danger);
+    border:     1px solid rgba(239, 68, 68, 0.3);
+  }
+}
+
+// ── Acciones ──────────────────────────────────────────────────────────────────
+
+.cell-actions {
+  display: flex;
+  gap:     0.5rem;
+}
+
+.action-link {
+  font-size:       0.8rem;
+  color:           var(--color-text-muted);
+  text-decoration: none;
+  padding:         0.2rem 0.5rem;
+  border-radius:   4px;
+  transition:      all 200ms;
+  background:      none;
+  border:          none;
+  cursor:          pointer;
+  font-family:     var(--font-ui);
+
+  &:hover {
+    background: var(--color-bg-elevated);
+    color:      var(--color-text-primary);
+  }
+
+  &--edit {
+    color: var(--color-accent);
+
+    &:hover {
+      background: var(--color-accent-dim);
+      color:      var(--color-accent);
+    }
+  }
+
+  &--danger {
+    color: var(--color-danger);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.12);
+      color:      var(--color-danger);
+    }
+  }
+}
+
+// ── Estados: cargando / error / vacío ─────────────────────────────────────────
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align:  center;
+  padding:     3rem;
+  color:       var(--color-text-muted);
+  font-family: var(--font-ui);
+}
+
+.error-state {
+  color: var(--color-danger);
+}
+
+// ── Botón primario ────────────────────────────────────────────────────────────
+
+.btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.4rem;
+  padding:         0.5rem 1rem;
+  border-radius:   6px;
+  font-family:     var(--font-ui);
+  font-size:       0.875rem;
+  font-weight:     500;
+  text-decoration: none;
+  border:          none;
+  cursor:          pointer;
+  transition:      background 200ms;
+
+  &--primary {
+    background: var(--color-accent);
+    color:      #0F1117;
+    overflow:   hidden;
+    position:   relative;
+    transition: background 200ms, box-shadow var(--transition-slow);
+
+    &::after {
+      content:        '';
+      position:       absolute;
+      inset:          0;
+      background:     linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+      transform:      translateX(-100%);
+      pointer-events: none;
+    }
+
+    &:hover {
+      background: var(--color-accent-hover);
+      box-shadow: var(--glow-accent);
+
+      &::after { animation: shimmer 500ms ease-out forwards; }
+    }
+  }
+}
+
+// ── Paginador ─────────────────────────────────────────────────────────────────
+
+.pagination {
+  display:         flex;
+  gap:             0.75rem;
+  align-items:     center;
+  justify-content: center;
+
+  &__btn {
+    background:    var(--color-bg-surface);
+    color:         var(--color-text-muted);
+    border:        1px solid var(--color-border);
+    border-radius: 6px;
+    padding:       0.35rem 0.75rem;
+    font-family:   var(--font-ui);
+    font-size:     0.9rem;
+    cursor:        pointer;
+    transition:    all 200ms;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-accent);
+      color:        var(--color-accent);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor:  not-allowed;
+    }
+  }
+
+  &__info {
+    font-family: var(--font-ui);
+    font-size:   0.85rem;
+    color:       var(--color-text-muted);
+  }
+}

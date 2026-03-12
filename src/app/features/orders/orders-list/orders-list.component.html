@@ -1,0 +1,154 @@
+<section class="orders-list animate-fade-in">
+
+  <!-- ── Cabecera ──────────────────────────────────────────────────────────── -->
+  <div class="list-header">
+    <div class="list-header__title">
+      <h1>Pedidos</h1>
+      @if (loadState() === 'loaded') {
+        <span class="list-header__count">{{ totalItems() }} registros</span>
+      }
+    </div>
+    <a routerLink="/orders/new" class="btn btn--primary">+ Nuevo pedido</a>
+  </div>
+
+  <!-- ── Filtros ────────────────────────────────────────────────────────────── -->
+  <!-- Dos selectores: estado del pedido + proveedor -->
+  <!-- Cada cambio llama al handler del .ts que resetea a página 1 -->
+  <div class="filters">
+
+    <select class="filter-select"
+            [value]="filterStatus()"
+            (change)="onStatusChange($any($event.target).value)">
+      <option value="">Todos los estados</option>
+      <option value="PENDIENTE">Pendiente</option>
+      <option value="COMPLETADO">Completado</option>
+      <option value="CANCELADO">Cancelado</option>
+    </select>
+
+    <select class="filter-select"
+            [value]="filterSupplierId()"
+            (change)="onSupplierChange($any($event.target).value)">
+      <option value="0">Todos los proveedores</option>
+      <!-- Iteramos la lista de proveedores cargada al iniciar -->
+      @for (supplier of suppliers(); track supplier.id) {
+        <option [value]="supplier.id">{{ supplier.name }}</option>
+      }
+    </select>
+
+  </div>
+
+  <!-- ── Estado: cargando ───────────────────────────────────────────────────── -->
+  @if (loadState() === 'loading') {
+    <div class="loading-state">Cargando pedidos…</div>
+  }
+
+  <!-- ── Estado: error ──────────────────────────────────────────────────────── -->
+  @if (loadState() === 'error') {
+    <div class="error-state">
+      No se pudo cargar la lista. Intenta de nuevo.
+    </div>
+  }
+
+  <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+  @if (loadState() === 'loaded') {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Proveedor</th>
+            <th>Estado</th>
+            <th>Ítems</th>
+            <th>Total</th>
+            <th>Fecha</th>
+            <th>Notas</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order.id; let i = $index) {
+            <tr class="animate-stagger" [style.--stagger-index]="i">
+
+              <!-- ID con # para que se lea como número de pedido -->
+              <td class="cell--mono">#{{ order.id }}</td>
+
+              <!-- Nombre del proveedor buscado en memoria — no hace HTTP -->
+              <td class="cell--name">{{ getSupplierName(order.supplier_id) }}</td>
+
+              <!-- Badge de estado con color según el valor -->
+              <td>
+                <span class="status-badge"
+                      [class.status-badge--warning]="order.status === 'PENDIENTE'"
+                      [class.status-badge--success]="order.status === 'COMPLETADO'"
+                      [class.status-badge--danger]="order.status === 'CANCELADO'">
+                  {{ order.status }}
+                </span>
+              </td>
+
+              <!-- Cantidad de ítems: cuántos productos distintos tiene el pedido -->
+              <td class="cell--center">{{ order.items.length }}</td>
+
+              <!-- Total calculado sumando los subtotales de cada ítem -->
+              <td class="cell--mono">{{ formatPrice(getOrderTotal(order)) }}</td>
+
+              <td class="cell--mono">{{ formatDate(order.created_at) }}</td>
+
+              <!-- Notas: si no hay, mostramos un guion suave -->
+              <td class="cell--notes">
+                @if (order.notes) {
+                  {{ order.notes }}
+                } @else {
+                  <span class="cell--muted">—</span>
+                }
+              </td>
+
+              <!-- Acciones: editar estado siempre disponible;
+                   cancelar solo si el pedido está PENDIENTE -->
+              <td class="cell-actions">
+                <a [routerLink]="['/orders', order.id, 'edit']"
+                   class="action-link action-link--edit">
+                  Editar
+                </a>
+                @if (order.status === 'PENDIENTE') {
+                  <button class="action-link action-link--danger"
+                          (click)="cancelOrder(order)">
+                    Cancelar
+                  </button>
+                }
+              </td>
+
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-state">No hay pedidos registrados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="pagination__btn"
+                aria-label="Página anterior"
+                (click)="onPageChange(-1)"
+                [disabled]="currentPage() === 1">
+          ‹
+        </button>
+
+        <span class="pagination__info">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <button class="pagination__btn"
+                aria-label="Página siguiente"
+                (click)="onPageChange(1)"
+                [disabled]="currentPage() === totalPages()">
+          ›
+        </button>
+      </div>
+    }
+  }
+
+</section>
