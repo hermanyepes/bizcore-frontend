@@ -5,8 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink }    from '@angular/router';
-import { CommonModule }  from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { SuppliersService, SupplierListParams } from '../suppliers.service';
 import { Supplier }                             from '../../../core/models/supplier.model';
@@ -20,7 +19,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-suppliers-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [CommonModule, RouterLink],
+  imports:         [RouterLink],
   templateUrl:     './suppliers-list.component.html',
   styleUrl:        './suppliers-list.component.scss',
 })

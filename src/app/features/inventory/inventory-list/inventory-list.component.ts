@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { InventoryService }                          from '../inventory.service';
@@ -19,7 +18,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './inventory-list.component.html',
   styleUrl: './inventory-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

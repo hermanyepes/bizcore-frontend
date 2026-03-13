@@ -13,14 +13,14 @@
 
   <!-- ── Filtros ──────────────────────────────────────────────────────────── -->
   <div class="filters">
-    <select class="filter-select" (change)="filterByCategory($any($event.target).value)">
+    <select class="filter-select" #categorySelect (change)="filterByCategory(categorySelect.value)">
       <option value="">Todas las categorías</option>
       @for (cat of categories; track cat) {
         <option [value]="cat">{{ cat }}</option>
       }
     </select>
 
-    <select class="filter-select" (change)="filterByStatus($any($event.target).value)">
+    <select class="filter-select" #statusSelect (change)="filterByStatus(statusSelect.value)">
       <option value="">Todos los estados</option>
       <option value="true">Activos</option>
       <option value="false">Inactivos</option>

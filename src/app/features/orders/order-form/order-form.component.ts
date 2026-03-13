@@ -34,7 +34,6 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule }                        from '@angular/common';
 
 import { OrdersService }    from '../orders.service';
 import { SuppliersService } from '../../suppliers/suppliers.service';
@@ -51,7 +50,7 @@ import { Product }   from '../../../core/models/product.model';
   // getSubtotal, getFormTotal) que dependen de FormControl values dentro de
   // un FormArray. Los FormControls no son Signals, así que OnPush impediría
   // que el template se re-evaluara al seleccionar un producto o cambiar cantidad.
-  imports:   [ReactiveFormsModule, RouterLink, CommonModule],
+  imports:   [ReactiveFormsModule, RouterLink],
   templateUrl:     './order-form.component.html',
   styleUrl:        './order-form.component.scss',
 })

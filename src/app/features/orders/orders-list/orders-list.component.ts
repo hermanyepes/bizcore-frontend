@@ -20,8 +20,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink }   from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { OrdersService, OrderListParams } from '../orders.service';
 import { SuppliersService }               from '../../suppliers/suppliers.service';
@@ -36,7 +35,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-orders-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [CommonModule, RouterLink],
+  imports:         [RouterLink],
   templateUrl:     './orders-list.component.html',
   styleUrl:        './orders-list.component.scss',
 })

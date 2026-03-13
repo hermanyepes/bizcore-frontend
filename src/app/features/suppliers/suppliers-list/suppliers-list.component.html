@@ -15,7 +15,8 @@
   <div class="filters">
     <select class="filter-select"
             [value]="filterActive()"
-            (change)="onFilterChange($any($event.target).value)">
+            #activeSelect
+            (change)="onFilterChange(activeSelect.value)">
       <option value="">Todos los estados</option>
       <option value="true">Activos</option>
       <option value="false">Inactivos</option>

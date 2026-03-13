@@ -70,7 +70,7 @@ export class AuthService {
     if (refreshToken) {
       this.http
         .post(`${environment.apiUrl}/auth/logout`, { refresh_token: refreshToken })
-        .subscribe({ error: (err) => console.warn('logout: fallo al invalidar refresh_token en el backend', err) });
+        .subscribe({ error: (_err) => { /* fallo silencioso — el token local ya fue eliminado */ } });
     }
 
     this.clearTokens();
