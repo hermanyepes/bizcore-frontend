@@ -1,0 +1,140 @@
+<!-- ============================================================
+     BizCore — DashboardComponent Template
+     ============================================================
+     Estructura:
+       1. Cabecera
+       2. Estado: cargando / error
+       3. Tarjetas de métricas (4)
+       4. Gráfico de dona + leyenda personalizada
+       5. Tabla de productos con stock bajo
+     ============================================================ -->
+
+<section class="dashboard animate-fade-in">
+
+  <!-- ── Cabecera ──────────────────────────────────────────────────────── -->
+  <div class="list-header">
+    <div class="list-header__title">
+      <h1>Dashboard</h1>
+    </div>
+  </div>
+
+  <!-- ── Estado: cargando ──────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="loading-state">Cargando resumen…</div>
+  }
+
+  <!-- ── Estado: error ─────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="error-state">{{ error() }}</div>
+  }
+
+  <!-- ── Contenido principal ───────────────────────────────────────────── -->
+  <!-- @if con "as data" asigna el valor a una variable local.             -->
+  <!-- Así no repetimos summary() en cada binding del template.            -->
+  @if (summary(); as data) {
+
+    <!-- ── Tarjetas de métricas ──────────────────────────────────────── -->
+    <div class="metric-cards">
+
+      <div class="metric-card animate-stagger" style="--stagger-index: 0">
+        <span class="metric-card__label">Usuarios activos</span>
+        <span class="metric-card__value">{{ data.total_active_users }}</span>
+      </div>
+
+      <div class="metric-card animate-stagger" style="--stagger-index: 1">
+        <span class="metric-card__label">Productos activos</span>
+        <span class="metric-card__value">{{ data.total_active_products }}</span>
+      </div>
+
+      <div class="metric-card animate-stagger" style="--stagger-index: 2">
+        <span class="metric-card__label">Stock total</span>
+        <span class="metric-card__value cell--mono">{{ data.total_stock }}</span>
+        <span class="metric-card__sub">unidades</span>
+      </div>
+
+      <!-- CurrencyPipe: 'COP' moneda · 'code' muestra "COP" · '1.0-0' sin decimales -->
+      <div class="metric-card animate-stagger" style="--stagger-index: 3">
+        <span class="metric-card__label">Valor del inventario</span>
+        <span class="metric-card__value metric-card__value--accent cell--mono">
+          {{ data.total_inventory_value | currency:'COP':'code':'1.0-0' }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- ── Gráfico de dona: pedidos por estado ───────────────────────── -->
+    <div class="chart-card animate-stagger" style="--stagger-index: 4">
+      <h2 class="chart-card__title">Pedidos por estado</h2>
+
+      <div class="chart-card__body">
+
+        <!-- #ordersChart: variable de referencia que ViewChild busca en el .ts -->
+        <!-- Sin este # el gráfico nunca se inicializa                          -->
+        <div class="chart-card__canvas-wrapper">
+          <canvas #ordersChart></canvas>
+        </div>
+
+        <!-- Leyenda personalizada: un punto de color + nombre del estado + conteo -->
+        <!-- Usamos orderEntries() (computed) en vez del pipe keyvalue             -->
+        <ul class="chart-legend">
+          @for (entry of orderEntries(); track entry.key) {
+            <li class="chart-legend__item">
+              <!-- El color del punto viene de chartColors, expuesto en el .ts -->
+              <span class="chart-legend__dot"
+                    [style.background-color]="chartColors[entry.key]">
+              </span>
+              <span class="chart-legend__label">{{ entry.key }}</span>
+              <span class="chart-legend__count cell--mono">{{ entry.value }}</span>
+            </li>
+          }
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- ── Tabla: productos con stock bajo ───────────────────────────── -->
+    @if (data.low_stock_products.length > 0) {
+      <div class="alert-card animate-stagger" style="--stagger-index: 5">
+
+        <h2 class="alert-card__title">
+          <span class="alert-card__icon">⚠</span>
+          Productos con stock bajo
+        </h2>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="col-center">Stock actual</th>
+                <th class="col-center">Umbral</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of data.low_stock_products; track product.id; let i = $index) {
+                <tr class="animate-stagger" [style.--stagger-index]="i">
+                  <td class="cell--name">{{ product.name }}</td>
+                  <td class="cell--center">
+                    <span class="status-badge status-badge--danger cell--mono">
+                      {{ product.stock }}
+                    </span>
+                  </td>
+                  <td class="cell--center cell--muted">menos de 10 uds.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    } @else {
+      <!-- Si no hay productos críticos, mensaje positivo en vez de tabla vacía -->
+      <div class="empty-alert animate-stagger" style="--stagger-index: 5">
+        ✓ Todo el inventario está en niveles saludables.
+      </div>
+    }
+
+  }
+
+</section>

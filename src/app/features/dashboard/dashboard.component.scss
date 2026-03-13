@@ -1,0 +1,180 @@
+// ============================================================
+// BizCore — DashboardComponent Styles
+// ============================================================
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1200px;
+}
+
+
+// ── Tarjetas de métricas ──────────────────────────────────────
+// auto-fit + minmax: 4 columnas en desktop, 2 en tablet, 1 en móvil
+// sin media queries manuales.
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    line-height: 1;
+    margin-top: 0.25rem;
+
+    // Variante ámbar para el valor monetario
+    &--accent {
+      color: var(--color-accent);
+      font-size: 1.5rem;
+    }
+  }
+
+  &__sub {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 0.125rem;
+  }
+}
+
+
+// ── Tarjeta del gráfico de dona ───────────────────────────────
+.chart-card {
+  padding: 1.5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin: 0 0 1.25rem;
+  }
+
+  // Dona a la izquierda, leyenda a la derecha
+  // En móvil se apilan (flex-wrap)
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  // Sin dimensiones explícitas Chart.js puede crecer sin control
+  &__canvas-wrapper {
+    flex: 0 0 auto;
+    width: 180px;
+    height: 180px;
+  }
+}
+
+
+// ── Leyenda personalizada de la dona ─────────────────────────
+.chart-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    flex: 1; // empuja el conteo hacia la derecha
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  &__count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    min-width: 2rem;
+    text-align: right;
+  }
+}
+
+
+// ── Tarjeta de alertas (stock bajo) ──────────────────────────
+.alert-card {
+  padding: 1.5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-danger-border, #7f1d1d);
+  border-radius: var(--radius-lg);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-danger, #ef4444);
+    margin: 0 0 1.25rem;
+  }
+
+  &__icon {
+    font-size: 1rem;
+  }
+}
+
+
+// ── Mensaje de inventario saludable ──────────────────────────
+.empty-alert {
+  padding: 1rem 1.5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+
+// ── Utilidad: centrado de columna ────────────────────────────
+.col-center {
+  text-align: center;
+}
