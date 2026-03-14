@@ -1,7 +1,9 @@
 <!-- Contenedor raíz del shell.
-     La clase layout--collapsed se activa via Signal cuando el sidebar está colapsado.
-     Usamos CSS Grid en el SCSS: sidebar | main (navbar + content). -->
-<div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
+     layout--collapsed: sidebar estrecho en desktop (solo iconos).
+     layout--mobile-open: drawer del sidebar visible en mobile. -->
+<div class="layout"
+     [class.layout--collapsed]="sidebarCollapsed()"
+     [class.layout--mobile-open]="mobileOpen()">
 
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar">
@@ -15,11 +17,13 @@
     <!-- Navegación principal.
          routerLinkActive agrega la clase CSS cuando la ruta está activa. -->
     <nav class="sidebar__nav">
+      <!-- (click)="closeMobileSidebar()" cierra el drawer al navegar en mobile -->
       <a
         routerLink="/dashboard"
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Dashboard"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">⊞</span>
         <span class="sidebar__text">Dashboard</span>
@@ -30,6 +34,7 @@
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Usuarios"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">👤</span>
         <span class="sidebar__text">Usuarios</span>
@@ -40,6 +45,7 @@
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Productos"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">📦</span>
         <span class="sidebar__text">Productos</span>
@@ -50,6 +56,7 @@
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Inventario"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">🗃️</span>
         <span class="sidebar__text">Inventario</span>
@@ -60,6 +67,7 @@
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Proveedores"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">🚚</span>
         <span class="sidebar__text">Proveedores</span>
@@ -70,6 +78,7 @@
         routerLinkActive="sidebar__link--active"
         class="sidebar__link"
         title="Pedidos"
+        (click)="closeMobileSidebar()"
       >
         <span class="sidebar__icon" aria-hidden="true">🧾</span>
         <span class="sidebar__text">Pedidos</span>
@@ -77,6 +86,11 @@
     </nav>
 
   </aside>
+
+  <!-- Overlay semitransparente para mobile.
+       Cubre el contenido cuando el drawer está abierto.
+       Al tocarlo, llama a closeMobileSidebar() para cerrar el drawer. -->
+  <div class="sidebar-overlay" (click)="closeMobileSidebar()"></div>
 
   <!-- ===== ZONA DERECHA: navbar + contenido ===== -->
   <div class="layout__main">

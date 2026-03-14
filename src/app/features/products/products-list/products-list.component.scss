@@ -280,3 +280,13 @@
     }
   }
 }
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  // La tabla tiene overflow: hidden en desktop (para los border-radius).
+  // En mobile lo reemplazamos con scroll horizontal para que las columnas no se corten.
+  .table-wrapper {
+    overflow-x: auto;
+  }
+}

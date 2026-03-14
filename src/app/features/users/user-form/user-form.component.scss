@@ -268,3 +268,12 @@
     color:        var(--color-accent);
   }
 }
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+

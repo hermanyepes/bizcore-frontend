@@ -136,4 +136,56 @@ describe('LayoutComponent', () => {
     expect(usernameEl.textContent?.trim()).toBe('');
     expect(roleEl.textContent?.trim()).toBe('');
   });
+
+  // ─── mobileOpen — estado inicial ──────────────────────────────────────────
+
+  // El drawer arranca cerrado — en mobile el sidebar debe estar oculto por defecto
+  it('should start with mobileOpen as false', () => {
+    expect(component.mobileOpen()).toBe(false);
+  });
+
+  it('should NOT have layout--mobile-open class initially', () => {
+    const root = fixture.nativeElement.querySelector('.layout') as HTMLElement;
+    expect(root.classList.contains('layout--mobile-open')).toBe(false);
+  });
+
+  // ─── toggleSidebar actualiza mobileOpen ───────────────────────────────────
+
+  // toggleSidebar cambia ambos signals: el CSS decide cuál importa según viewport
+  it('should set mobileOpen to true when toggleSidebar is called once', () => {
+    component.toggleSidebar();
+    expect(component.mobileOpen()).toBe(true);
+  });
+
+  it('should set mobileOpen back to false when toggleSidebar is called twice', () => {
+    component.toggleSidebar();
+    component.toggleSidebar();
+    expect(component.mobileOpen()).toBe(false);
+  });
+
+  it('should apply layout--mobile-open class when mobileOpen is true', () => {
+    component.toggleSidebar();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('.layout') as HTMLElement;
+    expect(root.classList.contains('layout--mobile-open')).toBe(true);
+  });
+
+  // ─── closeMobileSidebar ───────────────────────────────────────────────────
+
+  // closeMobileSidebar fuerza el cierre del drawer sin importar el estado actual
+  it('should set mobileOpen to false when closeMobileSidebar is called', () => {
+    component.toggleSidebar();           // abre el drawer
+    expect(component.mobileOpen()).toBe(true);
+
+    component.closeMobileSidebar();      // lo cierra
+    expect(component.mobileOpen()).toBe(false);
+  });
+
+  // ─── Overlay en el DOM ────────────────────────────────────────────────────
+
+  it('should render the sidebar-overlay element', () => {
+    const overlay = fixture.nativeElement.querySelector('.sidebar-overlay') as HTMLElement;
+    expect(overlay).toBeTruthy();
+  });
 });

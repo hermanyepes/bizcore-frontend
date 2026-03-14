@@ -308,3 +308,70 @@ $transition-speed:        0.25s;
   padding: 2rem;
   background-color: var(--color-bg-app);
 }
+
+// ─── OVERLAY (solo mobile) ──────────────────────────────────────────────────
+// El overlay es invisible en desktop. En mobile aparece cuando el drawer abre.
+
+.sidebar-overlay {
+  display: none;              // invisible en desktop — el grid ya separa sidebar y contenido
+}
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+// Por debajo de 768px el layout cambia radicalmente:
+//   - El sidebar sale del flujo del grid (position: fixed) y se convierte en un drawer
+//   - La zona principal ocupa toda la pantalla
+//   - El overlay oscuro aparece detrás del drawer cuando está abierto
+
+@media (max-width: 767px) {
+
+  // El grid ya no reserva espacio para el sidebar: una sola columna de contenido
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  // El sidebar se posiciona fuera de la pantalla (translateX -100%)
+  // y se desliza hacia adentro cuando mobileOpen es true.
+  // z-index 100 asegura que quede encima del contenido y del overlay.
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: $sidebar-width-expanded;   // siempre ancho completo en mobile
+    z-index: 100;
+    transform: translateX(-100%);     // oculto por defecto — fuera del viewport
+    transition: transform $transition-speed ease;
+  }
+
+  // Cuando el drawer está abierto, deslizamos el sidebar hacia adentro
+  .layout--mobile-open .sidebar {
+    transform: translateX(0);
+  }
+
+  // En mobile el layout colapsado no aplica — ignoramos esas reglas
+  .layout--collapsed {
+    grid-template-columns: 1fr;       // siempre una columna, sin importar el signal desktop
+  }
+
+  // El overlay se activa en mobile: primero totalmente transparente y sin eventos
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;                         // cubre toda la pantalla
+    background: rgba(0, 0, 0, 0);    // transparente por defecto
+    pointer-events: none;             // no intercepta clicks cuando está cerrado
+    z-index: 99;                      // justo debajo del sidebar (z-index 100)
+    transition: background $transition-speed ease;
+  }
+
+  // Cuando el drawer abre, el overlay se vuelve semitransparente y captura clicks
+  .layout--mobile-open .sidebar-overlay {
+    background: rgba(0, 0, 0, 0.5);  // capa oscura que oscurece el contenido
+    pointer-events: auto;             // ahora SÍ captura el click para cerrar
+  }
+
+  // Padding reducido en mobile — menos espacio desperdiciado en pantallas pequeñas
+  .layout__content {
+    padding: 1rem;
+  }
+}
