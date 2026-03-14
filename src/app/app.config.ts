@@ -8,7 +8,8 @@ import {
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withInterceptors }      from '@angular/common/http';
 import { routes }          from './app.routes';
-import { authInterceptor } from './core/auth/auth.interceptor';
+import { authInterceptor }    from './core/auth/auth.interceptor';
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,6 +23,8 @@ export const appConfig: ApplicationConfig = {
     // Cliente HTTP con el interceptor de auth registrado.
     // withInterceptors([]) acepta interceptores funcionales (Angular 17+).
     // El interceptor adjunta automáticamente el Bearer token a cada request.
-    provideHttpClient(withInterceptors([authInterceptor])),
+    // El orden importa: loadingInterceptor primero para que capture TODAS
+    // las peticiones incluyendo el reintento de refresh del authInterceptor.
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor])),
   ],
 };

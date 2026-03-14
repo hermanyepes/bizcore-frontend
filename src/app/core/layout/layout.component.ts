@@ -1,7 +1,8 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { AuthService } from '../auth/auth.service';
+import { AuthService }            from '../auth/auth.service';
+import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-layout',
@@ -9,7 +10,8 @@ import { AuthService } from '../auth/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   // RouterOutlet: renderiza el componente hijo activo (dashboard, productos, etc.)
   // RouterLink / RouterLinkActive: navegación declarativa en el sidebar
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  // LoadingSpinnerComponent: overlay global de carga (se activa vía LoadingService)
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingSpinnerComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
 })
