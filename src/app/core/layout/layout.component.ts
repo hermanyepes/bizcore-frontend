@@ -1,8 +1,10 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { AuthService }            from '../auth/auth.service';
-import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
+import { AuthService }              from '../auth/auth.service';
+import { LoadingSpinnerComponent }  from './loading-spinner/loading-spinner.component';
+import { SnackbarComponent }        from './snackbar/snackbar.component';
+import { ConfirmDialogComponent }   from './confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-layout',
@@ -11,7 +13,7 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
   // RouterOutlet: renderiza el componente hijo activo (dashboard, productos, etc.)
   // RouterLink / RouterLinkActive: navegación declarativa en el sidebar
   // LoadingSpinnerComponent: overlay global de carga (se activa vía LoadingService)
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingSpinnerComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LoadingSpinnerComponent, SnackbarComponent, ConfirmDialogComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
 })

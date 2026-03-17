@@ -5,6 +5,8 @@ import { of, throwError }            from 'rxjs';
 import { SuppliersListComponent }          from './suppliers-list.component';
 import { SuppliersService }                from '../suppliers.service';
 import { Supplier, SupplierPaginated }     from '../../../core/models/supplier.model';
+import { SnackbarService }                 from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }            from '../../../core/services/confirm-dialog.service';
 
 // ─── Helpers — datos de prueba ───────────────────────────────────────────────
 // makeSupplier construye un Supplier completo con defaults razonables.
@@ -47,6 +49,18 @@ describe('SuppliersListComponent', () => {
     updateSupplier:  vi.fn(),
   };
 
+  // Spy del ConfirmDialogService — por defecto confirma (true).
+  // Los tests que prueban la cancelación lo sobreescriben con mockResolvedValue(false).
+  const confirmServiceSpy = {
+    confirm: vi.fn().mockResolvedValue(true),
+  };
+
+  // Spy del SnackbarService — no necesitamos verificar mensajes específicos aquí,
+  // solo que no lanza errores al ser llamado.
+  const snackbarServiceSpy = {
+    show: vi.fn(),
+  };
+
   beforeEach(async () => {
     // Reseteamos el spy antes de cada test para evitar que un test contamine al siguiente.
     suppliersServiceSpy.getSuppliers.mockReturnValue(of(makePaginated()));
@@ -56,7 +70,9 @@ describe('SuppliersListComponent', () => {
       imports:   [SuppliersListComponent],
       providers: [
         provideRouter([]),
-        { provide: SuppliersService, useValue: suppliersServiceSpy },
+        { provide: SuppliersService,    useValue: suppliersServiceSpy },
+        { provide: ConfirmDialogService, useValue: confirmServiceSpy  },
+        { provide: SnackbarService,      useValue: snackbarServiceSpy },
       ],
     }).compileComponents();
 
@@ -67,7 +83,12 @@ describe('SuppliersListComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => vi.clearAllMocks());
+  afterEach(() => {
+    vi.clearAllMocks();
+    // Restaura el default: confirmar (true) para que los tests independientes
+    // no se vean afectados por un test previo que lo cambió a false.
+    confirmServiceSpy.confirm.mockResolvedValue(true);
+  });
 
   // ─── Creación ──────────────────────────────────────────────────────────────
   // Verifica que el componente se instancia sin errores.
@@ -200,11 +221,11 @@ describe('SuppliersListComponent', () => {
   // Cuando el usuario confirma, llama al servicio con is_active: false
   // y luego recarga la página actual.
 
-  it('should call updateSupplier with is_active:false when confirmed', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  it('should call updateSupplier with is_active:false when confirmed', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(true);
 
-    const supplier = makeSupplier();
-    component.deactivate(supplier);
+    component.deactivate(makeSupplier());
+    await Promise.resolve(); // deja que el .then() de la Promise se ejecute
 
     expect(suppliersServiceSpy.updateSupplier).toHaveBeenCalledWith(
       1,
@@ -212,20 +233,22 @@ describe('SuppliersListComponent', () => {
     );
   });
 
-  it('should reload the current page after deactivation', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  it('should reload the current page after deactivation', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(true);
     suppliersServiceSpy.getSuppliers.mockClear();
 
     component.deactivate(makeSupplier());
+    await Promise.resolve();
 
     // getSuppliers se llama de nuevo para recargar la lista
     expect(suppliersServiceSpy.getSuppliers).toHaveBeenCalledTimes(1);
   });
 
-  it('should NOT call updateSupplier when the user cancels the confirm', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('should NOT call updateSupplier when the user cancels the confirm', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(false);
 
     component.deactivate(makeSupplier());
+    await Promise.resolve();
 
     expect(suppliersServiceSpy.updateSupplier).not.toHaveBeenCalled();
   });

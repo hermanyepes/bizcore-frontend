@@ -7,6 +7,8 @@ import { OrdersService }                from '../orders.service';
 import { SuppliersService }             from '../../suppliers/suppliers.service';
 import { Order, OrderItem, OrderPaginated } from '../order.model';
 import { Supplier, SupplierPaginated }  from '../../../core/models/supplier.model';
+import { SnackbarService }              from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }         from '../../../core/services/confirm-dialog.service';
 
 // ─── Helpers — datos de prueba ───────────────────────────────────────────────
 
@@ -87,6 +89,14 @@ describe('OrdersListComponent', () => {
     getSuppliers: vi.fn(),
   };
 
+  const confirmServiceSpy = {
+    confirm: vi.fn().mockResolvedValue(true),
+  };
+
+  const snackbarServiceSpy = {
+    show: vi.fn(),
+  };
+
   beforeEach(async () => {
     // Cada test parte de un estado limpio y con datos por defecto
     ordersServiceSpy.getOrders.mockReturnValue(of(makeOrderPaginated()));
@@ -97,8 +107,10 @@ describe('OrdersListComponent', () => {
       imports:   [OrdersListComponent],
       providers: [
         provideRouter([]),
-        { provide: OrdersService,    useValue: ordersServiceSpy },
-        { provide: SuppliersService, useValue: suppliersServiceSpy },
+        { provide: OrdersService,       useValue: ordersServiceSpy    },
+        { provide: SuppliersService,    useValue: suppliersServiceSpy },
+        { provide: ConfirmDialogService, useValue: confirmServiceSpy  },
+        { provide: SnackbarService,      useValue: snackbarServiceSpy },
       ],
     }).compileComponents();
 
@@ -109,7 +121,10 @@ describe('OrdersListComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => vi.clearAllMocks());
+  afterEach(() => {
+    vi.clearAllMocks();
+    confirmServiceSpy.confirm.mockResolvedValue(true);
+  });
 
   // ─── Grupo 1: Creación ────────────────────────────────────────────────────
   // Prueba mínima: el componente existe sin errores de compilación.
@@ -341,27 +356,30 @@ describe('OrdersListComponent', () => {
   // Después recarga la página actual.
   // Si cancela el confirm, no se hace ninguna llamada.
 
-  it('should call cancelOrder service when user confirms', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  it('should call cancelOrder service when user confirms', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(true);
 
     component.cancelOrder(makeOrder());
+    await Promise.resolve();
 
     expect(ordersServiceSpy.cancelOrder).toHaveBeenCalledWith(1);
   });
 
-  it('should reload current page after cancellation', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  it('should reload current page after cancellation', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(true);
     ordersServiceSpy.getOrders.mockClear();
 
     component.cancelOrder(makeOrder());
+    await Promise.resolve();
 
     expect(ordersServiceSpy.getOrders).toHaveBeenCalledTimes(1);
   });
 
-  it('should NOT call cancelOrder when user dismisses confirm', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('should NOT call cancelOrder when user dismisses confirm', async () => {
+    confirmServiceSpy.confirm.mockResolvedValue(false);
 
     component.cancelOrder(makeOrder());
+    await Promise.resolve();
 
     expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
   });

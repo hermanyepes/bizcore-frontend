@@ -38,6 +38,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrdersService }    from '../orders.service';
 import { SuppliersService } from '../../suppliers/suppliers.service';
 import { ProductsService }  from '../../products/products.service';
+import { SnackbarService }  from '../../../core/services/snackbar.service';
 import { Order, OrderCreate, OrderStatus } from '../order.model';
 import { Supplier }  from '../../../core/models/supplier.model';
 import { Product }   from '../../../core/models/product.model';
@@ -61,6 +62,7 @@ export class OrderFormComponent implements OnInit {
   private readonly ordersService    = inject(OrdersService);
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService  = inject(ProductsService);
+  private readonly snackbarService  = inject(SnackbarService);
 
   // ----------------------------------------------------------
   // Detección de modo (crear vs editar)
@@ -287,7 +289,10 @@ export class OrderFormComponent implements OnInit {
     };
 
     this.ordersService.createOrder(payload).subscribe({
-      next:  () => this.router.navigate(['/orders']),
+      next:  () => {
+        this.snackbarService.show('Pedido creado');
+        this.router.navigate(['/orders']);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al crear el pedido.');
         this.isSaving.set(false);
@@ -306,7 +311,10 @@ export class OrderFormComponent implements OnInit {
       status: v.status ?? null,
       notes:  v.notes  || null,
     }).subscribe({
-      next:  () => this.router.navigate(['/orders']),
+      next:  () => {
+        this.snackbarService.show('Pedido actualizado');
+        this.router.navigate(['/orders']);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al actualizar el pedido.');
         this.isSaving.set(false);

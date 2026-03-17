@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 
 import { UsersService, UserCreatePayload,
          UserUpdatePayload }                           from '../users.service';
+import { SnackbarService }                            from '../../../core/services/snackbar.service';
 
 // ---------------------------------------------------------------------------
 // UserFormComponent
@@ -32,9 +33,10 @@ import { UsersService, UserCreatePayload,
 })
 export class UserFormComponent implements OnInit {
 
-  private readonly route        = inject(ActivatedRoute);
-  private readonly router       = inject(Router);
-  private readonly usersService = inject(UsersService);
+  private readonly route           = inject(ActivatedRoute);
+  private readonly router          = inject(Router);
+  private readonly usersService    = inject(UsersService);
+  private readonly snackbarService = inject(SnackbarService);
 
   // ---------------------------------------------------------------------------
   // Detección de modo
@@ -195,9 +197,10 @@ export class UserFormComponent implements OnInit {
     };
 
     this.usersService.createUser(payload).subscribe({
-      // Al crear, el backend devuelve el User completo con su document_id.
-      // Navegamos al detalle del usuario recién creado.
-      next:  (user) => this.router.navigate(['/users', user.document_id]),
+      next:  (user) => {
+        this.snackbarService.show('Usuario creado');
+        this.router.navigate(['/users', user.document_id]);
+      },
       error: (err)  => {
         // err.error.detail es el mensaje que devuelve FastAPI en los 4xx/5xx
         this.serverError.set(err.error?.detail ?? 'Error al crear el usuario.');
@@ -221,8 +224,10 @@ export class UserFormComponent implements OnInit {
     };
 
     this.usersService.updateUser(this.documentId!, payload).subscribe({
-      // Al actualizar, navegamos al detalle del mismo usuario
-      next:  ()    => this.router.navigate(['/users', this.documentId]),
+      next:  () => {
+        this.snackbarService.show('Usuario actualizado');
+        this.router.navigate(['/users', this.documentId]);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al actualizar el usuario.');
         this.isSaving.set(false);

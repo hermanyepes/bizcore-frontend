@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 
 import { ProductsService, ProductCreatePayload,
          ProductUpdatePayload, PRODUCT_CATEGORIES }    from '../products.service';
+import { SnackbarService }                            from '../../../core/services/snackbar.service';
 
 // ---------------------------------------------------------------------------
 // ProductFormComponent — mismo patrón dual que UserFormComponent:
@@ -34,6 +35,7 @@ export class ProductFormComponent implements OnInit {
   private readonly route           = inject(ActivatedRoute);
   private readonly router          = inject(Router);
   private readonly productsService = inject(ProductsService);
+  private readonly snackbarService = inject(SnackbarService);
 
   // Categorías disponibles — se usan para poblar el <select> del template
   readonly categories = PRODUCT_CATEGORIES;
@@ -133,9 +135,10 @@ export class ProductFormComponent implements OnInit {
     };
 
     this.productsService.createProduct(payload).subscribe({
-      // Al crear, el backend devuelve el Product con su id generado.
-      // Navegamos al detalle del producto recién creado.
-      next:  (product) => this.router.navigate(['/products', product.id]),
+      next:  (product) => {
+        this.snackbarService.show('Producto creado');
+        this.router.navigate(['/products', product.id]);
+      },
       error: (err)     => {
         this.serverError.set(err.error?.detail ?? 'Error al crear el producto.');
         this.isSaving.set(false);
@@ -155,7 +158,10 @@ export class ProductFormComponent implements OnInit {
     };
 
     this.productsService.updateProduct(this.productId!, payload).subscribe({
-      next:  ()    => this.router.navigate(['/products', this.productId]),
+      next:  () => {
+        this.snackbarService.show('Producto actualizado');
+        this.router.navigate(['/products', this.productId]);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al actualizar el producto.');
         this.isSaving.set(false);

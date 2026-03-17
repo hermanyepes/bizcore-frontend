@@ -1,0 +1,106 @@
+// ---------------------------------------------------------------------------
+// SnackbarComponent — estilos
+//
+// Posición: esquina inferior derecha, fixed para que no se mueva con el scroll.
+// z-index 9000: por encima del contenido normal pero debajo del confirm dialog
+// (que usará 10000) y del spinner (que usará 10001).
+// ---------------------------------------------------------------------------
+
+.snackbar {
+  // ── Posición fija — esquina inferior derecha ──────────────────────────────
+  position: fixed;
+  bottom:   1.75rem;
+  right:    1.75rem;
+  z-index:  9000;
+
+  // ── Layout interno — icono + texto en fila ────────────────────────────────
+  display:     flex;
+  align-items: center;
+  gap:         0.625rem;
+
+  // ── Dimensiones ───────────────────────────────────────────────────────────
+  min-width:  240px;
+  max-width:  360px;
+  padding:    0.875rem 1.25rem;
+
+  // ── Apariencia base ───────────────────────────────────────────────────────
+  background-color: var(--color-bg-elevated);
+  border-radius:    0.5rem;
+  border-left:      3px solid transparent; // el color lo pone el modificador
+  box-shadow:       0 4px 16px rgba(0, 0, 0, 0.4);
+
+  // ── Tipografía ────────────────────────────────────────────────────────────
+  font-family: var(--font-ui);
+  font-size:   0.875rem;
+  color:       var(--color-text-primary);
+
+  // ── Animación de entrada ──────────────────────────────────────────────────
+  // El snackbar aparece deslizándose desde abajo y apareciendo (fade).
+  animation: snackbar-in 0.25s ease-out;
+}
+
+// ── Modificadores de tipo ──────────────────────────────────────────────────
+// Cada tipo cambia el color del borde izquierdo y del icono.
+
+.snackbar--success {
+  border-left-color: var(--color-success);
+
+  .snackbar__icon {
+    color: var(--color-success);
+  }
+}
+
+.snackbar--error {
+  border-left-color: var(--color-danger);
+
+  .snackbar__icon {
+    color: var(--color-danger);
+  }
+}
+
+.snackbar--info {
+  border-left-color: var(--color-info);
+
+  .snackbar__icon {
+    color: var(--color-info);
+  }
+}
+
+// ── Partes internas ───────────────────────────────────────────────────────
+
+.snackbar__icon {
+  // Fuente monoespaciada para que ✓ ✕ ℹ se vean consistentes
+  font-family: var(--font-data);
+  font-size:   1rem;
+  font-weight: 700;
+  flex-shrink: 0; // el icono nunca se comprime aunque el mensaje sea largo
+}
+
+.snackbar__message {
+  line-height:  1.4;
+  word-break:   break-word; // mensajes largos hacen wrap, no se salen del box
+}
+
+// ── Animación ─────────────────────────────────────────────────────────────
+
+@keyframes snackbar-in {
+  from {
+    transform: translateY(0.75rem);
+    opacity:   0;
+  }
+  to {
+    transform: translateY(0);
+    opacity:   1;
+  }
+}
+
+// ── Responsive: en mobile se estira al ancho de la pantalla ───────────────
+@media (max-width: 480px) {
+  .snackbar {
+    left:      1rem;
+    right:     1rem;
+    min-width: unset;
+    max-width: unset;
+    bottom:    1rem;
+  }
+}

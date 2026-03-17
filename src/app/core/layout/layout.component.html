@@ -134,3 +134,11 @@
 <!-- Spinner global: vive fuera del layout para superponerse a TODO,
      incluido el sidebar. Se activa automáticamente en cada petición HTTP. -->
 <app-loading-spinner />
+
+<!-- Snackbar global: muestra notificaciones de éxito/error tras operaciones.
+     Vive fuera del router-outlet para persistir entre navegaciones. -->
+<app-snackbar />
+
+<!-- Confirm dialog global: solicita confirmación antes de acciones destructivas.
+     Overlay que bloquea la UI hasta que el usuario responda. -->
+<app-confirm-dialog />

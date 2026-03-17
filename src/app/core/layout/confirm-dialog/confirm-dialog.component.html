@@ -1,0 +1,59 @@
+<!--
+  @if renderiza el overlay solo cuando visible=true.
+  Al igual que el snackbar: cuando visible=false, no hay nada en el DOM.
+
+  El overlay (capa exterior) cumple dos roles:
+    1. Visual: fondo oscuro semitransparente que bloquea el contenido detrás.
+    2. Funcional: al hacer clic FUERA del diálogo, cierra con answer(false).
+       Esto es UX estándar — el usuario puede "escapar" tocando el fondo.
+
+  (click)="confirmService.answer(false)" en el overlay.
+  (click)="$event.stopPropagation()" en el diálogo interno evita que el clic
+  dentro del diálogo burbujee al overlay y lo cierre accidentalmente.
+
+  role="dialog" + aria-modal="true": accesibilidad — los lectores de pantalla
+  anuncian que hay un diálogo activo y que el resto de la pantalla está bloqueado.
+-->
+@if (confirmService.state().visible) {
+  <div
+    class="confirm-overlay"
+    role="dialog"
+    aria-modal="true"
+    (click)="confirmService.answer(false)"
+  >
+    <!-- Tarjeta del diálogo — stopPropagation evita cerrar al clicar adentro -->
+    <div class="confirm-dialog" (click)="$event.stopPropagation()">
+
+      <!-- Icono de advertencia -->
+      <div class="confirm-dialog__icon" aria-hidden="true">⚠</div>
+
+      <!-- Mensaje de confirmación — viene del servicio -->
+      <p class="confirm-dialog__message">
+        {{ confirmService.state().message }}
+      </p>
+
+      <!-- Botones de acción -->
+      <div class="confirm-dialog__actions">
+
+        <!-- Cancelar — responde false → la acción NO se ejecuta -->
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="confirmService.answer(false)"
+        >
+          Cancelar
+        </button>
+
+        <!-- Confirmar — responde true → la acción SÍ se ejecuta -->
+        <button
+          type="button"
+          class="btn btn--danger"
+          (click)="confirmService.answer(true)"
+        >
+          Confirmar
+        </button>
+
+      </div>
+    </div>
+  </div>
+}

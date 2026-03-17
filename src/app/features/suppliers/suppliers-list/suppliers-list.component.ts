@@ -9,6 +9,8 @@ import { RouterLink } from '@angular/router';
 
 import { SuppliersService, SupplierListParams } from '../suppliers.service';
 import { Supplier }                             from '../../../core/models/supplier.model';
+import { SnackbarService }                      from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }                 from '../../../core/services/confirm-dialog.service';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -26,6 +28,8 @@ type LoadState = 'loading' | 'loaded' | 'error';
 export class SuppliersListComponent implements OnInit {
 
   private readonly suppliersService = inject(SuppliersService);
+  private readonly snackbarService  = inject(SnackbarService);
+  private readonly confirmService   = inject(ConfirmDialogService);
 
   // ─── Estado de la pantalla ────────────────────────────────────────────────
   readonly loadState = signal<LoadState>('loading');
@@ -106,13 +110,23 @@ export class SuppliersListComponent implements OnInit {
   // No usamos DELETE — el proveedor queda en la BD para mantener el historial
   // de pedidos que lo referencian.
   deactivate(supplier: Supplier): void {
-    if (!confirm(`¿Desactivar a "${supplier.name}"?`)) return;
+    this.confirmService
+      .confirm(`¿Desactivar a "${supplier.name}"?`)
+      .then(confirmed => {
+        if (!confirmed) return;
 
-    this.suppliersService
-      .updateSupplier(supplier.id, { is_active: false })
-      .subscribe({
-        next: () => this.loadPage(this.currentPage()),
-        error: () => alert('No se pudo desactivar el proveedor. Intenta de nuevo.'),
+        this.suppliersService
+          .updateSupplier(supplier.id, { is_active: false })
+          .subscribe({
+            next: () => {
+              this.snackbarService.show('Proveedor desactivado');
+              this.loadPage(this.currentPage());
+            },
+            error: () => this.snackbarService.show(
+              'No se pudo desactivar el proveedor.',
+              'error',
+            ),
+          });
       });
   }
 

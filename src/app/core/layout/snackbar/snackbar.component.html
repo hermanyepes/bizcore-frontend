@@ -1,0 +1,29 @@
+<!--
+  @if solo renderiza el div cuando visible=true.
+  Cuando visible pasa a false, Angular saca el elemento del DOM completamente.
+
+  snackbar--{{ type }}  genera la clase de color:
+    snackbar--success → borde e icono verdes
+    snackbar--error   → borde e icono rojos
+    snackbar--info    → borde e icono azules
+
+  role="status" + aria-live="polite": accesibilidad — los lectores de pantalla
+  anuncian el mensaje sin interrumpir al usuario.
+-->
+@if (snackbarService.state().visible) {
+  <div
+    class="snackbar snackbar--{{ snackbarService.state().type }}"
+    role="status"
+    aria-live="polite"
+  >
+    <!-- Icono según el tipo: ✓ / ✕ / ℹ -->
+    <span class="snackbar__icon" aria-hidden="true">
+      {{ iconFor(snackbarService.state().type) }}
+    </span>
+
+    <!-- Texto del mensaje -->
+    <span class="snackbar__message">
+      {{ snackbarService.state().message }}
+    </span>
+  </div>
+}
