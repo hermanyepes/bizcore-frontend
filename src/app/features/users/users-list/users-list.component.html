@@ -96,45 +96,12 @@
       </table>
     </div>
 
-    <!-- Paginador — solo visible si hay más de una página -->
-    @if (totalPages() > 1) {
-      <div class="users-list__pagination">
-
-        <button
-          class="users-list__page-btn"
-          type="button"
-          aria-label="Página anterior"
-          [disabled]="currentPage() === 1"
-          (click)="goToPage(currentPage() - 1)"
-        >
-          ‹
-        </button>
-
-        @for (n of pageNumbers(); track n) {
-          <button
-            class="users-list__page-btn"
-            type="button"
-            [attr.aria-label]="'Ir a página ' + n"
-            [attr.aria-current]="n === currentPage() ? 'page' : null"
-            [class.users-list__page-btn--active]="n === currentPage()"
-            (click)="goToPage(n)"
-          >
-            {{ n }}
-          </button>
-        }
-
-        <button
-          class="users-list__page-btn"
-          type="button"
-          aria-label="Página siguiente"
-          [disabled]="currentPage() === totalPages()"
-          (click)="goToPage(currentPage() + 1)"
-        >
-          ›
-        </button>
-
-      </div>
-    }
+    <!-- Paginador compartido -->
+    <app-paginator
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="goToPage($event)"
+    />
   }
 
 </div>

@@ -193,7 +193,7 @@ describe('UsersListComponent', () => {
 
   it('should NOT render the paginator when there is only one page', () => {
     // La respuesta por defecto tiene pages: 1 — el paginador no debe aparecer
-    const paginator = fixture.nativeElement.querySelector('.users-list__pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeNull();
   });
 
@@ -205,7 +205,7 @@ describe('UsersListComponent', () => {
     TestBed.flushEffects();
     fixture.detectChanges();
 
-    const paginator = fixture.nativeElement.querySelector('.users-list__pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeTruthy();
   });
 

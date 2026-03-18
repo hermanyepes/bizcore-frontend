@@ -270,7 +270,7 @@ describe('SuppliersListComponent', () => {
   // ─── Paginador ────────────────────────────────────────────────────────────
 
   it('should NOT render the paginator when there is only one page', () => {
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeNull();
   });
 
@@ -281,19 +281,19 @@ describe('SuppliersListComponent', () => {
     component.loadPage(1);
     fixture.detectChanges();
 
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeTruthy();
   });
 
   // ─── onPageChange() ───────────────────────────────────────────────────────
 
   it('should NOT go below page 1', () => {
-    component.onPageChange(-1); // intenta ir a página 0
+    component.onPageChange(0); // página 0 es inválida
     expect(component.currentPage()).toBe(1);
   });
 
   it('should NOT go above the last page', () => {
-    component.onPageChange(1); // estamos en página 1 de 1 — no puede avanzar
+    component.onPageChange(2); // estamos en página 1 de 1 — página 2 no existe
     expect(component.currentPage()).toBe(1);
   });
 
@@ -309,7 +309,7 @@ describe('SuppliersListComponent', () => {
       of(makePaginated({ page: 2, total: 25, pages: 3 }))
     );
 
-    component.onPageChange(1);
+    component.onPageChange(2); // página absoluta 2
     expect(suppliersServiceSpy.getSuppliers).toHaveBeenCalledWith(
       expect.objectContaining({ page: 2 })
     );

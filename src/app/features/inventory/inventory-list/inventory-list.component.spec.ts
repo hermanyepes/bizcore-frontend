@@ -227,14 +227,14 @@ describe('InventoryListComponent', () => {
   // ─── Paginación ───────────────────────────────────────────────────────────
 
   it('debería no ir por debajo de la página 1', () => {
-    component.onPageChange(-1);
+    component.onPageChange(0); // página 0 es inválida
     expect(component.currentPage()).toBe(1);
   });
 
   it('debería no ir por encima del total de páginas', () => {
     component.totalPages.set(3);
     component.currentPage.set(3);
-    component.onPageChange(1);
+    component.onPageChange(4); // más allá del total — inválida
     expect(component.currentPage()).toBe(3);
   });
 
@@ -243,7 +243,7 @@ describe('InventoryListComponent', () => {
       of(makePaginated({ total: 25, pages: 3, page: 2 }))
     );
     component.totalPages.set(3);
-    component.onPageChange(1);
+    component.onPageChange(2); // página absoluta 2
 
     expect(component.currentPage()).toBe(2);
   });

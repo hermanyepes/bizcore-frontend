@@ -6,12 +6,13 @@ import { toObservable }                        from '@angular/core/rxjs-interop'
 
 import { UsersService, UserListParams } from '../users.service';
 import { User }                         from '../../../core/models/user.model';
+import { PaginatorComponent }           from '../../../shared/paginator/paginator.component';
 
 @Component({
   selector: 'app-users-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, PaginatorComponent],
   templateUrl: './users-list.component.html',
   styleUrl:    './users-list.component.scss',
 })
@@ -74,10 +75,4 @@ export class UsersListComponent {
     this.params.update(p => ({ ...p, page }));
   }
 
-  // Array de números de página para el paginador en el template.
-  // Computed: se recalcula cuando totalPages cambia.
-  // Ejemplo: totalPages = 4 → [1, 2, 3, 4]
-  pageNumbers = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
-  );
 }

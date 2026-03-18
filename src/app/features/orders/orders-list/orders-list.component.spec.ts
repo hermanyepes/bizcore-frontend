@@ -427,7 +427,7 @@ describe('OrdersListComponent', () => {
   // ─── Grupo 13: Paginación ─────────────────────────────────────────────────
 
   it('should NOT render the paginator when there is only one page', () => {
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeNull();
   });
 
@@ -438,17 +438,17 @@ describe('OrdersListComponent', () => {
     component.loadPage(1);
     fixture.detectChanges();
 
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeTruthy();
   });
 
   it('should NOT go below page 1', () => {
-    component.onPageChange(-1);
+    component.onPageChange(0); // página 0 es inválida
     expect(component.currentPage()).toBe(1);
   });
 
   it('should NOT go above the last page', () => {
-    component.onPageChange(1); // totalPages() es 1 — no puede avanzar
+    component.onPageChange(2); // totalPages() es 1 — no puede ir a página 2
     expect(component.currentPage()).toBe(1);
   });
 
@@ -464,7 +464,7 @@ describe('OrdersListComponent', () => {
       of(makeOrderPaginated({ page: 2, total: 25, pages: 3 }))
     );
 
-    component.onPageChange(1);
+    component.onPageChange(2); // página absoluta 2
     expect(ordersServiceSpy.getOrders).toHaveBeenCalledWith(
       expect.objectContaining({ page: 2 })
     );

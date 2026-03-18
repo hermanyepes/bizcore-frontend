@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 
 import { InventoryService }                          from '../inventory.service';
 import { InventoryMovement, MovementType }           from '../../../core/models/inventory.model';
+import { PaginatorComponent }                        from '../../../shared/paginator/paginator.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -18,7 +19,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, PaginatorComponent],
   templateUrl: './inventory-list.component.html',
   styleUrl: './inventory-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,11 +100,10 @@ export class InventoryListComponent implements OnInit {
     this.loadPage(1);
   }
 
-  // El usuario hizo clic en "Anterior" o "Siguiente"
-  onPageChange(delta: number): void {
-    const next = this.currentPage() + delta;
-    if (next < 1 || next > this.totalPages()) return;
-    this.loadPage(next);
+  // El usuario seleccionó una página en el paginador compartido
+  onPageChange(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.loadPage(page);
   }
 
   // Navega al detalle de un movimiento

@@ -11,6 +11,7 @@ import { SuppliersService, SupplierListParams } from '../suppliers.service';
 import { Supplier }                             from '../../../core/models/supplier.model';
 import { SnackbarService }                      from '../../../core/services/snackbar.service';
 import { ConfirmDialogService }                 from '../../../core/services/confirm-dialog.service';
+import { PaginatorComponent }                   from '../../../shared/paginator/paginator.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -21,7 +22,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-suppliers-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [RouterLink],
+  imports:         [RouterLink, PaginatorComponent],
   templateUrl:     './suppliers-list.component.html',
   styleUrl:        './suppliers-list.component.scss',
 })
@@ -97,11 +98,10 @@ export class SuppliersListComponent implements OnInit {
     this.loadPage(1);
   }
 
-  // El usuario hizo clic en "Anterior" o "Siguiente"
-  onPageChange(delta: number): void {
-    const next = this.currentPage() + delta;
-    if (next < 1 || next > this.totalPages()) return;
-    this.loadPage(next);
+  // El usuario seleccionó una página en el paginador compartido
+  onPageChange(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.loadPage(page);
   }
 
   // ─── Desactivar un proveedor ──────────────────────────────────────────────

@@ -120,28 +120,12 @@
       </table>
     </div>
 
-    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="pagination__btn"
-                aria-label="Página anterior"
-                (click)="onPageChange(-1)"
-                [disabled]="currentPage() === 1">
-          ‹
-        </button>
-
-        <span class="pagination__info">
-          Página {{ currentPage() }} de {{ totalPages() }}
-        </span>
-
-        <button class="pagination__btn"
-                aria-label="Página siguiente"
-                (click)="onPageChange(1)"
-                [disabled]="currentPage() === totalPages()">
-          ›
-        </button>
-      </div>
-    }
+    <!-- ── Paginador compartido ──────────────────────────────────────────── -->
+    <app-paginator
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="onPageChange($event)"
+    />
   }
 
 </section>
