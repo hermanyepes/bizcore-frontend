@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
@@ -12,6 +13,8 @@ import { Supplier }                             from '../../../core/models/suppl
 import { SnackbarService }                      from '../../../core/services/snackbar.service';
 import { ConfirmDialogService }                 from '../../../core/services/confirm-dialog.service';
 import { PaginatorComponent }                   from '../../../shared/paginator/paginator.component';
+import { ModalComponent }                       from '../../../shared/modal/modal.component';
+import { SupplierCreateModalComponent }         from '../supplier-create-modal/supplier-create-modal.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -22,7 +25,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-suppliers-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [RouterLink, PaginatorComponent],
+  imports:         [RouterLink, PaginatorComponent, ModalComponent, SupplierCreateModalComponent],
   templateUrl:     './suppliers-list.component.html',
   styleUrl:        './suppliers-list.component.scss',
 })
@@ -31,6 +34,29 @@ export class SuppliersListComponent implements OnInit {
   private readonly suppliersService = inject(SuppliersService);
   private readonly snackbarService  = inject(SnackbarService);
   private readonly confirmService   = inject(ConfirmDialogService);
+
+  @ViewChild(SupplierCreateModalComponent)
+  private createModalRef?: SupplierCreateModalComponent;
+
+  readonly showCreateModal = signal(false);
+
+  onCloseRequested(): void {
+    if (!this.createModalRef?.form.dirty) {
+      this.showCreateModal.set(false);
+      return;
+    }
+    this.confirmService
+      .confirm('¿Descartar los cambios sin guardar?')
+      .then(confirmed => {
+        if (confirmed) this.showCreateModal.set(false);
+      });
+  }
+
+  onSupplierCreated(): void {
+    this.showCreateModal.set(false);
+    this.loadPage(1);
+    this.snackbarService.show('Proveedor creado');
+  }
 
   // ─── Estado de la pantalla ────────────────────────────────────────────────
   readonly loadState = signal<LoadState>('loading');

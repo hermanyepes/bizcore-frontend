@@ -1,0 +1,55 @@
+<!--
+  Estructura visual:
+  ┌──────────────── overlay (full-screen, fondo oscuro) ─────────────────┐
+  │                                                                        │
+  │      ┌──────────────── modal-card (tarjeta centrada) ──────────────┐  │
+  │      │  ┌── modal-header ─────────────────────────────────────┐    │  │
+  │      │  │  Nuevo usuario                              [  ×  ]  │    │  │
+  │      │  └─────────────────────────────────────────────────────┘    │  │
+  │      │                                                               │  │
+  │      │  ┌── modal-body ───────────────────────────────────────┐    │  │
+  │      │  │  <ng-content> ← aquí va el formulario               │    │  │
+  │      │  └─────────────────────────────────────────────────────┘    │  │
+  │      └───────────────────────────────────────────────────────────────┘  │
+  │                                                                        │
+  └────────────────────────────────────────────────────────────────────────┘
+
+  (click) en el overlay → emite close (cierra al hacer clic en el fondo)
+  (click)="$event.stopPropagation()" en la tarjeta → evita que el clic
+  adentro del formulario burbujee al overlay y lo cierre accidentalmente.
+-->
+<div
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="title()"
+  (click)="closeRequested.emit()"
+>
+  <!-- Tarjeta — stopPropagation evita cerrar al clicar dentro del form -->
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Encabezado: título + botón cerrar -->
+    <div class="modal-header">
+      <h2 class="modal-title">{{ title() }}</h2>
+
+      <!--
+        El botón X emite close — mismo efecto que hacer clic en el overlay.
+        aria-label="Cerrar" para lectores de pantalla.
+      -->
+      <button
+        type="button"
+        class="modal-close"
+        aria-label="Cerrar"
+        (click)="closeRequested.emit()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Cuerpo — ng-content es la ranura donde el padre inyecta el formulario -->
+    <div class="modal-body">
+      <ng-content />
+    </div>
+
+  </div>
+</div>

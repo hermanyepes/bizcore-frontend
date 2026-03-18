@@ -1,0 +1,35 @@
+// ---------------------------------------------------------------------------
+// UserCreateModalComponent — estilos
+//
+// Este componente vive dentro del ModalComponent (modal-body).
+// No necesita sus propios estilos de layout (sin page-header, sin padding
+// de página) — el modal ya provee el contenedor.
+//
+// Reutiliza las clases globales de formulario definidas en styles.scss:
+//   .form-section, .form-section__title
+//   .form-row, .form-field, .form-label, .form-label--optional
+//   .form-input, .form-input--error, .form-select, .form-select--error
+//   .form-error
+//   .server-error
+//   .btn-primary
+//
+// Solo definimos lo que es específico de este componente.
+// ---------------------------------------------------------------------------
+
+// ── Contenedor del formulario ─────────────────────────────────────────────
+.create-form {
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem;
+}
+
+// ── Botones de acción ─────────────────────────────────────────────────────
+// En el modal hay un solo botón (Crear) alineado a la derecha.
+// El usuario cancela con el X del header o el fondo oscuro.
+.form-actions {
+  display:         flex;
+  justify-content: flex-end;
+  padding-top:     0.5rem;
+  border-top:      1px solid var(--color-border);
+  margin-top:      0.25rem;
+}

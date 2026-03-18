@@ -7,7 +7,8 @@
 @use 'styles/variables';
 @use 'styles/reset';
 @use 'styles/animations';
-@use 'styles/textures';  // capas atmosféricas — siempre al final del grupo de @use
+@use 'styles/textures';      // capas atmosféricas — siempre al final del grupo de @use
+@use 'styles/form-controls'; // controles de formulario globales — usados por modales y forms
 
 html {
   height: 100%;

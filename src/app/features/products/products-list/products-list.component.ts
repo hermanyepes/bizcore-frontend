@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { toSignal }                            from '@angular/core/rxjs-interop';
 import { toObservable }                        from '@angular/core/rxjs-interop';
 import { RouterLink }                          from '@angular/router';
@@ -7,18 +7,47 @@ import { switchMap }                           from 'rxjs/operators';
 import { ProductsService, ProductListParams, PRODUCT_CATEGORIES } from '../products.service';
 import { Product }                                                 from '../../../core/models/product.model';
 import { PaginatorComponent }                                      from '../../../shared/paginator/paginator.component';
+import { ModalComponent }                                          from '../../../shared/modal/modal.component';
+import { ProductCreateModalComponent }                             from '../product-create-modal/product-create-modal.component';
+import { SnackbarService }                                         from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }                                    from '../../../core/services/confirm-dialog.service';
 
 @Component({
   selector:    'app-products-list',
   standalone:  true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:     [RouterLink, PaginatorComponent],
+  imports:     [RouterLink, PaginatorComponent, ModalComponent, ProductCreateModalComponent],
   templateUrl: './products-list.component.html',
   styleUrl:    './products-list.component.scss',
 })
 export class ProductsListComponent {
 
   private readonly productsService = inject(ProductsService);
+  private readonly snackbarService = inject(SnackbarService);
+  private readonly confirmService  = inject(ConfirmDialogService);
+
+  @ViewChild(ProductCreateModalComponent)
+  private createModalRef?: ProductCreateModalComponent;
+
+  readonly showCreateModal = signal(false);
+
+  onCloseRequested(): void {
+    if (!this.createModalRef?.form.dirty) {
+      this.showCreateModal.set(false);
+      return;
+    }
+    this.confirmService
+      .confirm('¿Descartar los cambios sin guardar?')
+      .then(confirmed => {
+        if (confirmed) this.showCreateModal.set(false);
+      });
+  }
+
+  onProductCreated(): void {
+    this.showCreateModal.set(false);
+    this.params.update(p => ({ ...p, page: 1 }));
+    this.snackbarService.show('Producto creado');
+  }
 
   // Categorías disponibles — usadas para poblar el <select> de filtro
   readonly categories = PRODUCT_CATEGORIES;
