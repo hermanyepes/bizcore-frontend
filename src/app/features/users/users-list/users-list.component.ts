@@ -1,24 +1,64 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { toSignal }                            from '@angular/core/rxjs-interop';
 import { RouterLink }                          from '@angular/router';
 import { switchMap }                           from 'rxjs/operators';
 import { toObservable }                        from '@angular/core/rxjs-interop';
 
-import { UsersService, UserListParams } from '../users.service';
-import { User }                         from '../../../core/models/user.model';
-import { PaginatorComponent }           from '../../../shared/paginator/paginator.component';
+import { UsersService, UserListParams }      from '../users.service';
+import { User }                              from '../../../core/models/user.model';
+import { PaginatorComponent }               from '../../../shared/paginator/paginator.component';
+import { ModalComponent }                   from '../../../shared/modal/modal.component';
+import { UserCreateModalComponent }         from '../user-create-modal/user-create-modal.component';
+import { SnackbarService }                  from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }             from '../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-users-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PaginatorComponent],
+  imports: [RouterLink, PaginatorComponent, ModalComponent, UserCreateModalComponent],
   templateUrl: './users-list.component.html',
   styleUrl:    './users-list.component.scss',
 })
 export class UsersListComponent {
 
-  private readonly usersService = inject(UsersService);
+  private readonly usersService    = inject(UsersService);
+  private readonly snackbarService = inject(SnackbarService);
+  private readonly confirmService  = inject(ConfirmDialogService);
+
+  // ── ViewChild al formulario dentro del modal ──────────────────────────────
+  // Permite consultar form.dirty desde esta lista sin acoplar la lógica
+  // de "¿puedo cerrar?" al ModalComponent ni al formulario hijo.
+  // { static: false } porque vive dentro de un @if — no existe en el DOM
+  // hasta que showCreateModal() sea true.
+  @ViewChild(UserCreateModalComponent)
+  private createModalRef?: UserCreateModalComponent;
+
+  // ── Modal de creación ─────────────────────────────────────────────────────
+  readonly showCreateModal = signal(false);
+
+  // Se ejecuta cuando el usuario intenta cerrar el modal (clic X o fondo).
+  // Patrón close guard: pregunta antes de descartar si hay datos sin guardar.
+  onCloseRequested(): void {
+    if (!this.createModalRef?.form.dirty) {
+      // Formulario vacío o sin cambios → cerrar sin preguntar
+      this.showCreateModal.set(false);
+      return;
+    }
+    // Formulario con datos → pedir confirmación antes de descartar
+    this.confirmService
+      .confirm('¿Descartar los cambios sin guardar?')
+      .then(confirmed => {
+        if (confirmed) this.showCreateModal.set(false);
+      });
+  }
+
+  // Se ejecuta cuando UserCreateModalComponent emite (saved).
+  onUserCreated(): void {
+    this.showCreateModal.set(false);
+    this.params.update(p => ({ ...p, page: 1 }));
+    this.snackbarService.show('Usuario creado');
+  }
 
   // -------------------------------------------------------------------------
   // Estado de la paginación — Signal mutable que el componente controla.

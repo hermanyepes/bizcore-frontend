@@ -1,0 +1,200 @@
+<!--
+  Formulario de creación de usuario — vive dentro del ModalComponent.
+
+  Diferencias respecto a user-form.component.html:
+    - Sin <div class="form-page"> ni encabezado con back-link (eso lo da el modal)
+    - Sin @if (isLoading()) — no hay datos que cargar, es creación pura
+    - Los botones no tienen routerLink — el botón Cancelar emite close via el padre
+    - Sin ngValue en los selects de is_active (no existe en creación)
+-->
+<form [formGroup]="form" (ngSubmit)="save()" class="create-form" novalidate>
+
+  <!-- ── Sección: Identificación ──────────────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Identificación</p>
+
+    <div class="form-row">
+
+      <!-- Tipo de documento -->
+      <div class="form-field">
+        <label class="form-label" for="cm-document_type">Tipo de documento</label>
+        <select
+          id="cm-document_type"
+          formControlName="document_type"
+          class="form-select"
+          [class.form-select--error]="form.get('document_type')!.invalid && form.get('document_type')!.touched"
+        >
+          <option value="" disabled>Selecciona…</option>
+          <option value="CC">Cédula de Ciudadanía</option>
+          <option value="CE">Cédula de Extranjería</option>
+          <option value="TI">Tarjeta de Identidad</option>
+          <option value="PA">Pasaporte</option>
+        </select>
+        @if (form.get('document_type')!.invalid && form.get('document_type')!.touched) {
+          <span class="form-error">El tipo de documento es obligatorio.</span>
+        }
+      </div>
+
+      <!-- Número de documento -->
+      <div class="form-field">
+        <label class="form-label" for="cm-document_id">Número de documento</label>
+        <input
+          id="cm-document_id"
+          type="text"
+          formControlName="document_id"
+          class="form-input"
+          [class.form-input--error]="form.get('document_id')!.invalid && form.get('document_id')!.touched"
+          placeholder="Ej. 1234567890"
+          autocomplete="off"
+        />
+        @if (form.get('document_id')!.hasError('required') && form.get('document_id')!.touched) {
+          <span class="form-error">El número de documento es obligatorio.</span>
+        }
+        @if (form.get('document_id')!.hasError('maxlength')) {
+          <span class="form-error">Máximo 20 caracteres.</span>
+        }
+      </div>
+
+    </div><!-- /form-row -->
+
+    <!-- Correo electrónico -->
+    <div class="form-field">
+      <label class="form-label" for="cm-email">Correo electrónico</label>
+      <input
+        id="cm-email"
+        type="email"
+        formControlName="email"
+        class="form-input"
+        [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
+        placeholder="usuario@empresa.com"
+        autocomplete="email"
+      />
+      @if (form.get('email')!.hasError('required') && form.get('email')!.touched) {
+        <span class="form-error">El correo es obligatorio.</span>
+      }
+      @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
+        <span class="form-error">Ingresa un correo válido.</span>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Sección: Datos personales ────────────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Datos personales</p>
+
+    <!-- Nombre completo -->
+    <div class="form-field">
+      <label class="form-label" for="cm-full_name">Nombre completo</label>
+      <input
+        id="cm-full_name"
+        type="text"
+        formControlName="full_name"
+        class="form-input"
+        [class.form-input--error]="form.get('full_name')!.invalid && form.get('full_name')!.touched"
+        placeholder="Nombre y apellidos"
+        autocomplete="name"
+      />
+      @if (form.get('full_name')!.hasError('required') && form.get('full_name')!.touched) {
+        <span class="form-error">El nombre es obligatorio.</span>
+      }
+      @if (form.get('full_name')!.hasError('maxlength')) {
+        <span class="form-error">Máximo 80 caracteres.</span>
+      }
+    </div>
+
+    <div class="form-row">
+
+      <!-- Teléfono (opcional) -->
+      <div class="form-field">
+        <label class="form-label" for="cm-phone">
+          Teléfono <span class="form-label--optional">(opcional)</span>
+        </label>
+        <input
+          id="cm-phone"
+          type="tel"
+          formControlName="phone"
+          class="form-input"
+          placeholder="Ej. 3001234567"
+          autocomplete="tel"
+        />
+      </div>
+
+      <!-- Ciudad (opcional) -->
+      <div class="form-field">
+        <label class="form-label" for="cm-city">
+          Ciudad <span class="form-label--optional">(opcional)</span>
+        </label>
+        <input
+          id="cm-city"
+          type="text"
+          formControlName="city"
+          class="form-input"
+          placeholder="Ej. Bogotá"
+          autocomplete="address-level2"
+        />
+      </div>
+
+    </div><!-- /form-row -->
+
+  </div>
+
+  <!-- ── Sección: Rol y acceso ─────────────────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Rol y acceso</p>
+
+    <!-- Rol -->
+    <div class="form-field">
+      <label class="form-label" for="cm-role">Rol</label>
+      <select id="cm-role" formControlName="role" class="form-select">
+        <option value="Empleado">Empleado</option>
+        <option value="Administrador">Administrador</option>
+      </select>
+    </div>
+
+    <!-- Contraseña — obligatoria en creación -->
+    <div class="form-field">
+      <label class="form-label" for="cm-password">Contraseña</label>
+      <input
+        id="cm-password"
+        type="password"
+        formControlName="password"
+        class="form-input"
+        [class.form-input--error]="form.get('password')!.invalid && form.get('password')!.touched"
+        placeholder="Mínimo 8 caracteres"
+        autocomplete="new-password"
+      />
+      @if (form.get('password')!.hasError('required') && form.get('password')!.touched) {
+        <span class="form-error">La contraseña es obligatoria.</span>
+      }
+      @if (form.get('password')!.hasError('minlength') && form.get('password')!.touched) {
+        <span class="form-error">Mínimo 8 caracteres.</span>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Error del servidor ─────────────────────────────────────────────────── -->
+  @if (serverError()) {
+    <div class="server-error" role="alert">
+      ⚠ {{ serverError() }}
+    </div>
+  }
+
+  <!-- ── Acciones ──────────────────────────────────────────────────────────── -->
+  <!--
+    No hay routerLink aquí. El botón Guardar envía el form.
+    No hay botón Cancelar — el usuario cierra el modal con el botón X del header
+    o haciendo clic en el fondo oscuro.
+  -->
+  <div class="form-actions">
+    <button
+      type="submit"
+      class="btn-primary"
+      [disabled]="form.invalid || isSaving()"
+    >
+      {{ isSaving() ? 'Guardando…' : 'Crear usuario' }}
+    </button>
+  </div>
+
+</form>

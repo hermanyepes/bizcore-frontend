@@ -1,0 +1,97 @@
+<!--
+  Formulario de creación de producto — vive dentro del ModalComponent.
+  Usa las mismas clases CSS del módulo de productos (.field, .field__label, etc.)
+  para mantener consistencia visual con product-form.component.html.
+-->
+<form [formGroup]="form" (ngSubmit)="save()" class="create-form" novalidate>
+
+  <!-- ── Error del servidor ─────────────────────────────────────────────── -->
+  @if (serverError()) {
+    <div class="server-error" role="alert">⚠ {{ serverError() }}</div>
+  }
+
+  <!-- ── Sección: Información básica ───────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Información básica</p>
+
+    <!-- Nombre -->
+    <div class="field">
+      <label class="field__label" for="pm-name">Nombre *</label>
+      <input
+        id="pm-name"
+        type="text"
+        formControlName="name"
+        class="field__input"
+        [class.field__input--error]="form.get('name')!.invalid && form.get('name')!.touched"
+        placeholder="Ej: Café Premium 500g"
+      />
+      @if (form.get('name')!.invalid && form.get('name')!.touched) {
+        <span class="field__error">El nombre es obligatorio (máx. 120 caracteres).</span>
+      }
+    </div>
+
+    <!-- Descripción (opcional) -->
+    <div class="field">
+      <label class="field__label" for="pm-description">
+        Descripción <span class="form-label--optional">(opcional)</span>
+      </label>
+      <textarea
+        id="pm-description"
+        formControlName="description"
+        class="field__input field__input--textarea"
+        placeholder="Descripción opcional del producto"
+        rows="3"
+      ></textarea>
+    </div>
+
+  </div>
+
+  <!-- ── Sección: Precio y clasificación ───────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Precio y clasificación</p>
+
+    <div class="form-row">
+
+      <!-- Precio -->
+      <div class="field">
+        <label class="field__label" for="pm-price">Precio (COP) *</label>
+        <input
+          id="pm-price"
+          type="number"
+          formControlName="price"
+          class="field__input field__input--mono"
+          [class.field__input--error]="form.get('price')!.invalid && form.get('price')!.touched"
+          placeholder="Ej: 15000"
+          min="1"
+        />
+        @if (form.get('price')!.invalid && form.get('price')!.touched) {
+          <span class="field__error">El precio es obligatorio y debe ser mayor a 0.</span>
+        }
+      </div>
+
+      <!-- Categoría (opcional) -->
+      <div class="field">
+        <label class="field__label" for="pm-category">Categoría</label>
+        <select id="pm-category" formControlName="category" class="field__input field__select">
+          <option [value]="null">Sin categoría</option>
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Acciones ──────────────────────────────────────────────────────── -->
+  <div class="form-actions">
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="form.invalid || isSaving()"
+    >
+      {{ isSaving() ? 'Guardando…' : 'Crear producto' }}
+    </button>
+  </div>
+
+</form>

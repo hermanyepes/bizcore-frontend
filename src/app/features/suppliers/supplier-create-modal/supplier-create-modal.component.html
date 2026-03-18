@@ -1,0 +1,100 @@
+<!--
+  Formulario de creación de proveedor — vive dentro del ModalComponent.
+-->
+<form [formGroup]="form" (ngSubmit)="save()" class="create-form" novalidate>
+
+  <!-- ── Error del servidor ─────────────────────────────────────────────── -->
+  @if (serverError()) {
+    <div class="server-error" role="alert">⚠ {{ serverError() }}</div>
+  }
+
+  <!-- ── Sección: Información básica ───────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Información básica</p>
+
+    <div class="field">
+      <label class="field__label" for="sm-name">Nombre *</label>
+      <input
+        id="sm-name"
+        type="text"
+        formControlName="name"
+        class="field__input"
+        [class.field__input--error]="form.get('name')!.invalid && form.get('name')!.touched"
+        placeholder="Ej: Distribuidora Colombia S.A."
+      />
+      @if (form.get('name')!.invalid && form.get('name')!.touched) {
+        <span class="field__error">El nombre es obligatorio (máx. 150 caracteres).</span>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Sección: Contacto ─────────────────────────────────────────────── -->
+  <div class="form-section">
+    <p class="form-section__title">Información de contacto</p>
+
+    <div class="form-row">
+
+      <!-- Email de contacto (opcional) -->
+      <div class="field">
+        <label class="field__label" for="sm-contact_email">
+          Email <span class="form-label--optional">(opcional)</span>
+        </label>
+        <input
+          id="sm-contact_email"
+          type="email"
+          formControlName="contact_email"
+          class="field__input"
+          [class.field__input--error]="form.get('contact_email')!.invalid && form.get('contact_email')!.touched"
+          placeholder="ventas@proveedor.com"
+        />
+        @if (form.get('contact_email')!.invalid && form.get('contact_email')!.touched) {
+          <span class="field__error">Ingresa un email válido o deja el campo vacío.</span>
+        }
+      </div>
+
+      <!-- Teléfono (opcional) -->
+      <div class="field">
+        <label class="field__label" for="sm-phone">
+          Teléfono <span class="form-label--optional">(opcional)</span>
+        </label>
+        <input
+          id="sm-phone"
+          type="text"
+          formControlName="phone"
+          class="field__input"
+          placeholder="+57 310 555 1234"
+        />
+      </div>
+
+    </div>
+
+    <!-- Dirección (opcional) -->
+    <div class="field">
+      <label class="field__label" for="sm-address">
+        Dirección <span class="form-label--optional">(opcional)</span>
+      </label>
+      <input
+        id="sm-address"
+        type="text"
+        formControlName="address"
+        class="field__input"
+        placeholder="Ej: Calle 10 # 5-20, Bogotá"
+        autocomplete="off"
+      />
+    </div>
+
+  </div>
+
+  <!-- ── Acciones ──────────────────────────────────────────────────────── -->
+  <div class="form-actions">
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="form.invalid || isSaving()"
+    >
+      {{ isSaving() ? 'Guardando…' : 'Crear proveedor' }}
+    </button>
+  </div>
+
+</form>
