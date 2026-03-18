@@ -6,12 +6,13 @@ import { switchMap }                           from 'rxjs/operators';
 
 import { ProductsService, ProductListParams, PRODUCT_CATEGORIES } from '../products.service';
 import { Product }                                                 from '../../../core/models/product.model';
+import { PaginatorComponent }                                      from '../../../shared/paginator/paginator.component';
 
 @Component({
   selector:    'app-products-list',
   standalone:  true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:     [RouterLink],
+  imports:     [RouterLink, PaginatorComponent],
   templateUrl: './products-list.component.html',
   styleUrl:    './products-list.component.scss',
 })
@@ -45,11 +46,6 @@ export class ProductsListComponent {
   totalItems  = computed(() => this.response()?.total     ?? 0);
   currentPage = computed(() => this.response()?.page      ?? 1);
   isLoading   = computed(() => this.response() === undefined);
-
-  // Array de números de página para el paginador en el template
-  pageNumbers = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
-  );
 
   // ─── Paginación ───────────────────────────────────────────────────────────
   goToPage(page: number): void {

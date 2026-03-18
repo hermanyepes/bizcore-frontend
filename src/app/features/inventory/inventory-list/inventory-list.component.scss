@@ -282,3 +282,12 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .table-wrapper {
+    overflow-x: auto;
+  }
+}
+

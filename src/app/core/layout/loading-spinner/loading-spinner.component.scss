@@ -1,0 +1,68 @@
+// Overlay: cubre toda la ventana del navegador por encima de todo el contenido.
+// position: fixed + inset: 0 = pega los 4 bordes a la ventana sin importar el scroll.
+// z-index: 9999 = aparece encima de modales, sidebars, cualquier otro elemento.
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  // Fondo semitransparente sobre el slate oscuro de la app
+  background-color: rgb(15 23 42 / 60%); // slate-950 al 60%
+  backdrop-filter: blur(2px);
+
+  // Centra el anillo en el overlay
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Contenedor del anillo giratorio
+.spinner-ring {
+  position: relative;
+  width: 56px;
+  height: 56px;
+
+  // Cada uno de los 4 arcos es un div hijo con borde superior coloreado
+  div {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+
+    // Solo el borde superior se colorea — eso crea el arco visible
+    border-top-color: var(--color-accent, #f59e0b); // ámbar de la app
+
+    // Animación de rotación — cada arco tiene un desfase diferente
+    // para crear el efecto de profundidad del spinner
+    animation: spin 1s linear infinite;
+
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      inset: 8px; // más pequeño — adentro del primero
+      border-top-color: rgb(245 158 11 / 75%);
+      animation-delay: -0.25s;
+      animation-direction: reverse; // gira al revés para efecto 3D
+    }
+
+    &:nth-child(3) {
+      inset: 16px;
+      border-top-color: rgb(245 158 11 / 50%);
+      animation-delay: -0.5s;
+    }
+
+    &:nth-child(4) {
+      inset: 24px;
+      border-top-color: rgb(245 158 11 / 25%);
+      animation-delay: -0.75s;
+      animation-direction: reverse;
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

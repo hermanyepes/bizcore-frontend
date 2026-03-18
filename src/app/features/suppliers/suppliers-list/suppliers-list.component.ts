@@ -5,11 +5,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink }    from '@angular/router';
-import { CommonModule }  from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { SuppliersService, SupplierListParams } from '../suppliers.service';
 import { Supplier }                             from '../../../core/models/supplier.model';
+import { SnackbarService }                      from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }                 from '../../../core/services/confirm-dialog.service';
+import { PaginatorComponent }                   from '../../../shared/paginator/paginator.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -20,13 +22,15 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-suppliers-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [CommonModule, RouterLink],
+  imports:         [RouterLink, PaginatorComponent],
   templateUrl:     './suppliers-list.component.html',
   styleUrl:        './suppliers-list.component.scss',
 })
 export class SuppliersListComponent implements OnInit {
 
   private readonly suppliersService = inject(SuppliersService);
+  private readonly snackbarService  = inject(SnackbarService);
+  private readonly confirmService   = inject(ConfirmDialogService);
 
   // ─── Estado de la pantalla ────────────────────────────────────────────────
   readonly loadState = signal<LoadState>('loading');
@@ -94,11 +98,10 @@ export class SuppliersListComponent implements OnInit {
     this.loadPage(1);
   }
 
-  // El usuario hizo clic en "Anterior" o "Siguiente"
-  onPageChange(delta: number): void {
-    const next = this.currentPage() + delta;
-    if (next < 1 || next > this.totalPages()) return;
-    this.loadPage(next);
+  // El usuario seleccionó una página en el paginador compartido
+  onPageChange(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.loadPage(page);
   }
 
   // ─── Desactivar un proveedor ──────────────────────────────────────────────
@@ -107,13 +110,23 @@ export class SuppliersListComponent implements OnInit {
   // No usamos DELETE — el proveedor queda en la BD para mantener el historial
   // de pedidos que lo referencian.
   deactivate(supplier: Supplier): void {
-    if (!confirm(`¿Desactivar a "${supplier.name}"?`)) return;
+    this.confirmService
+      .confirm(`¿Desactivar a "${supplier.name}"?`)
+      .then(confirmed => {
+        if (!confirmed) return;
 
-    this.suppliersService
-      .updateSupplier(supplier.id, { is_active: false })
-      .subscribe({
-        next: () => this.loadPage(this.currentPage()),
-        error: () => alert('No se pudo desactivar el proveedor. Intenta de nuevo.'),
+        this.suppliersService
+          .updateSupplier(supplier.id, { is_active: false })
+          .subscribe({
+            next: () => {
+              this.snackbarService.show('Proveedor desactivado');
+              this.loadPage(this.currentPage());
+            },
+            error: () => this.snackbarService.show(
+              'No se pudo desactivar el proveedor.',
+              'error',
+            ),
+          });
       });
   }
 

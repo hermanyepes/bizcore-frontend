@@ -13,14 +13,14 @@
 
   <!-- ── Filtros ──────────────────────────────────────────────────────────── -->
   <div class="filters">
-    <select class="filter-select" (change)="filterByCategory($any($event.target).value)">
+    <select class="filter-select" #categorySelect (change)="filterByCategory(categorySelect.value)">
       <option value="">Todas las categorías</option>
       @for (cat of categories; track cat) {
         <option [value]="cat">{{ cat }}</option>
       }
     </select>
 
-    <select class="filter-select" (change)="filterByStatus($any($event.target).value)">
+    <select class="filter-select" #statusSelect (change)="filterByStatus(statusSelect.value)">
       <option value="">Todos los estados</option>
       <option value="true">Activos</option>
       <option value="false">Inactivos</option>
@@ -83,34 +83,12 @@
       </table>
     </div>
 
-    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="pagination__btn"
-                aria-label="Página anterior"
-                (click)="goToPage(currentPage() - 1)"
-                [disabled]="currentPage() === 1">
-          ‹
-        </button>
-
-        @for (n of pageNumbers(); track n) {
-          <button class="pagination__btn"
-                  [attr.aria-label]="'Ir a página ' + n"
-                  [attr.aria-current]="n === currentPage() ? 'page' : null"
-                  [class.pagination__btn--active]="n === currentPage()"
-                  (click)="goToPage(n)">
-            {{ n }}
-          </button>
-        }
-
-        <button class="pagination__btn"
-                aria-label="Página siguiente"
-                (click)="goToPage(currentPage() + 1)"
-                [disabled]="currentPage() === totalPages()">
-          ›
-        </button>
-      </div>
-    }
+    <!-- ── Paginador compartido ──────────────────────────────────────────── -->
+    <app-paginator
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="goToPage($event)"
+    />
   }
 
 </section>

@@ -184,7 +184,7 @@ describe('ProductsListComponent', () => {
   // ─── Paginador ────────────────────────────────────────────────────────────
 
   it('should NOT render the paginator when there is only one page', () => {
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeNull();
   });
 
@@ -196,7 +196,7 @@ describe('ProductsListComponent', () => {
     TestBed.flushEffects();
     fixture.detectChanges();
 
-    const paginator = fixture.nativeElement.querySelector('.pagination');
+    const paginator = fixture.nativeElement.querySelector('nav.paginator');
     expect(paginator).toBeTruthy();
   });
 

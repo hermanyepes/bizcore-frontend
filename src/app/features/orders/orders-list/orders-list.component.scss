@@ -295,3 +295,12 @@
     color:       var(--color-text-muted);
   }
 }
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .table-wrapper {
+    overflow-x: auto;
+  }
+}
+

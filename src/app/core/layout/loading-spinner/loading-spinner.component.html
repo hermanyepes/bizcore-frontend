@@ -1,0 +1,16 @@
+<!-- Overlay global: cubre toda la pantalla con un fondo semitransparente.   -->
+<!-- @if evalúa el signal directamente — Angular sabe llamar isLoading()    -->
+<!-- automáticamente cuando lo ve en el template.                            -->
+@if (loadingService.isLoading()) {
+  <div class="spinner-overlay" role="status" aria-label="Cargando...">
+    <div class="spinner-ring">
+      <!-- Los 4 divs internos son los 4 arcos del anillo giratorio.         -->
+      <!-- El CSS los anima con un desfase (animation-delay) para crear      -->
+      <!-- el efecto de rotación continua.                                   -->
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+}

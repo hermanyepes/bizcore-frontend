@@ -1,0 +1,37 @@
+<!--
+  El paginador solo se renderiza si hay más de una página.
+  Con una sola página no hay nada que paginar — no tiene sentido mostrar controles.
+-->
+@if (totalPages() > 1) {
+  <nav class="paginator" aria-label="Paginación">
+
+    <!-- Botón: página anterior -->
+    <button
+      class="paginator__btn"
+      type="button"
+      aria-label="Página anterior"
+      [disabled]="currentPage() === 1"
+      (click)="goTo(currentPage() - 1)"
+    >
+      ‹
+    </button>
+
+    <!-- Indicador textual: "Página 2 de 5" -->
+    <!-- aria-current="page" informa al lector de pantalla cuál es la página activa -->
+    <span class="paginator__info" aria-current="page">
+      Página {{ currentPage() }} de {{ totalPages() }}
+    </span>
+
+    <!-- Botón: página siguiente -->
+    <button
+      class="paginator__btn"
+      type="button"
+      aria-label="Página siguiente"
+      [disabled]="currentPage() === totalPages()"
+      (click)="goTo(currentPage() + 1)"
+    >
+      ›
+    </button>
+
+  </nav>
+}

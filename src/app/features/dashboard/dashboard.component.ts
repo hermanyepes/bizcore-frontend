@@ -25,6 +25,7 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   inject,
   signal,
@@ -73,6 +74,7 @@ const CHART_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CurrencyPipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',

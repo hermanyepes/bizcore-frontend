@@ -1,59 +1,130 @@
-# BizcoreFrontend
+# BizCore Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+Angular frontend for **BizCore** — a generic business management platform that covers users, products, inventory, suppliers, orders, and a real-time dashboard.
 
-## Development server
+---
 
-To start a local development server, run:
+## Stack
+
+| Technology | Version | Purpose |
+|---|---|---|
+| Angular | 21.2 | SPA framework |
+| TypeScript | 5.x | Language |
+| Vitest | via `@angular/build` | Unit testing |
+| Chart.js | 4.x | Dashboard donut chart |
+| SCSS | — | Styling (dark theme) |
+
+---
+
+## Prerequisites
+
+- Node.js ≥ 20
+- npm ≥ 11
+- Angular CLI 21: `npm install -g @angular/cli@21`
+- BizCore backend running locally (see [backend README](../../backend/README.md))
+
+---
+
+## Running locally
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start dev server
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200` in your browser.
 
-## Code scaffolding
+The app expects the backend at `http://localhost:8000/api/v1` (configured in `src/environments/environment.ts`).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Running tests
 
 ```bash
-ng generate --help
+ng test --watch=false
 ```
 
-## Building
+Current test count: **478 tests passing**.
 
-To build the project run:
+---
+
+## Production build
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output goes to `dist/bizcore-frontend/`. No environment variables are needed at build time — the API URL is baked in via `environment.prod.ts`.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Environment configuration
 
-```bash
-ng test
+There are two environment files under `src/environments/`:
+
+| File | Used when |
+|---|---|
+| `environment.ts` | `ng serve` (development) |
+| `environment.prod.ts` | `ng build` (production) |
+
+To point the app at a different backend, edit `apiUrl` in the relevant file:
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8000/api/v1',
+};
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## Folder structure
 
-```bash
-ng e2e
+```
+src/app/
+├── core/                     # Singleton services, models, interceptors, layout
+│   ├── auth/                 # AuthService, AuthGuard, token refresh logic
+│   ├── interceptors/         # HTTP interceptors (auth token, loading spinner)
+│   ├── layout/               # Shell layout, navbar, sidebar drawer
+│   │   ├── confirm-dialog/   # Reusable confirmation dialog
+│   │   ├── loading-spinner/  # Global loading overlay
+│   │   └── snackbar/         # Global toast notifications
+│   ├── models/               # TypeScript interfaces (User, Product, Supplier…)
+│   └── services/             # Shared services (LoadingService, SnackbarService…)
+│
+└── features/                 # Lazy-loaded feature modules
+    ├── login/                # Login page
+    ├── dashboard/            # KPI summary + Chart.js donut
+    ├── users/                # User list, detail, create/edit form
+    ├── products/             # Product list, detail, create/edit form
+    ├── inventory/            # Inventory list, stock adjustment form
+    ├── suppliers/            # Supplier list, detail, create/edit form
+    └── orders/               # Order list, detail, create form
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## Features
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **JWT authentication** with automatic token refresh (access token + refresh token)
+- **Role-based UI** — Admin vs. Employee views
+- **Global loading spinner** on every HTTP request
+- **Snackbar notifications** for success / error feedback
+- **Confirmation dialogs** before destructive actions (delete, cancel order)
+- **Responsive layout** — collapsible sidebar drawer on mobile, scrollable tables, single-column forms on small screens
+- **Dark theme** — slate + amber palette, Syne / DM Sans / JetBrains Mono fonts
+
+---
+
+## Screenshots
+
+> Screenshots will be added after the final polish pass.
+
+---
+
+## Backend
+
+The REST API is built with **FastAPI + PostgreSQL**. See the [backend repository](https://github.com/hermanyepes/bizcore) for setup instructions.

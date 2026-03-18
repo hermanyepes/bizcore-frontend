@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule }                       from '@angular/common';
 
 import { InventoryService }          from '../inventory.service';
 import { InventoryMovement, MovementType } from '../../../core/models/inventory.model';
@@ -17,7 +16,7 @@ type LoadState = 'loading' | 'loaded' | 'error' | 'not-found';
 @Component({
   selector: 'app-inventory-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './inventory-detail.component.html',
   styleUrl: './inventory-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

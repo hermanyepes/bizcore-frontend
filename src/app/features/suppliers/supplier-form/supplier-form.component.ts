@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 
 import { SuppliersService, SupplierCreatePayload,
          SupplierUpdatePayload }                       from '../suppliers.service';
+import { SnackbarService }                            from '../../../core/services/snackbar.service';
 
 // ---------------------------------------------------------------------------
 // SupplierFormComponent — mismo patrón dual que ProductFormComponent:
@@ -35,6 +36,7 @@ export class SupplierFormComponent implements OnInit {
   private readonly route            = inject(ActivatedRoute);
   private readonly router           = inject(Router);
   private readonly suppliersService = inject(SuppliersService);
+  private readonly snackbarService  = inject(SnackbarService);
 
   // ---------------------------------------------------------------------------
   // Detección de modo
@@ -133,8 +135,10 @@ export class SupplierFormComponent implements OnInit {
     };
 
     this.suppliersService.createSupplier(payload).subscribe({
-      // Después de crear, volvemos a la lista — no hay detail page para proveedores.
-      next:  () => this.router.navigate(['/suppliers']),
+      next:  () => {
+        this.snackbarService.show('Proveedor creado');
+        this.router.navigate(['/suppliers']);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al crear el proveedor.');
         this.isSaving.set(false);
@@ -154,8 +158,10 @@ export class SupplierFormComponent implements OnInit {
     };
 
     this.suppliersService.updateSupplier(this.supplierId!, payload).subscribe({
-      // Después de editar, volvemos a la lista — mismo motivo que al crear.
-      next:  () => this.router.navigate(['/suppliers']),
+      next:  () => {
+        this.snackbarService.show('Proveedor actualizado');
+        this.router.navigate(['/suppliers']);
+      },
       error: (err) => {
         this.serverError.set(err.error?.detail ?? 'Error al actualizar el proveedor.');
         this.isSaving.set(false);

@@ -9,6 +9,7 @@ import { Router, RouterLink }                                      from '@angula
 
 import { InventoryService }                         from '../inventory.service';
 import { MovementType }                             from '../../../core/models/inventory.model';
+import { SnackbarService }                          from '../../../core/services/snackbar.service';
 
 // ─── Opciones del select de tipo ─────────────────────────────────────────────
 // Array de objetos para mostrar etiquetas legibles en el <select>
@@ -46,6 +47,7 @@ export class InventoryFormComponent {
 
   private readonly inventoryService = inject(InventoryService);
   private readonly router           = inject(Router);
+  private readonly snackbarService  = inject(SnackbarService);
 
   // Opciones del select — accesibles desde el template
   readonly movementTypeOptions = MOVEMENT_TYPE_OPTIONS;
@@ -119,8 +121,10 @@ export class InventoryFormComponent {
       quantity:      v.quantity!,
       notes:         v.notes || null,
     }).subscribe({
-      // Al crear exitosamente, navegamos al detalle del movimiento registrado
-      next: (movement) => this.router.navigate(['/inventory', movement.id]),
+      next: (movement) => {
+        this.snackbarService.show('Movimiento registrado');
+        this.router.navigate(['/inventory', movement.id]);
+      },
       error: (err) => {
         // El backend puede responder:
         //   400 → stock insuficiente o producto inactivo (detail en español)

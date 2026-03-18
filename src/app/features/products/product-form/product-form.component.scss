@@ -222,3 +222,13 @@
     }
   }
 }
+
+// ─── RESPONSIVE MOBILE ──────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  // En desktop: 2 columnas. En mobile: 1 columna para que los campos no se aprieten.
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -18,7 +18,8 @@
 
     <select class="filter-select"
             [value]="filterStatus()"
-            (change)="onStatusChange($any($event.target).value)">
+            #statusSelect
+            (change)="onStatusChange(statusSelect.value)">
       <option value="">Todos los estados</option>
       <option value="PENDIENTE">Pendiente</option>
       <option value="COMPLETADO">Completado</option>
@@ -27,7 +28,8 @@
 
     <select class="filter-select"
             [value]="filterSupplierId()"
-            (change)="onSupplierChange($any($event.target).value)">
+            #supplierSelect
+            (change)="onSupplierChange(supplierSelect.value)">
       <option value="0">Todos los proveedores</option>
       <!-- Iteramos la lista de proveedores cargada al iniciar -->
       @for (supplier of suppliers(); track supplier.id) {
@@ -127,28 +129,12 @@
       </table>
     </div>
 
-    <!-- ── Paginador ──────────────────────────────────────────────────────── -->
-    @if (totalPages() > 1) {
-      <div class="pagination">
-        <button class="pagination__btn"
-                aria-label="Página anterior"
-                (click)="onPageChange(-1)"
-                [disabled]="currentPage() === 1">
-          ‹
-        </button>
-
-        <span class="pagination__info">
-          Página {{ currentPage() }} de {{ totalPages() }}
-        </span>
-
-        <button class="pagination__btn"
-                aria-label="Página siguiente"
-                (click)="onPageChange(1)"
-                [disabled]="currentPage() === totalPages()">
-          ›
-        </button>
-      </div>
-    }
+    <!-- ── Paginador compartido ──────────────────────────────────────────── -->
+    <app-paginator
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="onPageChange($event)"
+    />
   }
 
 </section>

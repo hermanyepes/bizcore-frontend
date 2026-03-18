@@ -20,13 +20,15 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink }   from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { OrdersService, OrderListParams } from '../orders.service';
 import { SuppliersService }               from '../../suppliers/suppliers.service';
 import { Order, OrderStatus }             from '../order.model';
 import { Supplier }                       from '../../../core/models/supplier.model';
+import { SnackbarService }                from '../../../core/services/snackbar.service';
+import { ConfirmDialogService }           from '../../../core/services/confirm-dialog.service';
+import { PaginatorComponent }            from '../../../shared/paginator/paginator.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -36,7 +38,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-orders-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [CommonModule, RouterLink],
+  imports:         [RouterLink, PaginatorComponent],
   templateUrl:     './orders-list.component.html',
   styleUrl:        './orders-list.component.scss',
 })
@@ -44,6 +46,8 @@ export class OrdersListComponent implements OnInit {
 
   private readonly ordersService    = inject(OrdersService);
   private readonly suppliersService = inject(SuppliersService);
+  private readonly snackbarService  = inject(SnackbarService);
+  private readonly confirmService   = inject(ConfirmDialogService);
 
   // ─── Estado de la pantalla ────────────────────────────────────────────────
   readonly loadState = signal<LoadState>('loading');
@@ -143,23 +147,32 @@ export class OrdersListComponent implements OnInit {
     this.loadPage(1);
   }
 
-  // El usuario hizo clic en "Anterior" o "Siguiente"
-  onPageChange(delta: number): void {
-    const next = this.currentPage() + delta;
-    if (next < 1 || next > this.totalPages()) return;
-    this.loadPage(next);
+  // El usuario seleccionó una página en el paginador compartido
+  onPageChange(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.loadPage(page);
   }
 
   // ─── Cancelar un pedido ───────────────────────────────────────────────────
   // Llama al DELETE, que en el backend cambia status a 'CANCELADO'.
   // El historial se conserva — nunca se borra la fila de la BD.
   cancelOrder(order: Order): void {
-    if (!confirm(`¿Cancelar el pedido #${order.id}?`)) return;
+    this.confirmService
+      .confirm(`¿Cancelar el pedido #${order.id}?`)
+      .then(confirmed => {
+        if (!confirmed) return;
 
-    this.ordersService.cancelOrder(order.id).subscribe({
-      next:  () => this.loadPage(this.currentPage()),
-      error: () => alert('No se pudo cancelar el pedido. Intenta de nuevo.'),
-    });
+        this.ordersService.cancelOrder(order.id).subscribe({
+          next: () => {
+            this.snackbarService.show('Pedido cancelado');
+            this.loadPage(this.currentPage());
+          },
+          error: () => this.snackbarService.show(
+            'No se pudo cancelar el pedido.',
+            'error',
+          ),
+        });
+      });
   }
 
   // ─── Helpers para el template ─────────────────────────────────────────────
