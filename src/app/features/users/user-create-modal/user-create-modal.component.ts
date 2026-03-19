@@ -110,7 +110,7 @@ export class UserCreateModalComponent implements OnInit {
       password:      v.password!,
     };
 
-    this.usersService.createUser(payload).subscribe({
+    this.usersService.create(payload).subscribe({
       next: () => {
         // No navegamos, no mostramos snackbar — eso es responsabilidad del padre.
         // Solo avisamos que la operación fue exitosa.

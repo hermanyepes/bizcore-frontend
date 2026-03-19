@@ -40,7 +40,7 @@ export class UserDetailComponent {
   private readonly user$ = this.route.paramMap.pipe(
     switchMap(params => {
       const id = params.get('id') ?? '';
-      return this.usersService.getUser(id).pipe(
+      return this.usersService.getOne(id).pipe(
         catchError(() => of(null))
       );
     })

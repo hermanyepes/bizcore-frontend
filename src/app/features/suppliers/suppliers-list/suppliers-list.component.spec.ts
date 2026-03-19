@@ -46,7 +46,7 @@ describe('SuppliersListComponent', () => {
   // El spy reemplaza al servicio real — no se hace ninguna llamada HTTP real.
   const suppliersServiceSpy = {
     getSuppliers:    vi.fn(),
-    updateSupplier:  vi.fn(),
+    update:  vi.fn(),
   };
 
   // Spy del ConfirmDialogService — por defecto confirma (true).
@@ -64,7 +64,7 @@ describe('SuppliersListComponent', () => {
   beforeEach(async () => {
     // Reseteamos el spy antes de cada test para evitar que un test contamine al siguiente.
     suppliersServiceSpy.getSuppliers.mockReturnValue(of(makePaginated()));
-    suppliersServiceSpy.updateSupplier.mockReturnValue(of(makeSupplier()));
+    suppliersServiceSpy.update.mockReturnValue(of(makeSupplier()));
 
     await TestBed.configureTestingModule({
       imports:   [SuppliersListComponent],
@@ -221,13 +221,13 @@ describe('SuppliersListComponent', () => {
   // Cuando el usuario confirma, llama al servicio con is_active: false
   // y luego recarga la página actual.
 
-  it('should call updateSupplier with is_active:false when confirmed', async () => {
+  it('should call update with is_active:false when confirmed', async () => {
     confirmServiceSpy.confirm.mockResolvedValue(true);
 
     component.deactivate(makeSupplier());
     await Promise.resolve(); // deja que el .then() de la Promise se ejecute
 
-    expect(suppliersServiceSpy.updateSupplier).toHaveBeenCalledWith(
+    expect(suppliersServiceSpy.update).toHaveBeenCalledWith(
       1,
       { is_active: false }
     );
@@ -244,13 +244,13 @@ describe('SuppliersListComponent', () => {
     expect(suppliersServiceSpy.getSuppliers).toHaveBeenCalledTimes(1);
   });
 
-  it('should NOT call updateSupplier when the user cancels the confirm', async () => {
+  it('should NOT call update when the user cancels the confirm', async () => {
     confirmServiceSpy.confirm.mockResolvedValue(false);
 
     component.deactivate(makeSupplier());
     await Promise.resolve();
 
-    expect(suppliersServiceSpy.updateSupplier).not.toHaveBeenCalled();
+    expect(suppliersServiceSpy.update).not.toHaveBeenCalled();
   });
 
   // ─── Estado vacío ─────────────────────────────────────────────────────────

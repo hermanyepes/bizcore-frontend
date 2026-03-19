@@ -25,9 +25,9 @@ function makeSupplier(overrides: Partial<Supplier> = {}): Supplier {
 // ─── Mocks compartidos ────────────────────────────────────────────────────────
 
 const suppliersServiceSpy = {
-  getSupplier:    vi.fn().mockReturnValue(of(makeSupplier())),
-  createSupplier: vi.fn().mockReturnValue(of(makeSupplier())),
-  updateSupplier: vi.fn().mockReturnValue(of(makeSupplier())),
+  getOne:    vi.fn().mockReturnValue(of(makeSupplier())),
+  create: vi.fn().mockReturnValue(of(makeSupplier())),
+  update: vi.fn().mockReturnValue(of(makeSupplier())),
 };
 
 // ─── Modo CREAR — /suppliers/new (paramMap sin 'id') ─────────────────────────
@@ -43,7 +43,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
   };
 
   beforeEach(async () => {
-    suppliersServiceSpy.createSupplier.mockReturnValue(of(makeSupplier()));
+    suppliersServiceSpy.create.mockReturnValue(of(makeSupplier()));
 
     await TestBed.configureTestingModule({
       imports:   [SupplierFormComponent],
@@ -73,8 +73,8 @@ describe('SupplierFormComponent — modo CREAR', () => {
     expect(component.supplierId).toBeNull();
   });
 
-  it('should NOT call getSupplier on init in create mode', () => {
-    expect(suppliersServiceSpy.getSupplier).not.toHaveBeenCalled();
+  it('should NOT call getOne on init in create mode', () => {
+    expect(suppliersServiceSpy.getOne).not.toHaveBeenCalled();
   });
 
   // ─── Validación del formulario ─────────────────────────────────────────────
@@ -119,21 +119,21 @@ describe('SupplierFormComponent — modo CREAR', () => {
 
   // ─── save() — guardas ─────────────────────────────────────────────────────
 
-  it('should NOT call createSupplier if form is invalid', () => {
+  it('should NOT call create if form is invalid', () => {
     component.save(); // name vacío → inválido
-    expect(suppliersServiceSpy.createSupplier).not.toHaveBeenCalled();
+    expect(suppliersServiceSpy.create).not.toHaveBeenCalled();
   });
 
-  it('should NOT call createSupplier if isSaving is true', () => {
+  it('should NOT call create if isSaving is true', () => {
     component.form.patchValue({ name: 'Distri Colombia' });
     component.isSaving.set(true);
     component.save();
-    expect(suppliersServiceSpy.createSupplier).not.toHaveBeenCalled();
+    expect(suppliersServiceSpy.create).not.toHaveBeenCalled();
   });
 
   // ─── saveCreate — payload correcto ────────────────────────────────────────
 
-  it('should call createSupplier with the correct payload', () => {
+  it('should call create with the correct payload', () => {
     component.form.patchValue({
       name:          'Distribuidora Colombia',
       contact_email: 'contacto@distcol.com',
@@ -142,7 +142,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
     });
     component.save();
 
-    expect(suppliersServiceSpy.createSupplier).toHaveBeenCalledWith({
+    expect(suppliersServiceSpy.create).toHaveBeenCalledWith({
       name:          'Distribuidora Colombia',
       contact_email: 'contacto@distcol.com',
       phone:         '3101234567',
@@ -155,7 +155,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
     component.form.patchValue({ name: 'Distri', contact_email: '' });
     component.save();
 
-    expect(suppliersServiceSpy.createSupplier).toHaveBeenCalledWith(
+    expect(suppliersServiceSpy.create).toHaveBeenCalledWith(
       expect.objectContaining({ contact_email: null })
     );
   });
@@ -164,7 +164,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
     component.form.patchValue({ name: 'Distri', phone: '' });
     component.save();
 
-    expect(suppliersServiceSpy.createSupplier).toHaveBeenCalledWith(
+    expect(suppliersServiceSpy.create).toHaveBeenCalledWith(
       expect.objectContaining({ phone: null })
     );
   });
@@ -173,7 +173,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
     component.form.patchValue({ name: 'Distri', address: '' });
     component.save();
 
-    expect(suppliersServiceSpy.createSupplier).toHaveBeenCalledWith(
+    expect(suppliersServiceSpy.create).toHaveBeenCalledWith(
       expect.objectContaining({ address: null })
     );
   });
@@ -190,8 +190,8 @@ describe('SupplierFormComponent — modo CREAR', () => {
 
   // ─── Errores del servidor ──────────────────────────────────────────────────
 
-  it('should set serverError when createSupplier fails', () => {
-    suppliersServiceSpy.createSupplier.mockReturnValue(
+  it('should set serverError when create fails', () => {
+    suppliersServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: { detail: 'El nombre ya existe.' } }))
     );
     component.form.patchValue({ name: 'Distri Colombia' });
@@ -202,7 +202,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
   });
 
   it('should show fallback error message when detail is missing', () => {
-    suppliersServiceSpy.createSupplier.mockReturnValue(
+    suppliersServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: {} }))
     );
     component.form.patchValue({ name: 'Distri Colombia' });
@@ -242,8 +242,8 @@ describe('SupplierFormComponent — modo EDITAR', () => {
   };
 
   beforeEach(async () => {
-    suppliersServiceSpy.getSupplier.mockReturnValue(of(makeSupplier()));
-    suppliersServiceSpy.updateSupplier.mockReturnValue(of(makeSupplier()));
+    suppliersServiceSpy.getOne.mockReturnValue(of(makeSupplier()));
+    suppliersServiceSpy.update.mockReturnValue(of(makeSupplier()));
 
     await TestBed.configureTestingModule({
       imports:   [SupplierFormComponent],
@@ -273,8 +273,8 @@ describe('SupplierFormComponent — modo EDITAR', () => {
     expect(component.supplierId).toBe(3);
   });
 
-  it('should call getSupplier on init with the correct id', () => {
-    expect(suppliersServiceSpy.getSupplier).toHaveBeenCalledWith(3);
+  it('should call getOne on init with the correct id', () => {
+    expect(suppliersServiceSpy.getOne).toHaveBeenCalledWith(3);
   });
 
   // ─── Pre-población del formulario ──────────────────────────────────────────
@@ -301,11 +301,11 @@ describe('SupplierFormComponent — modo EDITAR', () => {
 
   // ─── saveUpdate — payload correcto ────────────────────────────────────────
 
-  it('should call updateSupplier with the correct id and payload', () => {
+  it('should call update with the correct id and payload', () => {
     component.form.patchValue({ name: 'Distri Colombia Editada' });
     component.save();
 
-    expect(suppliersServiceSpy.updateSupplier).toHaveBeenCalledWith(
+    expect(suppliersServiceSpy.update).toHaveBeenCalledWith(
       3,
       expect.objectContaining({ name: 'Distri Colombia Editada' })
     );
@@ -321,8 +321,8 @@ describe('SupplierFormComponent — modo EDITAR', () => {
 
   // ─── Error del servidor al actualizar ─────────────────────────────────────
 
-  it('should set serverError when updateSupplier fails', () => {
-    suppliersServiceSpy.updateSupplier.mockReturnValue(
+  it('should set serverError when update fails', () => {
+    suppliersServiceSpy.update.mockReturnValue(
       throwError(() => ({ error: { detail: 'Email ya en uso.' } }))
     );
     component.save();
@@ -350,8 +350,8 @@ describe('SupplierFormComponent — modo EDITAR', () => {
 
   // ─── Error al cargar el proveedor ─────────────────────────────────────────
 
-  it('should set serverError when getSupplier fails on load', () => {
-    suppliersServiceSpy.getSupplier.mockReturnValue(
+  it('should set serverError when getOne fails on load', () => {
+    suppliersServiceSpy.getOne.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
     fixture   = TestBed.createComponent(SupplierFormComponent);

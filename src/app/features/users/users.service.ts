@@ -1,9 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable }            from 'rxjs';
+import { Injectable }   from '@angular/core';
+import { HttpParams }   from '@angular/common/http';
+import { Observable }   from 'rxjs';
 
-import { environment }              from '../../../environments/environment';
-import { User, UserPaginated }      from '../../core/models/user.model';
+import { environment }                        from '../../../environments/environment';
+import { User, UserPaginated }                from '../../core/models/user.model';
+import { GenericCrudService }                 from '../../shared/services/generic-crud.service';
 
 // Parámetros opcionales para el listado paginado.
 // Todos son opcionales — si no se envían, el backend devuelve todos los registros.
@@ -43,12 +44,12 @@ export interface UserUpdatePayload {
 }
 
 @Injectable({ providedIn: 'root' })
-export class UsersService {
+export class UsersService extends GenericCrudService<User, UserCreatePayload, UserUpdatePayload> {
 
-  private readonly http = inject(HttpClient);
-
-  // URL base para todos los endpoints de usuario
-  private readonly baseUrl = `${environment.apiUrl}/users`;
+  // getOne / create / update / remove vienen de GenericCrudService.
+  // Solo declaramos baseUrl (obligatorio por 'abstract') y getUsers
+  // (específico de este módulo — la lista tiene params propios).
+  protected readonly baseUrl = `${environment.apiUrl}/users`;
 
   // -------------------------------------------------------------------------
   // getUsers — trae una página de usuarios con filtros opcionales
@@ -74,31 +75,5 @@ export class UsersService {
     // El interceptor agrega el Bearer token automáticamente — no hay que hacerlo aquí.
     // El tipo genérico <UserPaginated> le dice a Angular qué forma tiene la respuesta.
     return this.http.get<UserPaginated>(this.baseUrl + '/', { params: httpParams });
-  }
-
-  // -------------------------------------------------------------------------
-  // getUser — trae un usuario por su document_id
-  // GET /api/v1/users/{document_id}
-  // -------------------------------------------------------------------------
-  getUser(documentId: string): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/${documentId}`);
-  }
-
-  // -------------------------------------------------------------------------
-  // createUser — crea un usuario nuevo
-  // POST /api/v1/users
-  // Devuelve el User creado tal como el backend lo guarda (con created_at, etc.)
-  // -------------------------------------------------------------------------
-  createUser(payload: UserCreatePayload): Observable<User> {
-    return this.http.post<User>(this.baseUrl + '/', payload);
-  }
-
-  // -------------------------------------------------------------------------
-  // updateUser — actualiza campos de un usuario existente
-  // PUT /api/v1/users/{document_id}
-  // Solo se envían los campos que se quieren cambiar (payload parcial).
-  // -------------------------------------------------------------------------
-  updateUser(documentId: string, payload: UserUpdatePayload): Observable<User> {
-    return this.http.put<User>(`${this.baseUrl}/${documentId}`, payload);
   }
 }

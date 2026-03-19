@@ -33,7 +33,7 @@ export class ProductDetailComponent {
   private readonly product$ = this.route.paramMap.pipe(
     switchMap(params => {
       const id = Number(params.get('id'));
-      return this.productsService.getProduct(id).pipe(
+      return this.productsService.getOne(id).pipe(
         catchError(() => of(null))
       );
     })

@@ -142,7 +142,7 @@ export class SuppliersListComponent implements OnInit {
         if (!confirmed) return;
 
         this.suppliersService
-          .updateSupplier(supplier.id, { is_active: false })
+          .update(supplier.id, { is_active: false })
           .subscribe({
             next: () => {
               this.snackbarService.show('Proveedor desactivado');

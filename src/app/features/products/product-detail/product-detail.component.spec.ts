@@ -31,7 +31,7 @@ describe('ProductDetailComponent', () => {
   let component: ProductDetailComponent;
 
   const productsServiceSpy = {
-    getProduct: vi.fn().mockReturnValue(of(makeProduct())),
+    getOne: vi.fn().mockReturnValue(of(makeProduct())),
   };
 
   // Mock de ActivatedRoute — el id del producto es un número en la URL como string
@@ -40,7 +40,7 @@ describe('ProductDetailComponent', () => {
   };
 
   beforeEach(async () => {
-    productsServiceSpy.getProduct.mockReturnValue(of(makeProduct()));
+    productsServiceSpy.getOne.mockReturnValue(of(makeProduct()));
 
     await TestBed.configureTestingModule({
       imports:   [ProductDetailComponent],
@@ -69,9 +69,9 @@ describe('ProductDetailComponent', () => {
 
   // ─── Llamada al servicio ──────────────────────────────────────────────────
 
-  it('should call getProduct with the numeric id from the URL', () => {
+  it('should call getOne with the numeric id from the URL', () => {
     // La URL tiene "42" como string; el componente convierte a Number(42)
-    expect(productsServiceSpy.getProduct).toHaveBeenCalledWith(42);
+    expect(productsServiceSpy.getOne).toHaveBeenCalledWith(42);
   });
 
   // ─── Estado después de recibir datos ────────────────────────────────────
@@ -132,7 +132,7 @@ describe('ProductDetailComponent', () => {
   });
 
   it('should NOT show the category badge when category is null', () => {
-    productsServiceSpy.getProduct.mockReturnValue(of(makeProduct({ category: null })));
+    productsServiceSpy.getOne.mockReturnValue(of(makeProduct({ category: null })));
     fixture   = TestBed.createComponent(ProductDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -152,7 +152,7 @@ describe('ProductDetailComponent', () => {
   });
 
   it('should show "Inactivo" badge for an inactive product', () => {
-    productsServiceSpy.getProduct.mockReturnValue(of(makeProduct({ is_active: false })));
+    productsServiceSpy.getOne.mockReturnValue(of(makeProduct({ is_active: false })));
     fixture   = TestBed.createComponent(ProductDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -173,7 +173,7 @@ describe('ProductDetailComponent', () => {
   });
 
   it('should show dash for null description', () => {
-    productsServiceSpy.getProduct.mockReturnValue(of(makeProduct({ description: null })));
+    productsServiceSpy.getOne.mockReturnValue(of(makeProduct({ description: null })));
     fixture   = TestBed.createComponent(ProductDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -186,9 +186,9 @@ describe('ProductDetailComponent', () => {
 
   // ─── Estado: no encontrado ────────────────────────────────────────────────
 
-  describe('when getProduct returns an error', () => {
+  describe('when getOne returns an error', () => {
     beforeEach(() => {
-      productsServiceSpy.getProduct.mockReturnValue(throwError(() => new Error('404 Not Found')));
+      productsServiceSpy.getOne.mockReturnValue(throwError(() => new Error('404 Not Found')));
       fixture   = TestBed.createComponent(ProductDetailComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
