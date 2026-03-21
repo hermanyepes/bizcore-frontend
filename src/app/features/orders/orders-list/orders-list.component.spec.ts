@@ -282,7 +282,7 @@ describe('OrdersListComponent', () => {
   });
 
   it('should display the sum of item subtotals as the order total', () => {
-    // makeOrderItem tiene subtotal=60000; formatPrice lo convierte a "$60.000"
+    // makeOrderItem tiene subtotal=60000; currencyCop lo convierte a "$60.000"
     const result = component.getOrderTotal(makeOrder());
     expect(result).toBe(60000);
   });
@@ -491,9 +491,4 @@ describe('OrdersListComponent', () => {
     expect(result).toContain('2026');
   });
 
-  it('should format price as Colombian peso string', () => {
-    const result = component.formatPrice(950000);
-    expect(result).toContain('950');
-    expect(result).toContain('$');
-  });
 });

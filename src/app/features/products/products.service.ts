@@ -1,9 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable }            from 'rxjs';
+import { Injectable }  from '@angular/core';
+import { HttpParams }  from '@angular/common/http';
+import { Observable }  from 'rxjs';
 
-import { environment }                  from '../../../environments/environment';
-import { Product, ProductPaginated }    from '../../core/models/product.model';
+import { environment }                        from '../../../environments/environment';
+import { Product, ProductPaginated }          from '../../core/models/product.model';
+import { GenericCrudService }                 from '../../shared/services/generic-crud.service';
 
 // ─── Categorías fijas del frontend ───────────────────────────────────────────
 // El backend acepta cualquier texto libre en `category`.
@@ -64,10 +65,10 @@ export interface ProductUpdatePayload {
 // ─── Servicio ─────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
-export class ProductsService {
+export class ProductsService extends GenericCrudService<Product, ProductCreatePayload, ProductUpdatePayload> {
 
-  private readonly http    = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/products`;
+  // getOne / create / update / remove vienen de GenericCrudService.
+  protected readonly baseUrl = `${environment.apiUrl}/products`;
 
   // ---------------------------------------------------------------------------
   // getProducts — lista paginada con filtros opcionales
@@ -86,31 +87,5 @@ export class ProductsService {
     }
 
     return this.http.get<ProductPaginated>(this.baseUrl + '/', { params: httpParams });
-  }
-
-  // ---------------------------------------------------------------------------
-  // getProduct — detalle de un producto por su id numérico
-  // GET /api/v1/products/{id}
-  // ---------------------------------------------------------------------------
-  getProduct(id: number): Observable<Product> {
-    return this.http.get<Product>(`${this.baseUrl}/${id}`);
-  }
-
-  // ---------------------------------------------------------------------------
-  // createProduct — registra un producto nuevo
-  // POST /api/v1/products
-  // Solo el Administrador puede crear (el backend valida el rol del token).
-  // ---------------------------------------------------------------------------
-  createProduct(payload: ProductCreatePayload): Observable<Product> {
-    return this.http.post<Product>(this.baseUrl + '/', payload);
-  }
-
-  // ---------------------------------------------------------------------------
-  // updateProduct — actualiza campos de un producto existente
-  // PUT /api/v1/products/{id}
-  // Payload parcial — solo los campos que cambiaron.
-  // ---------------------------------------------------------------------------
-  updateProduct(id: number, payload: ProductUpdatePayload): Observable<Product> {
-    return this.http.put<Product>(`${this.baseUrl}/${id}`, payload);
   }
 }

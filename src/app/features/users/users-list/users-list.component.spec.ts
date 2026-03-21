@@ -49,7 +49,7 @@ describe('UsersListComponent', () => {
   // `of()` es síncrono: el subscribe se ejecuta en el mismo instante, sin red real.
   const usersServiceSpy = {
     getUsers: vi.fn().mockReturnValue(of(makePaginated())),
-    getUser:  vi.fn(),
+    getOne:   vi.fn(),
   };
 
   beforeEach(async () => {

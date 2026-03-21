@@ -89,7 +89,7 @@ export class ProductFormComponent implements OnInit {
   private loadProduct(): void {
     this.isLoading.set(true);
 
-    this.productsService.getProduct(this.productId!).subscribe({
+    this.productsService.getOne(this.productId!).subscribe({
       next: (product) => {
         this.form.patchValue({
           name:        product.name,
@@ -134,7 +134,7 @@ export class ProductFormComponent implements OnInit {
       category:    v.category    || null,
     };
 
-    this.productsService.createProduct(payload).subscribe({
+    this.productsService.create(payload).subscribe({
       next:  (product) => {
         this.snackbarService.show('Producto creado');
         this.router.navigate(['/products', product.id]);
@@ -157,7 +157,7 @@ export class ProductFormComponent implements OnInit {
       is_active:   v.is_active   ?? null,
     };
 
-    this.productsService.updateProduct(this.productId!, payload).subscribe({
+    this.productsService.update(this.productId!, payload).subscribe({
       next:  () => {
         this.snackbarService.show('Producto actualizado');
         this.router.navigate(['/products', this.productId]);

@@ -129,7 +129,7 @@
                   <!-- Precio unitario — calculado en memoria, solo lectura -->
                   <div class="cell--price">
                     @if (getProductPrice($index) !== null) {
-                      {{ formatPrice(getProductPrice($index)!) }}
+                      {{ getProductPrice($index)! | currencyCop }}
                     } @else {
                       <span class="cell--muted">—</span>
                     }
@@ -138,7 +138,7 @@
                   <!-- Subtotal — precio × cantidad, calculado en tiempo real -->
                   <div class="cell--price">
                     @if (getSubtotal($index) !== null) {
-                      {{ formatPrice(getSubtotal($index)!) }}
+                      {{ getSubtotal($index)! | currencyCop }}
                     } @else {
                       <span class="cell--muted">—</span>
                     }
@@ -160,7 +160,7 @@
             <!-- Fila de total -->
             <div class="items-table__total">
               <span>TOTAL</span>
-              <span class="total-value">{{ formatPrice(getFormTotal()) }}</span>
+              <span class="total-value">{{ getFormTotal() | currencyCop }}</span>
             </div>
 
           </div>
@@ -188,15 +188,15 @@
               <div class="items-table__row items-table__row--readonly">
                 <span class="cell--name">{{ getProductName(item.product_id) }}</span>
                 <span class="cell--center">{{ item.quantity }}</span>
-                <span class="cell--price">{{ formatPrice(item.unit_price) }}</span>
-                <span class="cell--price">{{ formatPrice(item.subtotal) }}</span>
+                <span class="cell--price">{{ item.unit_price | currencyCop }}</span>
+                <span class="cell--price">{{ item.subtotal | currencyCop }}</span>
                 <span></span>
               </div>
             }
 
             <div class="items-table__total">
               <span>TOTAL</span>
-              <span class="total-value">{{ formatPrice(getLoadedOrderTotal()) }}</span>
+              <span class="total-value">{{ getLoadedOrderTotal() | currencyCop }}</span>
             </div>
           </div>
         </div>

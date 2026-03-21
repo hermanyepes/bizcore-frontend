@@ -104,6 +104,87 @@ describe('AuthService', () => {
     expect(user?.role).toBe('Administrador');
   });
 
+  // ─── refreshAccessToken ───────────────────────────────────────────────────
+
+  it('should return null when there is no refresh token', () => {
+    // localStorage vacío — no hay refresh_token que enviar
+    service = TestBed.inject(AuthService);
+
+    const result = service.refreshAccessToken();
+
+    expect(result).toBeNull();
+  });
+
+  it('should POST to /auth/refresh and save new tokens', () => {
+    // Sesión con refresh_token guardado
+    localStorage.setItem('bizcore_access',  validToken());
+    localStorage.setItem('bizcore_refresh', 'old-refresh-token');
+    service = TestBed.inject(AuthService);
+
+    const newAccess  = validToken();
+    const newRefresh = 'new-refresh-token';
+
+    // Suscribimos para activar el Observable
+    service.refreshAccessToken()!.subscribe();
+
+    // Verificamos que se hizo exactamente UN POST con el refresh_token correcto
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh`);
+    expect(req.request.body).toEqual({ refresh_token: 'old-refresh-token' });
+
+    // Respondemos con tokens nuevos
+    req.flush({ access_token: newAccess, refresh_token: newRefresh });
+
+    // Los tokens nuevos deben haber sido guardados
+    expect(localStorage.getItem('bizcore_access')).toBe(newAccess);
+    expect(localStorage.getItem('bizcore_refresh')).toBe(newRefresh);
+    expect(service.accessToken()).toBe(newAccess);
+  });
+
+  it('should share a single in-flight request when called twice simultaneously', () => {
+    // Este test prueba el fix del race condition:
+    // dos llamadas simultáneas a refreshAccessToken() deben producir un solo POST.
+    localStorage.setItem('bizcore_refresh', 'old-refresh-token');
+    service = TestBed.inject(AuthService);
+
+    const obs1 = service.refreshAccessToken();
+    const obs2 = service.refreshAccessToken(); // segunda llamada antes de que resuelva la primera
+
+    // Ambos deben ser el mismo Observable (misma referencia)
+    expect(obs1).toBe(obs2);
+
+    obs1!.subscribe();
+    obs2!.subscribe();
+
+    // expectOne falla si hay más de un request — verifica que solo se hizo UNO
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh`);
+    req.flush({ access_token: validToken(), refresh_token: 'new-refresh-token' });
+  });
+
+  it('should reset refresh flags after a failed refresh so future calls can retry', () => {
+    // Si el refresh falla, _isRefreshing debe volver a false
+    // para que el próximo 401 pueda intentar un refresh nuevo.
+    localStorage.setItem('bizcore_refresh', 'expired-refresh-token');
+    service = TestBed.inject(AuthService);
+
+    service.refreshAccessToken()!.subscribe({ error: () => {} });
+
+    // Simulamos error del backend (refresh_token revocado)
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/refresh`);
+    req.flush({ detail: 'Token inválido' }, { status: 401, statusText: 'Unauthorized' });
+
+    // Después del fallo, una segunda llamada debe crear un Observable nuevo (no el mismo)
+    // Si los flags no se limpiaron, devolvería el Observable muerto anterior
+    localStorage.setItem('bizcore_refresh', 'new-refresh-token');
+    const retryObs = service.refreshAccessToken();
+
+    expect(retryObs).not.toBeNull();
+
+    // Consumimos el request del reintento para que httpMock.verify() no se queje
+    retryObs!.subscribe({ error: () => {} });
+    const retryReq = httpMock.expectOne(`${environment.apiUrl}/auth/refresh`);
+    retryReq.flush({ access_token: validToken(), refresh_token: 'newest-token' });
+  });
+
   // ─── logout ───────────────────────────────────────────────────────────────
 
   it('should clear tokens and navigate to /login on logout', () => {

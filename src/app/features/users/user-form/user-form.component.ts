@@ -136,7 +136,7 @@ export class UserFormComponent implements OnInit {
   private loadUser(): void {
     this.isLoading.set(true);
 
-    this.usersService.getUser(this.documentId!).subscribe({
+    this.usersService.getOne(this.documentId!).subscribe({
       next: (user) => {
         // patchValue llena solo los campos que existen en el objeto pasado.
         // A diferencia de setValue, no exige que estén TODOS los campos —
@@ -196,7 +196,7 @@ export class UserFormComponent implements OnInit {
       password:      v.password!,
     };
 
-    this.usersService.createUser(payload).subscribe({
+    this.usersService.create(payload).subscribe({
       next:  (user) => {
         this.snackbarService.show('Usuario creado');
         this.router.navigate(['/users', user.document_id]);
@@ -223,7 +223,7 @@ export class UserFormComponent implements OnInit {
       password:  v.password  || null,
     };
 
-    this.usersService.updateUser(this.documentId!, payload).subscribe({
+    this.usersService.update(this.documentId!, payload).subscribe({
       next:  () => {
         this.snackbarService.show('Usuario actualizado');
         this.router.navigate(['/users', this.documentId]);

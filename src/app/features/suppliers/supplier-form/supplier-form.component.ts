@@ -88,7 +88,7 @@ export class SupplierFormComponent implements OnInit {
   private loadSupplier(): void {
     this.isLoading.set(true);
 
-    this.suppliersService.getSupplier(this.supplierId!).subscribe({
+    this.suppliersService.getOne(this.supplierId!).subscribe({
       next: (supplier) => {
         this.form.patchValue({
           name:          supplier.name,
@@ -134,7 +134,7 @@ export class SupplierFormComponent implements OnInit {
       address:       v.address       || null,
     };
 
-    this.suppliersService.createSupplier(payload).subscribe({
+    this.suppliersService.create(payload).subscribe({
       next:  () => {
         this.snackbarService.show('Proveedor creado');
         this.router.navigate(['/suppliers']);
@@ -157,7 +157,7 @@ export class SupplierFormComponent implements OnInit {
       is_active:     v.is_active     ?? null,
     };
 
-    this.suppliersService.updateSupplier(this.supplierId!, payload).subscribe({
+    this.suppliersService.update(this.supplierId!, payload).subscribe({
       next:  () => {
         this.snackbarService.show('Proveedor actualizado');
         this.router.navigate(['/suppliers']);

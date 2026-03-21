@@ -60,7 +60,7 @@
                 }
               </td>
               <!-- Precio en font-data (JetBrains Mono) según design guide -->
-              <td class="cell--price">{{ formatPrice(product.price) }}</td>
+              <td class="cell--price">{{ product.price | currencyCop }}</td>
               <td class="cell--mono">{{ product.stock }}</td>
               <td>
                 <span class="status-badge"

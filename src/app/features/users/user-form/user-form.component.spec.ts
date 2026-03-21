@@ -58,14 +58,14 @@ describe('UserFormComponent — modo CREAR', () => {
   };
 
   const usersServiceSpy = {
-    getUser:    vi.fn(),
-    createUser: vi.fn(),
-    updateUser: vi.fn(),
+    getOne:    vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
   };
 
   beforeEach(async () => {
     // Resetea spies antes de cada test para evitar contaminación entre tests
-    usersServiceSpy.createUser.mockReturnValue(of(makeUser()));
+    usersServiceSpy.create.mockReturnValue(of(makeUser()));
 
     await TestBed.configureTestingModule({
       imports:   [UserFormComponent],
@@ -154,17 +154,17 @@ describe('UserFormComponent — modo CREAR', () => {
 
   // ─── Llamada al servicio ────────────────────────────────────────────────────
 
-  it('should NOT call createUser if the form is invalid', () => {
+  it('should NOT call create if the form is invalid', () => {
     // El formulario vacío es inválido — save() debe hacer guardia y salir
     component.save();
-    expect(usersServiceSpy.createUser).not.toHaveBeenCalled();
+    expect(usersServiceSpy.create).not.toHaveBeenCalled();
   });
 
-  it('should call createUser with the correct payload on submit', () => {
+  it('should call create with the correct payload on submit', () => {
     fillCreateForm(component);
     component.save();
 
-    expect(usersServiceSpy.createUser).toHaveBeenCalledWith({
+    expect(usersServiceSpy.create).toHaveBeenCalledWith({
       document_id:   '1000000001',
       document_type: 'CC',
       email:         'juan@test.com',
@@ -176,12 +176,12 @@ describe('UserFormComponent — modo CREAR', () => {
     });
   });
 
-  it('should NOT call createUser a second time if isSaving is already true', () => {
+  it('should NOT call create a second time if isSaving is already true', () => {
     // Simula que el primer envío ya está en curso
     component['isSaving'].set(true);
     fillCreateForm(component);
     component.save();
-    expect(usersServiceSpy.createUser).not.toHaveBeenCalled();
+    expect(usersServiceSpy.create).not.toHaveBeenCalled();
   });
 
   // ─── Navegación ─────────────────────────────────────────────────────────────
@@ -197,7 +197,7 @@ describe('UserFormComponent — modo CREAR', () => {
   // ─── Manejo de errores ──────────────────────────────────────────────────────
 
   it('should display the server error message on API error', () => {
-    usersServiceSpy.createUser.mockReturnValue(
+    usersServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: { detail: 'El documento ya existe.' } }))
     );
 
@@ -211,7 +211,7 @@ describe('UserFormComponent — modo CREAR', () => {
   });
 
   it('should set isSaving back to false after a create API error', () => {
-    usersServiceSpy.createUser.mockReturnValue(
+    usersServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: { detail: 'Error' } }))
     );
 
@@ -239,14 +239,14 @@ describe('UserFormComponent — modo EDITAR', () => {
   };
 
   const usersServiceSpy = {
-    getUser:    vi.fn(),
-    createUser: vi.fn(),
-    updateUser: vi.fn(),
+    getOne:    vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
   };
 
   beforeEach(async () => {
-    usersServiceSpy.getUser.mockReturnValue(of(makeUser()));
-    usersServiceSpy.updateUser.mockReturnValue(of(makeUser()));
+    usersServiceSpy.getOne.mockReturnValue(of(makeUser()));
+    usersServiceSpy.update.mockReturnValue(of(makeUser()));
 
     await TestBed.configureTestingModule({
       imports:   [UserFormComponent],
@@ -283,8 +283,8 @@ describe('UserFormComponent — modo EDITAR', () => {
 
   // ─── Carga de datos ─────────────────────────────────────────────────────────
 
-  it('should call getUser with the id from the URL', () => {
-    expect(usersServiceSpy.getUser).toHaveBeenCalledWith('1000000001');
+  it('should call getOne with the id from the URL', () => {
+    expect(usersServiceSpy.getOne).toHaveBeenCalledWith('1000000001');
   });
 
   it('should patch full_name with the loaded user data', () => {
@@ -338,20 +338,20 @@ describe('UserFormComponent — modo EDITAR', () => {
 
   // ─── Llamada al servicio ────────────────────────────────────────────────────
 
-  it('should call updateUser with the correct document_id and payload', () => {
+  it('should call update with the correct document_id and payload', () => {
     // El form ya viene pre-poblado por patchValue en loadUser()
     component.save();
 
-    expect(usersServiceSpy.updateUser).toHaveBeenCalledWith(
+    expect(usersServiceSpy.update).toHaveBeenCalledWith(
       '1000000001',
       expect.objectContaining({ full_name: 'Juan Pérez', role: 'Administrador' })
     );
   });
 
-  it('should NOT call updateUser if isSaving is already true', () => {
+  it('should NOT call update if isSaving is already true', () => {
     component['isSaving'].set(true);
     component.save();
-    expect(usersServiceSpy.updateUser).not.toHaveBeenCalled();
+    expect(usersServiceSpy.update).not.toHaveBeenCalled();
   });
 
   // ─── Navegación ─────────────────────────────────────────────────────────────
@@ -365,7 +365,7 @@ describe('UserFormComponent — modo EDITAR', () => {
   // ─── Manejo de errores ──────────────────────────────────────────────────────
 
   it('should display the server error message on update API error', () => {
-    usersServiceSpy.updateUser.mockReturnValue(
+    usersServiceSpy.update.mockReturnValue(
       throwError(() => ({ error: { detail: 'Error de servidor.' } }))
     );
 
@@ -378,7 +378,7 @@ describe('UserFormComponent — modo EDITAR', () => {
   });
 
   it('should set isSaving back to false after an update API error', () => {
-    usersServiceSpy.updateUser.mockReturnValue(
+    usersServiceSpy.update.mockReturnValue(
       throwError(() => ({ error: { detail: 'Error' } }))
     );
 
@@ -390,7 +390,7 @@ describe('UserFormComponent — modo EDITAR', () => {
 
   it('should show a spinner while loading user data', () => {
     // Subject que nunca emite simula latencia de red infinita → isLoading = true
-    usersServiceSpy.getUser.mockReturnValue(new Subject<User>());
+    usersServiceSpy.getOne.mockReturnValue(new Subject<User>());
 
     // Recreamos el fixture para que ngOnInit llame al nuevo mock
     const newFixture = TestBed.createComponent(UserFormComponent);
@@ -400,8 +400,8 @@ describe('UserFormComponent — modo EDITAR', () => {
     expect(spinner).toBeTruthy();
   });
 
-  it('should show a server error if getUser fails on load', () => {
-    usersServiceSpy.getUser.mockReturnValue(
+  it('should show a server error if getOne fails on load', () => {
+    usersServiceSpy.getOne.mockReturnValue(
       throwError(() => new Error('500 Internal Server Error'))
     );
 

@@ -72,7 +72,7 @@ export class SupplierCreateModalComponent {
       address:       v.address       || null,
     };
 
-    this.suppliersService.createSupplier(payload).subscribe({
+    this.suppliersService.create(payload).subscribe({
       next: () => {
         this.saved.emit();
       },

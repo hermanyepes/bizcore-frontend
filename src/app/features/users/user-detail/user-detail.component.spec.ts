@@ -35,10 +35,10 @@ describe('UserDetailComponent', () => {
   let fixture:   ComponentFixture<UserDetailComponent>;
   let component: UserDetailComponent;
 
-  // Mock del servicio — solo getUser nos importa aquí
+  // Mock del servicio — solo getOne nos importa aquí
   const usersServiceSpy = {
-    getUser:  vi.fn().mockReturnValue(of(makeUser())),
-    getUsers: vi.fn(),
+    getOne:  vi.fn().mockReturnValue(of(makeUser())),
+    getOnes: vi.fn(),
   };
 
   // Mock de ActivatedRoute — expone paramMap como Observable síncrono.
@@ -53,7 +53,7 @@ describe('UserDetailComponent', () => {
 
   beforeEach(async () => {
     // Resetea el spy antes de cada test para evitar contaminación
-    usersServiceSpy.getUser.mockReturnValue(of(makeUser()));
+    usersServiceSpy.getOne.mockReturnValue(of(makeUser()));
 
     await TestBed.configureTestingModule({
       imports:   [UserDetailComponent],
@@ -86,9 +86,9 @@ describe('UserDetailComponent', () => {
 
   // ─── Llamada al servicio ──────────────────────────────────────────────────
 
-  it('should call getUser with the id from the URL', () => {
+  it('should call getOne with the id from the URL', () => {
     // Verifica que el switchMap leyó el id del paramMap y llamó al servicio
-    expect(usersServiceSpy.getUser).toHaveBeenCalledWith('1000000001');
+    expect(usersServiceSpy.getOne).toHaveBeenCalledWith('1000000001');
   });
 
   // ─── Estado después de recibir datos ────────────────────────────────────
@@ -156,7 +156,7 @@ describe('UserDetailComponent', () => {
   describe('when the user has role Empleado', () => {
     beforeEach(() => {
       // Cambiamos el mock y re-creamos el fixture para que el nuevo mock aplique
-      usersServiceSpy.getUser.mockReturnValue(of(makeUser({ role: 'Empleado' })));
+      usersServiceSpy.getOne.mockReturnValue(of(makeUser({ role: 'Empleado' })));
       fixture   = TestBed.createComponent(UserDetailComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -174,7 +174,7 @@ describe('UserDetailComponent', () => {
 
   describe('when the user is inactive', () => {
     beforeEach(() => {
-      usersServiceSpy.getUser.mockReturnValue(of(makeUser({ is_active: false })));
+      usersServiceSpy.getOne.mockReturnValue(of(makeUser({ is_active: false })));
       fixture   = TestBed.createComponent(UserDetailComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -192,11 +192,11 @@ describe('UserDetailComponent', () => {
 
   // ─── Estado: no encontrado ────────────────────────────────────────────────
 
-  describe('when getUser returns an error', () => {
+  describe('when getOne returns an error', () => {
     beforeEach(() => {
       // throwError() crea un Observable que falla inmediatamente.
       // El catchError del componente lo convierte en of(null) → isNotFound = true.
-      usersServiceSpy.getUser.mockReturnValue(throwError(() => new Error('404 Not Found')));
+      usersServiceSpy.getOne.mockReturnValue(throwError(() => new Error('404 Not Found')));
       fixture   = TestBed.createComponent(UserDetailComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();

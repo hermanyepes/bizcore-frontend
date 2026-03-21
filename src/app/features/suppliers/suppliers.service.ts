@@ -1,9 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable }            from 'rxjs';
+import { Injectable }  from '@angular/core';
+import { HttpParams }  from '@angular/common/http';
+import { Observable }  from 'rxjs';
 
-import { environment }                    from '../../../environments/environment';
-import { Supplier, SupplierPaginated }    from '../../core/models/supplier.model';
+import { environment }                          from '../../../environments/environment';
+import { Supplier, SupplierPaginated }          from '../../core/models/supplier.model';
+import { GenericCrudService }                   from '../../shared/services/generic-crud.service';
 
 // ─── Parámetros para el listado paginado ─────────────────────────────────────
 // El componente de lista construye este objeto y lo pasa a getSuppliers().
@@ -43,10 +44,10 @@ export interface SupplierUpdatePayload {
 // ─── Servicio ─────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
-export class SuppliersService {
+export class SuppliersService extends GenericCrudService<Supplier, SupplierCreatePayload, SupplierUpdatePayload> {
 
-  private readonly http    = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/suppliers`;
+  // getOne / create / update / remove vienen de GenericCrudService.
+  protected readonly baseUrl = `${environment.apiUrl}/suppliers`;
 
   // ---------------------------------------------------------------------------
   // getSuppliers — lista paginada con filtros opcionales
@@ -64,31 +65,5 @@ export class SuppliersService {
     }
 
     return this.http.get<SupplierPaginated>(this.baseUrl + '/', { params: httpParams });
-  }
-
-  // ---------------------------------------------------------------------------
-  // getSupplier — detalle de un proveedor por su id numérico
-  // GET /api/v1/suppliers/{id}
-  // ---------------------------------------------------------------------------
-  getSupplier(id: number): Observable<Supplier> {
-    return this.http.get<Supplier>(`${this.baseUrl}/${id}`);
-  }
-
-  // ---------------------------------------------------------------------------
-  // createSupplier — registra un proveedor nuevo
-  // POST /api/v1/suppliers
-  // Solo el Administrador puede crear (el backend valida el rol del token).
-  // ---------------------------------------------------------------------------
-  createSupplier(payload: SupplierCreatePayload): Observable<Supplier> {
-    return this.http.post<Supplier>(this.baseUrl + '/', payload);
-  }
-
-  // ---------------------------------------------------------------------------
-  // updateSupplier — actualiza campos de un proveedor existente
-  // PUT /api/v1/suppliers/{id}
-  // Payload parcial — solo los campos que cambiaron.
-  // ---------------------------------------------------------------------------
-  updateSupplier(id: number, payload: SupplierUpdatePayload): Observable<Supplier> {
-    return this.http.put<Supplier>(`${this.baseUrl}/${id}`, payload);
   }
 }

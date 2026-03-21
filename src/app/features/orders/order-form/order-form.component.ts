@@ -40,8 +40,9 @@ import { SuppliersService } from '../../suppliers/suppliers.service';
 import { ProductsService }  from '../../products/products.service';
 import { SnackbarService }  from '../../../core/services/snackbar.service';
 import { Order, OrderCreate, OrderStatus } from '../order.model';
-import { Supplier }  from '../../../core/models/supplier.model';
-import { Product }   from '../../../core/models/product.model';
+import { Supplier }         from '../../../core/models/supplier.model';
+import { Product }          from '../../../core/models/product.model';
+import { CurrencyCopPipe }  from '../../../shared/pipes/currency-cop.pipe';
 
 
 @Component({
@@ -51,7 +52,7 @@ import { Product }   from '../../../core/models/product.model';
   // getSubtotal, getFormTotal) que dependen de FormControl values dentro de
   // un FormArray. Los FormControls no son Signals, así que OnPush impediría
   // que el template se re-evaluara al seleccionar un producto o cambiar cantidad.
-  imports:   [ReactiveFormsModule, RouterLink],
+  imports:   [ReactiveFormsModule, RouterLink, CurrencyCopPipe],
   templateUrl:     './order-form.component.html',
   styleUrl:        './order-form.component.scss',
 })
@@ -345,12 +346,4 @@ export class OrderFormComponent implements OnInit {
     return order.items.reduce((acc, item) => acc + item.subtotal, 0);
   }
 
-  // Formatea un entero COP: 60000 → "$60.000"
-  formatPrice(value: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style:                 'currency',
-      currency:              'COP',
-      minimumFractionDigits: 0,
-    }).format(value);
-  }
 }

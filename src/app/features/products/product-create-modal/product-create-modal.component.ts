@@ -81,7 +81,7 @@ export class ProductCreateModalComponent {
       category:    v.category    || null,
     };
 
-    this.productsService.createProduct(payload).subscribe({
+    this.productsService.create(payload).subscribe({
       next: () => {
         // El padre cierra el modal, muestra el snackbar y recarga la lista
         this.saved.emit();

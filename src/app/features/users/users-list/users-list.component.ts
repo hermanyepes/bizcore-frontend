@@ -30,32 +30,32 @@ export class UsersListComponent {
   // Permite consultar form.dirty desde esta lista sin acoplar la lógica
   // de "¿puedo cerrar?" al ModalComponent ni al formulario hijo.
   // { static: false } porque vive dentro de un @if — no existe en el DOM
-  // hasta que showCreateModal() sea true.
+  // hasta que isCreateModalOpen() sea true.
   @ViewChild(UserCreateModalComponent)
   private createModalRef?: UserCreateModalComponent;
 
   // ── Modal de creación ─────────────────────────────────────────────────────
-  readonly showCreateModal = signal(false);
+  readonly isCreateModalOpen = signal(false);
 
   // Se ejecuta cuando el usuario intenta cerrar el modal (clic X o fondo).
   // Patrón close guard: pregunta antes de descartar si hay datos sin guardar.
   onCloseRequested(): void {
     if (!this.createModalRef?.form.dirty) {
       // Formulario vacío o sin cambios → cerrar sin preguntar
-      this.showCreateModal.set(false);
+      this.isCreateModalOpen.set(false);
       return;
     }
     // Formulario con datos → pedir confirmación antes de descartar
     this.confirmService
       .confirm('¿Descartar los cambios sin guardar?')
       .then(confirmed => {
-        if (confirmed) this.showCreateModal.set(false);
+        if (confirmed) this.isCreateModalOpen.set(false);
       });
   }
 
   // Se ejecuta cuando UserCreateModalComponent emite (saved).
   onUserCreated(): void {
-    this.showCreateModal.set(false);
+    this.isCreateModalOpen.set(false);
     this.params.update(p => ({ ...p, page: 1 }));
     this.snackbarService.show('Usuario creado');
   }

@@ -91,7 +91,7 @@
               <td class="cell--center">{{ order.items.length }}</td>
 
               <!-- Total calculado sumando los subtotales de cada ítem -->
-              <td class="cell--mono">{{ formatPrice(getOrderTotal(order)) }}</td>
+              <td class="cell--mono">{{ getOrderTotal(order) | currencyCop }}</td>
 
               <td class="cell--mono">{{ formatDate(order.created_at) }}</td>
 

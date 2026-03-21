@@ -1,7 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient }                            from '@angular/common/http';
 import { Router }                                from '@angular/router';
-import { tap }                                   from 'rxjs/operators';
+import { Observable }                            from 'rxjs';
+import { tap, shareReplay }                      from 'rxjs/operators';
 
 import { environment }    from '../../../environments/environment';
 import {
@@ -20,6 +21,12 @@ export class AuthService {
 
   private readonly http   = inject(HttpClient);
   private readonly router = inject(Router);
+
+  // --- Guardia anti-race-condition para el refresh ---
+  // Si dos requests 401 llegan al mismo tiempo, solo se hace UN POST a /auth/refresh.
+  // El segundo suscriptor se engancha al Observable ya en vuelo en lugar de crear otro.
+  private _isRefreshing   = false;
+  private refreshInFlight$: Observable<TokenResponse> | null = null;
 
   // --- Estado reactivo con Signals ---
   // Signal privado: solo este servicio puede cambiarlo
@@ -78,10 +85,17 @@ export class AuthService {
   }
 
   // -------------------------------------------------------------------------
-  // refreshAccessToken — usa el refresh_token para obtener un nuevo access_token
-  // Lo llama el interceptor automáticamente cuando recibe un 401
+  // refreshAccessToken — usa el refresh_token para obtener un nuevo access_token.
+  // Lo llama el interceptor automáticamente cuando recibe un 401.
+  //
+  // Patrón anti-race-condition:
+  //   - Si ya hay una petición de refresh en vuelo (_isRefreshing === true),
+  //     devolvemos el mismo Observable (refreshInFlight$) en lugar de crear uno nuevo.
+  //   - shareReplay(1) garantiza que cualquier suscriptor que llegue tarde
+  //     reciba el último resultado emitido sin relanzar el POST.
+  //   - Al completar (tap final), limpiamos los flags para la próxima vez.
   // -------------------------------------------------------------------------
-  refreshAccessToken() {
+  refreshAccessToken(): Observable<TokenResponse> | null {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!refreshToken) {
       // No hay refresh_token guardado — la sesión está muerta
@@ -89,13 +103,32 @@ export class AuthService {
       return null;
     }
 
+    // Si ya hay un refresh en vuelo, devolvemos ese mismo Observable.
+    // El interceptor se suscribe a él y recibirá el resultado cuando llegue,
+    // sin disparar un segundo POST al backend.
+    if (this._isRefreshing && this.refreshInFlight$) {
+      return this.refreshInFlight$;
+    }
+
     const body: RefreshRequest = { refresh_token: refreshToken };
 
-    return this.http
+    this._isRefreshing = true;
+    this.refreshInFlight$ = this.http
       .post<TokenResponse>(`${environment.apiUrl}/auth/refresh`, body)
       .pipe(
-        tap(response => this.saveTokens(response))
+        // Guardamos los tokens nuevos tan pronto llegue la respuesta
+        tap(response => this.saveTokens(response)),
+        // Limpiamos los flags al terminar (tanto en éxito como en error)
+        tap({
+          next:  () => { this._isRefreshing = false; this.refreshInFlight$ = null; },
+          error: () => { this._isRefreshing = false; this.refreshInFlight$ = null; },
+        }),
+        // shareReplay(1): comparte esta única ejecución entre todos los suscriptores.
+        // Si el interceptor se suscribe dos veces, ambos reciben el mismo resultado.
+        shareReplay(1),
       );
+
+    return this.refreshInFlight$;
   }
 
   // -------------------------------------------------------------------------

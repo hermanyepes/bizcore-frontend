@@ -26,9 +26,9 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
 // ─── Mocks compartidos ────────────────────────────────────────────────────────
 
 const productsServiceSpy = {
-  getProduct:    vi.fn().mockReturnValue(of(makeProduct())),
-  createProduct: vi.fn().mockReturnValue(of(makeProduct())),
-  updateProduct: vi.fn().mockReturnValue(of(makeProduct())),
+  getOne:    vi.fn().mockReturnValue(of(makeProduct())),
+  create: vi.fn().mockReturnValue(of(makeProduct())),
+  update: vi.fn().mockReturnValue(of(makeProduct())),
 };
 
 // ─── Modo CREAR — /products/new (paramMap sin 'id') ──────────────────────────
@@ -44,7 +44,7 @@ describe('ProductFormComponent — modo CREAR', () => {
   };
 
   beforeEach(async () => {
-    productsServiceSpy.createProduct.mockReturnValue(of(makeProduct()));
+    productsServiceSpy.create.mockReturnValue(of(makeProduct()));
 
     await TestBed.configureTestingModule({
       imports:   [ProductFormComponent],
@@ -74,8 +74,8 @@ describe('ProductFormComponent — modo CREAR', () => {
     expect(component.productId).toBeNull();
   });
 
-  it('should NOT call getProduct on init in create mode', () => {
-    expect(productsServiceSpy.getProduct).not.toHaveBeenCalled();
+  it('should NOT call getOne on init in create mode', () => {
+    expect(productsServiceSpy.getOne).not.toHaveBeenCalled();
   });
 
   // ─── Validación del formulario ────────────────────────────────────────────
@@ -119,21 +119,21 @@ describe('ProductFormComponent — modo CREAR', () => {
 
   // ─── save() — validaciones de guarda ─────────────────────────────────────
 
-  it('should NOT call createProduct if form is invalid', () => {
+  it('should NOT call create if form is invalid', () => {
     component.save();
-    expect(productsServiceSpy.createProduct).not.toHaveBeenCalled();
+    expect(productsServiceSpy.create).not.toHaveBeenCalled();
   });
 
-  it('should NOT call createProduct if isSaving is true', () => {
+  it('should NOT call create if isSaving is true', () => {
     component.form.patchValue({ name: 'Café', price: 5000 });
     component.isSaving.set(true);
     component.save();
-    expect(productsServiceSpy.createProduct).not.toHaveBeenCalled();
+    expect(productsServiceSpy.create).not.toHaveBeenCalled();
   });
 
   // ─── saveCreate — llamada al servicio ────────────────────────────────────
 
-  it('should call createProduct with the correct payload', () => {
+  it('should call create with the correct payload', () => {
     component.form.patchValue({
       name:        'Café Premium',
       description: 'Descripción test',
@@ -142,7 +142,7 @@ describe('ProductFormComponent — modo CREAR', () => {
     });
     component.save();
 
-    expect(productsServiceSpy.createProduct).toHaveBeenCalledWith({
+    expect(productsServiceSpy.create).toHaveBeenCalledWith({
       name:        'Café Premium',
       description: 'Descripción test',
       price:       15000,
@@ -154,7 +154,7 @@ describe('ProductFormComponent — modo CREAR', () => {
     component.form.patchValue({ name: 'Café', price: 5000, description: '' });
     component.save();
 
-    expect(productsServiceSpy.createProduct).toHaveBeenCalledWith(
+    expect(productsServiceSpy.create).toHaveBeenCalledWith(
       expect.objectContaining({ description: null })
     );
   });
@@ -163,7 +163,7 @@ describe('ProductFormComponent — modo CREAR', () => {
     component.form.patchValue({ name: 'Café', price: 5000, category: null });
     component.save();
 
-    expect(productsServiceSpy.createProduct).toHaveBeenCalledWith(
+    expect(productsServiceSpy.create).toHaveBeenCalledWith(
       expect.objectContaining({ category: null })
     );
   });
@@ -176,8 +176,8 @@ describe('ProductFormComponent — modo CREAR', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/products', 42]);
   });
 
-  it('should set serverError when createProduct fails', () => {
-    productsServiceSpy.createProduct.mockReturnValue(
+  it('should set serverError when create fails', () => {
+    productsServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: { detail: 'Error de prueba' } }))
     );
     component.form.patchValue({ name: 'Café', price: 5000 });
@@ -188,7 +188,7 @@ describe('ProductFormComponent — modo CREAR', () => {
   });
 
   it('should show fallback error message when detail is missing', () => {
-    productsServiceSpy.createProduct.mockReturnValue(
+    productsServiceSpy.create.mockReturnValue(
       throwError(() => ({ error: {} }))
     );
     component.form.patchValue({ name: 'Café', price: 5000 });
@@ -234,8 +234,8 @@ describe('ProductFormComponent — modo EDITAR', () => {
   };
 
   beforeEach(async () => {
-    productsServiceSpy.getProduct.mockReturnValue(of(makeProduct()));
-    productsServiceSpy.updateProduct.mockReturnValue(of(makeProduct()));
+    productsServiceSpy.getOne.mockReturnValue(of(makeProduct()));
+    productsServiceSpy.update.mockReturnValue(of(makeProduct()));
 
     await TestBed.configureTestingModule({
       imports:   [ProductFormComponent],
@@ -265,8 +265,8 @@ describe('ProductFormComponent — modo EDITAR', () => {
     expect(component.productId).toBe(42);
   });
 
-  it('should call getProduct on init with the correct id', () => {
-    expect(productsServiceSpy.getProduct).toHaveBeenCalledWith(42);
+  it('should call getOne on init with the correct id', () => {
+    expect(productsServiceSpy.getOne).toHaveBeenCalledWith(42);
   });
 
   // ─── Pre-población del formulario ─────────────────────────────────────────
@@ -294,11 +294,11 @@ describe('ProductFormComponent — modo EDITAR', () => {
 
   // ─── saveUpdate — llamada al servicio ────────────────────────────────────
 
-  it('should call updateProduct with the correct payload', () => {
+  it('should call update with the correct payload', () => {
     component.form.patchValue({ name: 'Café Editado', price: 18000 });
     component.save();
 
-    expect(productsServiceSpy.updateProduct).toHaveBeenCalledWith(
+    expect(productsServiceSpy.update).toHaveBeenCalledWith(
       42,
       expect.objectContaining({ name: 'Café Editado', price: 18000 })
     );
@@ -307,7 +307,7 @@ describe('ProductFormComponent — modo EDITAR', () => {
   it('should NOT include stock in the update payload', () => {
     component.save();
 
-    const call = productsServiceSpy.updateProduct.mock.calls[0][1];
+    const call = productsServiceSpy.update.mock.calls[0][1];
     expect(call).not.toHaveProperty('stock');
   });
 
@@ -317,8 +317,8 @@ describe('ProductFormComponent — modo EDITAR', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/products', 42]);
   });
 
-  it('should set serverError when updateProduct fails', () => {
-    productsServiceSpy.updateProduct.mockReturnValue(
+  it('should set serverError when update fails', () => {
+    productsServiceSpy.update.mockReturnValue(
       throwError(() => ({ error: { detail: 'Error de actualización' } }))
     );
     component.save();
@@ -345,8 +345,8 @@ describe('ProductFormComponent — modo EDITAR', () => {
 
   // ─── Error al cargar el producto ─────────────────────────────────────────
 
-  it('should set serverError when getProduct fails on load', async () => {
-    productsServiceSpy.getProduct.mockReturnValue(
+  it('should set serverError when getOne fails on load', async () => {
+    productsServiceSpy.getOne.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
     fixture   = TestBed.createComponent(ProductFormComponent);
