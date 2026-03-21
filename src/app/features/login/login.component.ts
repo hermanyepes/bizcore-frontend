@@ -1,4 +1,5 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router }                            from '@angular/router';
 
@@ -16,9 +17,12 @@ import { AuthService } from '../../core/auth/auth.service';
 export class LoginComponent {
 
   // Inyecciones — dependencias que este componente necesita
-  private readonly fb      = inject(FormBuilder); // fábrica de formularios reactivos
-  private readonly auth    = inject(AuthService);
-  private readonly router  = inject(Router);
+  private readonly fb         = inject(FormBuilder); // fábrica de formularios reactivos
+  private readonly auth       = inject(AuthService);
+  private readonly router     = inject(Router);
+  // DestroyRef: referencia al ciclo de vida del componente — usada por takeUntilDestroyed
+  // para cancelar el Observable de login si el usuario navega antes de que resuelva
+  private readonly destroyRef = inject(DestroyRef);
 
   // -----------------------------------------------------------------------
   // El formulario reactivo — definido completamente en TypeScript
@@ -85,25 +89,28 @@ export class LoginComponent {
     const credentials = this.form.value as { email: string; password: string };
 
     // Llamamos al AuthService — él retorna un Observable
-    // subscribe() es donde realmente se ejecuta la petición HTTP
-    this.auth.login(credentials).subscribe({
-      // next: se ejecuta cuando el backend responde con éxito (200 OK)
-      next: () => {
-        this.isLoading.set(false);
-        // Redirigimos al dashboard — el guard de las rutas internas verificará el token
-        this.router.navigate(['/dashboard']);
-      },
-      // error: se ejecuta si el backend responde con error (401, 422, 500) o sin red
-      error: (err) => {
-        this.isLoading.set(false);
-        // 401 = credenciales incorrectas, cualquier otro = problema inesperado
-        if (err.status === 401) {
-          this.errorMessage.set('Correo o contraseña incorrectos.');
-        } else {
-          this.errorMessage.set('Error al conectar con el servidor. Intenta de nuevo.');
-        }
-      },
-    });
+    // takeUntilDestroyed cancela la suscripción si el componente se destruye antes de que resuelva
+    // (evita actualizar un componente que ya no existe si el usuario navega durante el login)
+    this.auth.login(credentials)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        // next: se ejecuta cuando el backend responde con éxito (200 OK)
+        next: () => {
+          this.isLoading.set(false);
+          // Redirigimos al dashboard — el guard de las rutas internas verificará el token
+          this.router.navigate(['/dashboard']);
+        },
+        // error: se ejecuta si el backend responde con error (401, 422, 500) o sin red
+        error: (err) => {
+          this.isLoading.set(false);
+          // 401 = credenciales incorrectas, cualquier otro = problema inesperado
+          if (err.status === 401) {
+            this.errorMessage.set('Correo o contraseña incorrectos.');
+          } else {
+            this.errorMessage.set('Error al conectar con el servidor. Intenta de nuevo.');
+          }
+        },
+      });
   }
 
   // Alterna visibilidad de la contraseña entre texto plano y puntos
