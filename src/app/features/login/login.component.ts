@@ -57,7 +57,7 @@ export class LoginComponent {
   readonly errorMessage = signal<string | null>(null);
 
   // true = mostrar contraseña como texto, false = ocultar con puntos
-  readonly showPassword = signal(false);
+  readonly isPasswordVisible = signal(false);
 
   // -----------------------------------------------------------------------
   // Getters de conveniencia — acceden al FormControl de cada campo
@@ -115,6 +115,6 @@ export class LoginComponent {
 
   // Alterna visibilidad de la contraseña entre texto plano y puntos
   togglePassword(): void {
-    this.showPassword.update(v => !v);
+    this.isPasswordVisible.update(v => !v);
   }
 }

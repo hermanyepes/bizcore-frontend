@@ -152,11 +152,11 @@ describe('LoginComponent', () => {
 
   // ─── togglePassword ───────────────────────────────────────────────────────
 
-  it('should toggle showPassword signal', () => {
-    expect(component.showPassword()).toBe(false);
+  it('should toggle isPasswordVisible signal', () => {
+    expect(component.isPasswordVisible()).toBe(false);
     component.togglePassword();
-    expect(component.showPassword()).toBe(true);
+    expect(component.isPasswordVisible()).toBe(true);
     component.togglePassword();
-    expect(component.showPassword()).toBe(false);
+    expect(component.isPasswordVisible()).toBe(false);
   });
 });

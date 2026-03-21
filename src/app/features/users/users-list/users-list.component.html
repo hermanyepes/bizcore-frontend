@@ -12,7 +12,7 @@
       </span>
     </div>
     <!-- Botón para crear un nuevo usuario — abre el modal de creación -->
-    <button class="users-list__btn-new" (click)="showCreateModal.set(true)">
+    <button class="users-list__btn-new" (click)="isCreateModalOpen.set(true)">
       + Nuevo usuario
     </button>
   </div>
@@ -107,14 +107,14 @@
 </div>
 
 <!-- ── Modal de creación ──────────────────────────────────────────────────
-  @if renderiza el modal SOLO cuando showCreateModal es true.
-  Cuando se cierra (showCreateModal = false), Angular destruye el componente
+  @if renderiza el modal SOLO cuando isCreateModalOpen es true.
+  Cuando se cierra (isCreateModalOpen = false), Angular destruye el componente
   y el formulario queda limpio para la próxima apertura — sin restos de datos.
 
   (close): el usuario presionó X o el fondo oscuro → cerramos sin guardar
   (saved): el form guardó exitosamente → onUserCreated() cierra + recarga + snackbar
 -->
-@if (showCreateModal()) {
+@if (isCreateModalOpen()) {
   <app-modal title="Nuevo usuario" (closeRequested)="onCloseRequested()">
     <app-user-create-modal (saved)="onUserCreated()" />
   </app-modal>
