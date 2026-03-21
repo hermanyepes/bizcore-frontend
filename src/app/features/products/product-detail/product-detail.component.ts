@@ -7,12 +7,13 @@ import { of }                           from 'rxjs';
 
 import { ProductsService } from '../products.service';
 import { Product }         from '../../../core/models/product.model';
+import { CurrencyCopPipe } from '../../../shared/pipes/currency-cop.pipe';
 
 @Component({
   selector:    'app-product-detail',
   standalone:  true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:     [RouterLink, SlicePipe, UpperCasePipe, DatePipe],
+  imports:     [RouterLink, SlicePipe, UpperCasePipe, DatePipe, CurrencyCopPipe],
   templateUrl: './product-detail.component.html',
   styleUrl:    './product-detail.component.scss',
 })
@@ -48,13 +49,4 @@ export class ProductDetailComponent {
   readonly isLoading  = computed(() => this.product() === undefined);
   readonly isNotFound = computed(() => this.product() === null);
 
-  // Formateador de precio COP — mismo que en ProductsListComponent
-  formatPrice(price: number): string {
-    return price.toLocaleString('es-CO', {
-      style:                 'currency',
-      currency:              'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  }
 }

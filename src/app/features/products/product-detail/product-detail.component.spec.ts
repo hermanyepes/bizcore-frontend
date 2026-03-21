@@ -116,13 +116,6 @@ describe('ProductDetailComponent', () => {
     expect(values[3].textContent?.trim()).toBe('Bebidas');
   });
 
-  // ─── formatPrice ─────────────────────────────────────────────────────────
-
-  it('should format price correctly', () => {
-    expect(component.formatPrice(15000)).toContain('15.000');
-    expect(component.formatPrice(2500000)).toContain('2.500.000');
-  });
-
   // ─── Category badge ───────────────────────────────────────────────────────
 
   it('should show the category badge when category is set', () => {

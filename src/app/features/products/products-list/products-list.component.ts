@@ -11,12 +11,13 @@ import { ModalComponent }                                          from '../../.
 import { ProductCreateModalComponent }                             from '../product-create-modal/product-create-modal.component';
 import { SnackbarService }                                         from '../../../core/services/snackbar.service';
 import { ConfirmDialogService }                                    from '../../../core/services/confirm-dialog.service';
+import { CurrencyCopPipe }                                         from '../../../shared/pipes/currency-cop.pipe';
 
 @Component({
   selector:    'app-products-list',
   standalone:  true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:     [RouterLink, PaginatorComponent, ModalComponent, ProductCreateModalComponent],
+  imports:     [RouterLink, PaginatorComponent, ModalComponent, ProductCreateModalComponent, CurrencyCopPipe],
   templateUrl: './products-list.component.html',
   styleUrl:    './products-list.component.scss',
 })
@@ -96,16 +97,4 @@ export class ProductsListComponent {
     this.params.update(p => ({ ...p, page: 1, is_active }));
   }
 
-  // ─── Formateador de precio COP ────────────────────────────────────────────
-  // Convierte 15000 → "$15.000"
-  // Locale 'es-CO': separador de miles = punto, sin decimales.
-  // Se llama desde el template para cada fila de la tabla.
-  formatPrice(price: number): string {
-    return price.toLocaleString('es-CO', {
-      style:                 'currency',
-      currency:              'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  }
 }

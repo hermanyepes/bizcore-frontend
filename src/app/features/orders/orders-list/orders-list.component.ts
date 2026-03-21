@@ -29,6 +29,7 @@ import { Supplier }                       from '../../../core/models/supplier.mo
 import { SnackbarService }                from '../../../core/services/snackbar.service';
 import { ConfirmDialogService }           from '../../../core/services/confirm-dialog.service';
 import { PaginatorComponent }            from '../../../shared/paginator/paginator.component';
+import { CurrencyCopPipe }               from '../../../shared/pipes/currency-cop.pipe';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
 // Tres estados posibles para la pantalla: cargando, datos listos, o error.
@@ -38,7 +39,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
   selector:        'app-orders-list',
   standalone:      true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports:         [RouterLink, PaginatorComponent],
+  imports:         [RouterLink, PaginatorComponent, CurrencyCopPipe],
   templateUrl:     './orders-list.component.html',
   styleUrl:        './orders-list.component.scss',
 })
@@ -188,15 +189,6 @@ export class OrdersListComponent implements OnInit {
   // El backend guarda cada subtotal — solo sumamos.
   getOrderTotal(order: Order): number {
     return order.items.reduce((acc, item) => acc + item.subtotal, 0);
-  }
-
-  // Formatea un número en pesos colombianos: 950000 → "$950.000"
-  formatPrice(value: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style:                 'currency',
-      currency:              'COP',
-      minimumFractionDigits: 0,
-    }).format(value);
   }
 
   // Formatea la fecha ISO a formato legible: "12/03/2026"

@@ -118,13 +118,6 @@ describe('ProductsListComponent', () => {
     expect(priceEl.textContent?.trim()).toContain('15.000');
   });
 
-  // ─── formatPrice ──────────────────────────────────────────────────────────
-
-  it('should format price with COP locale', () => {
-    expect(component.formatPrice(15000)).toContain('15.000');
-    expect(component.formatPrice(1500000)).toContain('1.500.000');
-  });
-
   // ─── Category badge ───────────────────────────────────────────────────────
 
   it('should show category badge when product has a category', () => {

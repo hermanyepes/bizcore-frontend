@@ -73,7 +73,7 @@
         <div class="field-group">
           <span class="field-label">Precio</span>
           <span class="field-value mono field-value--price">
-            {{ formatPrice(product()!.price) }}
+            {{ product()!.price | currencyCop }}
           </span>
         </div>
 
