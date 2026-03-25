@@ -10,6 +10,7 @@ import { provideHttpClient, withInterceptors }      from '@angular/common/http';
 import { routes }          from './app.routes';
 import { authInterceptor }    from './core/auth/auth.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { errorInterceptor }   from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,11 +21,12 @@ export const appConfig: ApplicationConfig = {
     // ruta directamente como @Input() en los componentes (Angular 16+)
     provideRouter(routes, withComponentInputBinding()),
 
-    // Cliente HTTP con el interceptor de auth registrado.
+    // Cliente HTTP con la cadena de interceptores registrada.
     // withInterceptors([]) acepta interceptores funcionales (Angular 17+).
-    // El interceptor adjunta automáticamente el Bearer token a cada request.
-    // El orden importa: loadingInterceptor primero para que capture TODAS
-    // las peticiones incluyendo el reintento de refresh del authInterceptor.
-    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor])),
+    // El orden importa — los errores recorren la cadena en orden INVERSO:
+    //   loading  → primero en salida, último en llegada (envuelve todo)
+    //   error    → recibe los errores que auth no resolvió y muestra snackbar
+    //   auth     → recibe los errores del servidor primero; maneja el 401
+    provideHttpClient(withInterceptors([loadingInterceptor, errorInterceptor, authInterceptor])),
   ],
 };
