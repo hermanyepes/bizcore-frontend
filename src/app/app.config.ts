@@ -11,6 +11,7 @@ import { routes }          from './app.routes';
 import { authInterceptor }    from './core/auth/auth.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 import { errorInterceptor }   from './core/interceptors/error.interceptor';
+import { cacheInterceptor }   from './core/interceptors/cache.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,6 +28,7 @@ export const appConfig: ApplicationConfig = {
     //   loading  → primero en salida, último en llegada (envuelve todo)
     //   error    → recibe los errores que auth no resolvió y muestra snackbar
     //   auth     → recibe los errores del servidor primero; maneja el 401
-    provideHttpClient(withInterceptors([loadingInterceptor, errorInterceptor, authInterceptor])),
+    // cache va primero: si hay hit, los demás interceptores no se ejecutan.
+    provideHttpClient(withInterceptors([cacheInterceptor, loadingInterceptor, errorInterceptor, authInterceptor])),
   ],
 };
