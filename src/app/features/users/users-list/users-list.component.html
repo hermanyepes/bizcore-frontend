@@ -11,10 +11,12 @@
         }
       </span>
     </div>
-    <!-- Botón para crear un nuevo usuario — abre el modal de creación -->
-    <button class="users-list__btn-new" (click)="isCreateModalOpen.set(true)">
-      + Nuevo usuario
-    </button>
+    <!-- Visible solo para roles con permiso de gestión de usuarios -->
+    @if (['Superadmin', 'Administrador'].includes(currentUser()?.role ?? '')) {
+      <button class="users-list__btn-new" (click)="isCreateModalOpen.set(true)">
+        + Nuevo usuario
+      </button>
+    }
   </div>
 
   <!-- Estado: cargando -->

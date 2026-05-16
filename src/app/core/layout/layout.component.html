@@ -29,16 +29,18 @@
         <span class="sidebar__text">Dashboard</span>
       </a>
 
-      <a
-        routerLink="/users"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Usuarios"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">👤</span>
-        <span class="sidebar__text">Usuarios</span>
-      </a>
+      @if (['Superadmin', 'Administrador'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/users"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Usuarios"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">👤</span>
+          <span class="sidebar__text">Usuarios</span>
+        </a>
+      }
 
       <a
         routerLink="/products"
@@ -51,27 +53,31 @@
         <span class="sidebar__text">Productos</span>
       </a>
 
-      <a
-        routerLink="/inventory"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Inventario"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">🗃️</span>
-        <span class="sidebar__text">Inventario</span>
-      </a>
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/inventory"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Inventario"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">🗃️</span>
+          <span class="sidebar__text">Inventario</span>
+        </a>
+      }
 
-      <a
-        routerLink="/suppliers"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Proveedores"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">🚚</span>
-        <span class="sidebar__text">Proveedores</span>
-      </a>
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/suppliers"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Proveedores"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">🚚</span>
+          <span class="sidebar__text">Proveedores</span>
+        </a>
+      }
 
       <a
         routerLink="/orders"
