@@ -57,7 +57,9 @@
               <td class="users-list__cell">
                 <span
                   class="users-list__badge"
+                  [class.users-list__badge--superadmin]="user.role === 'Superadmin'"
                   [class.users-list__badge--admin]="user.role === 'Administrador'"
+                  [class.users-list__badge--supervisor]="user.role === 'Supervisor'"
                   [class.users-list__badge--employee]="user.role === 'Empleado'"
                 >
                   {{ user.role }}

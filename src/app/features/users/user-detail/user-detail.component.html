@@ -54,7 +54,9 @@
           <div class="profile-badges">
             <!-- Badge de rol -->
             <span class="badge"
+                  [class.badge--superadmin]="user()!.role === 'Superadmin'"
                   [class.badge--admin]="user()!.role === 'Administrador'"
+                  [class.badge--supervisor]="user()!.role === 'Supervisor'"
                   [class.badge--empleado]="user()!.role === 'Empleado'">
               {{ user()!.role }}
             </span>

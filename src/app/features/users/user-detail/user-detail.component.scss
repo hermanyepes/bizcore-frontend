@@ -157,10 +157,22 @@
   border-radius: 999px;
   border:        1px solid transparent;
 
+  &--superadmin {
+    color:            #A855F7;
+    background-color: rgba(168, 85, 247, 0.12);
+    border-color:     #A855F7;
+  }
+
   &--admin {
     color:            var(--color-accent);
     background-color: var(--color-accent-dim);
     border-color:     var(--color-accent);
+  }
+
+  &--supervisor {
+    color:            #06B6D4;
+    background-color: rgba(6, 182, 212, 0.12);
+    border-color:     #06B6D4;
   }
 
   &--empleado {
