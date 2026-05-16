@@ -73,7 +73,7 @@ export class UserCreateModalComponent implements OnInit {
     city:      new FormControl<string | null>(null, [Validators.maxLength(50)]),
 
     // ── Acceso ───────────────────────────────────────────────────────────
-    role:     new FormControl<'Administrador' | 'Empleado'>('Empleado', [Validators.required]),
+    role:     new FormControl<'Administrador' | 'Supervisor' | 'Empleado'>('Empleado', [Validators.required]),
     // password sin validators en la declaración — se agregan en ngOnInit
     // para seguir el mismo patrón que UserFormComponent
     password: new FormControl(''),

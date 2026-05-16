@@ -12,7 +12,7 @@ export interface UserListParams {
   page?:      number;
   page_size?: number;
   is_active?: boolean;
-  role?:      'Administrador' | 'Empleado';
+  role?:      'Administrador' | 'Supervisor' | 'Empleado';
 }
 
 // Datos necesarios para crear un usuario nuevo.
@@ -25,7 +25,7 @@ export interface UserCreatePayload {
   phone?:        string | null;
   email:         string;
   city?:         string | null;
-  role:          'Administrador' | 'Empleado';
+  role:          'Administrador' | 'Supervisor' | 'Empleado';
   password:      string;
 }
 
@@ -38,7 +38,7 @@ export interface UserUpdatePayload {
   full_name?: string | null;
   phone?:     string | null;
   city?:      string | null;
-  role?:      'Administrador' | 'Empleado' | null;
+  role?:      'Administrador' | 'Supervisor' | 'Empleado' | null;
   password?:  string | null;
   is_active?: boolean | null;
 }
