@@ -6,7 +6,7 @@
     <div class="page-header__row">
       <h1 class="page-title">Detalle de usuario</h1>
       <!-- Botones: solo visibles cuando los datos ya cargaron -->
-      @if (!isLoading() && !isNotFound()) {
+      @if (!isLoading() && !isNotFound() && canEdit()) {
         <a [routerLink]="['/users', user()!.document_id, 'edit']" class="btn-primary">
           Editar
         </a>

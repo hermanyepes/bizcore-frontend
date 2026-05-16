@@ -7,6 +7,7 @@ import { UsersService, UserCreatePayload,
          UserUpdatePayload }                           from '../users.service';
 import { AuthService }                                from '../../../core/auth/auth.service';
 import { SnackbarService }                            from '../../../core/services/snackbar.service';
+import { canManageUser }                              from '../../../shared/utils/role-hierarchy';
 
 // ---------------------------------------------------------------------------
 // UserFormComponent
@@ -40,8 +41,9 @@ export class UserFormComponent implements OnInit {
   private readonly authService     = inject(AuthService);
   private readonly snackbarService = inject(SnackbarService);
 
-  // Superadmin puede editar el email en modo EDITAR
-  readonly isSuperadmin = computed(() => this.authService.currentUser()?.role === 'Superadmin');
+  readonly isSuperadmin  = computed(() => this.authService.currentUser()?.role === 'Superadmin');
+  // sub del JWT es document_id — coincide con la URL cuando el admin edita su propio perfil
+  readonly isEditingSelf = computed(() => this.authService.currentUser()?.sub === this.documentId);
 
   // ---------------------------------------------------------------------------
   // Detección de modo
@@ -70,6 +72,26 @@ export class UserFormComponent implements OnInit {
   readonly isPasswordVisible  = signal(false);
 
   togglePassword(): void { this.isPasswordVisible.update(v => !v); }
+
+  onEmailInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const lower = input.value.toLowerCase();
+    if (input.value !== lower) {
+      const pos = input.selectionStart ?? lower.length;
+      this.form.get('email')!.setValue(lower, { emitEvent: false });
+      input.value = lower;
+      input.setSelectionRange(pos, pos);
+    }
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const numeric = input.value.replace(/\D/g, '');
+    if (input.value !== numeric) {
+      this.form.get('phone')!.setValue(numeric || null, { emitEvent: false });
+      input.value = numeric;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // FormGroup — la "carpeta" que agrupa todos los campos del formulario
@@ -147,6 +169,13 @@ export class UserFormComponent implements OnInit {
 
     this.usersService.getOne(this.documentId!).subscribe({
       next: (user) => {
+        // Protección contra acceso directo por URL (/users/CC-123/edit)
+        if (!canManageUser(this.authService.currentUser(), user.role, user.document_id)) {
+          this.snackbarService.show('No tienes permiso para editar este usuario.');
+          this.router.navigate(['/users', this.documentId]);
+          return;
+        }
+
         // patchValue llena solo los campos que existen en el objeto pasado.
         // A diferencia de setValue, no exige que estén TODOS los campos —
         // ideal para actualizar un subconjunto del FormGroup.

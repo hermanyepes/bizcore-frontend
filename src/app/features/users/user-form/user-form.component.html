@@ -90,6 +90,7 @@
               [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
               placeholder="usuario@empresa.com"
               autocomplete="email"
+              (input)="onEmailInput($event)"
             />
             @if (form.get('email')!.hasError('required') && form.get('email')!.touched) {
               <span class="form-error">El correo es obligatorio.</span>
@@ -123,6 +124,7 @@
               [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
               placeholder="usuario@empresa.com"
               autocomplete="email"
+              (input)="onEmailInput($event)"
             />
             @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
               <span class="form-error">Ingresa un correo válido.</span>
@@ -164,6 +166,8 @@
               class="form-input"
               placeholder="Ej. 3001234567"
               autocomplete="tel"
+              inputmode="numeric"
+              (input)="onPhoneInput($event)"
             />
           </div>
 
@@ -192,18 +196,22 @@
 
         <div class="form-row">
 
-          <!-- Rol -->
-          <div class="form-field">
-            <label class="form-label" for="role">Rol</label>
-            <select id="role" formControlName="role" class="form-select">
-              <option value="Empleado">Empleado</option>
-              <option value="Supervisor">Supervisor</option>
-              <option value="Administrador">Administrador</option>
-            </select>
-          </div>
+          <!-- Rol — oculto al editar el propio perfil (Separation of Duties) -->
+          @if (!isEditingSelf()) {
+            <div class="form-field">
+              <label class="form-label" for="role">Rol</label>
+              <select id="role" formControlName="role" class="form-select">
+                <option value="Empleado">Empleado</option>
+                <option value="Supervisor">Supervisor</option>
+                @if (isSuperadmin()) {
+                  <option value="Administrador">Administrador</option>
+                }
+              </select>
+            </div>
+          }
 
-          <!-- Estado activo/inactivo — solo en modo EDITAR -->
-          @if (isEditMode) {
+          <!-- Estado activo/inactivo — solo en modo EDITAR y nunca sobre el propio perfil -->
+          @if (isEditMode && !isEditingSelf()) {
             <div class="form-field">
               <label class="form-label" for="is_active">Estado</label>
               <select id="is_active" formControlName="is_active" class="form-select">

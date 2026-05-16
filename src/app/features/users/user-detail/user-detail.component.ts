@@ -10,6 +10,7 @@ import { AuthService }          from '../../../core/auth/auth.service';
 import { SnackbarService }      from '../../../core/services/snackbar.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { User }                 from '../../../core/models/user.model';
+import { canManageUser }        from '../../../shared/utils/role-hierarchy';
 
 @Component({
   selector:    'app-user-detail',
@@ -62,9 +63,16 @@ export class UserDetailComponent {
 
   // Computed Signals que el template usa para decidir qué renderizar.
   // Se recalculan solos cuando `user` o `currentUser` cambia.
-  readonly isLoading   = computed(() => this.user() === undefined);
-  readonly isNotFound  = computed(() => this.user() === null);
+  readonly isLoading    = computed(() => this.user() === undefined);
+  readonly isNotFound   = computed(() => this.user() === null);
   readonly isSuperadmin = computed(() => this.authService.currentUser()?.role === 'Superadmin');
+  readonly canEdit      = computed(() =>
+    canManageUser(
+      this.authService.currentUser(),
+      this.user()?.role ?? '',
+      this.user()?.document_id ?? ''
+    )
+  );
 
   // ---------------------------------------------------------------------------
   // hardDeleteUser — elimina físicamente el usuario tras confirmación explícita

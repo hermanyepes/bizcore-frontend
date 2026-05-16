@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   inject,
   output,
   signal,
@@ -14,6 +15,7 @@ import {
 } from '@angular/forms';
 
 import { UsersService, UserCreatePayload } from '../users.service';
+import { AuthService }                     from '../../../core/auth/auth.service';
 
 // ---------------------------------------------------------------------------
 // UserCreateModalComponent — formulario de CREACIÓN de usuario para modal
@@ -47,6 +49,9 @@ import { UsersService, UserCreatePayload } from '../users.service';
 export class UserCreateModalComponent implements OnInit {
 
   private readonly usersService = inject(UsersService);
+  private readonly authService  = inject(AuthService);
+
+  readonly isSuperadmin = computed(() => this.authService.currentUser()?.role === 'Superadmin');
 
   // ── Output ────────────────────────────────────────────────────────────────
   // El padre escucha este evento para saber que la creación fue exitosa.
@@ -88,6 +93,26 @@ export class UserCreateModalComponent implements OnInit {
       Validators.minLength(8),
     ]);
     this.form.get('password')!.updateValueAndValidity();
+  }
+
+  onEmailInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const lower = input.value.toLowerCase();
+    if (input.value !== lower) {
+      const pos = input.selectionStart ?? lower.length;
+      this.form.get('email')!.setValue(lower, { emitEvent: false });
+      input.value = lower;
+      input.setSelectionRange(pos, pos);
+    }
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const numeric = input.value.replace(/\D/g, '');
+    if (input.value !== numeric) {
+      this.form.get('phone')!.setValue(numeric || null, { emitEvent: false });
+      input.value = numeric;
+    }
   }
 
   // ── save — se ejecuta al enviar el formulario ─────────────────────────────
