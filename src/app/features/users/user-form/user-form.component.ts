@@ -64,9 +64,12 @@ export class UserFormComponent implements OnInit {
   // isSaving:  true mientras esperamos respuesta del servidor al guardar
   // serverError: mensaje de error del backend (null si no hay error)
   // ---------------------------------------------------------------------------
-  readonly isLoading   = signal(false);
-  readonly isSaving    = signal(false);
-  readonly serverError = signal<string | null>(null);
+  readonly isLoading          = signal(false);
+  readonly isSaving           = signal(false);
+  readonly serverError        = signal<string | null>(null);
+  readonly isPasswordVisible  = signal(false);
+
+  togglePassword(): void { this.isPasswordVisible.update(v => !v); }
 
   // ---------------------------------------------------------------------------
   // FormGroup — la "carpeta" que agrupa todos los campos del formulario

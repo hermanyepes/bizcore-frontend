@@ -186,6 +186,40 @@
   }
 }
 
+// ── Visor de contraseña ───────────────────────────────────────────────────────
+
+// Envuelve el input de contraseña para posicionar el botón del ojo encima
+.password-wrapper {
+  position: relative;
+  display:  flex;
+  align-items: center;
+
+  // El input necesita espacio a la derecha para no quedar tapado por el ojo
+  .form-input {
+    padding-right: 2.75rem;
+  }
+}
+
+// Botón del ojo — posicionado en el extremo derecho del input
+.password-toggle {
+  position:   absolute;
+  right:      0.625rem;
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  width:      28px;
+  height:     28px;
+  background: none;
+  border:     none;
+  color:      var(--color-text-muted);
+  cursor:     pointer;
+  border-radius: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+
+  &:hover { color: var(--color-text-primary); }
+}
+
 // ── Mensajes de error de validación ──────────────────────────────────────────
 
 .form-error {
