@@ -106,6 +106,30 @@
       <div class="form-section">
         <p class="form-section__title">Datos personales</p>
 
+        <!-- Correo electrónico — visible en modo EDITAR (campo de creación está arriba) -->
+        @if (isEditMode) {
+          <div class="form-field">
+            <label class="form-label" for="email">
+              Correo electrónico
+              @if (!isSuperadmin()) {
+                <span class="form-label--optional">(solo editable por Superadmin)</span>
+              }
+            </label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
+              placeholder="usuario@empresa.com"
+              autocomplete="email"
+            />
+            @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
+              <span class="form-error">Ingresa un correo válido.</span>
+            }
+          </div>
+        }
+
         <!-- Nombre completo -->
         <div class="form-field">
           <label class="form-label" for="full_name">Nombre completo</label>

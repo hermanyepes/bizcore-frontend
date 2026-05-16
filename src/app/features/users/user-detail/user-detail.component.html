@@ -5,11 +5,18 @@
     <a [routerLink]="['/users']" class="back-link">← Volver a usuarios</a>
     <div class="page-header__row">
       <h1 class="page-title">Detalle de usuario</h1>
-      <!-- Botón de edición: solo visible cuando los datos ya cargaron -->
+      <!-- Botones: solo visibles cuando los datos ya cargaron -->
       @if (!isLoading() && !isNotFound()) {
         <a [routerLink]="['/users', user()!.document_id, 'edit']" class="btn-primary">
           Editar
         </a>
+        <!-- Borrado físico: solo Superadmin y solo si el usuario ya está inactivo.
+             El flujo de doble intención fuerza: primero desactivar, luego eliminar. -->
+        @if (isSuperadmin() && !user()!.is_active) {
+          <button class="btn-danger" (click)="hardDeleteUser()">
+            Eliminar permanentemente
+          </button>
+        }
       }
     </div>
   </div>

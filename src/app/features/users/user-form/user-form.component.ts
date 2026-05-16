@@ -1,10 +1,11 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators,
          ReactiveFormsModule }                         from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 
 import { UsersService, UserCreatePayload,
          UserUpdatePayload }                           from '../users.service';
+import { AuthService }                                from '../../../core/auth/auth.service';
 import { SnackbarService }                            from '../../../core/services/snackbar.service';
 
 // ---------------------------------------------------------------------------
@@ -36,7 +37,11 @@ export class UserFormComponent implements OnInit {
   private readonly route           = inject(ActivatedRoute);
   private readonly router          = inject(Router);
   private readonly usersService    = inject(UsersService);
+  private readonly authService     = inject(AuthService);
   private readonly snackbarService = inject(SnackbarService);
+
+  // Superadmin puede editar el email en modo EDITAR
+  readonly isSuperadmin = computed(() => this.authService.currentUser()?.role === 'Superadmin');
 
   // ---------------------------------------------------------------------------
   // Detección de modo
@@ -107,13 +112,14 @@ export class UserFormComponent implements OnInit {
   // ---------------------------------------------------------------------------
   ngOnInit(): void {
     if (this.isEditMode) {
-      // En modo editar: bloquear los campos que el backend no permite cambiar.
-      // disable() hace dos cosas:
-      //   1. El input queda como readonly visualmente
-      //   2. form.value NO incluye el campo (pero form.getRawValue() sí lo haría)
+      // En modo editar: bloquear los campos no editables.
       this.form.get('document_id')!.disable();
       this.form.get('document_type')!.disable();
-      this.form.get('email')!.disable();
+
+      // Email: editable solo para Superadmin; bloqueado para Admin
+      if (!this.isSuperadmin()) {
+        this.form.get('email')!.disable();
+      }
 
       // Cargar los datos actuales del usuario para pre-poblar el formulario
       this.loadUser();
@@ -147,9 +153,9 @@ export class UserFormComponent implements OnInit {
           city:      user.city,
           role:      user.role,
           is_active: user.is_active,
-          // Nota: document_id, document_type, email no se patchean aquí
-          // porque están deshabilitados. Tampoco se patchea password —
-          // el usuario debe escribir una nueva si quiere cambiarla.
+          email:     user.email,   // visible y editable para Superadmin; disabled para Admin
+          // document_id y document_type están disabled y no se patchean.
+          // password no se patchea — el admin escribe una nueva si quiere cambiarla.
         });
         this.isLoading.set(false);
       },
@@ -225,6 +231,11 @@ export class UserFormComponent implements OnInit {
       role:      v.role      ?? null,
       is_active: v.is_active ?? null,
     };
+
+    // Email solo para Superadmin — se incluye si el campo está habilitado y tiene valor
+    if (this.isSuperadmin() && v.email) {
+      payload.email = v.email;
+    }
 
     // Incluir password SOLO si tiene contenido real
     if (v.password) {
