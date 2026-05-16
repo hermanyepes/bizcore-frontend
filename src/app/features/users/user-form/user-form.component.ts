@@ -88,7 +88,7 @@ export class UserFormComponent implements OnInit {
     full_name:     new FormControl('',       [Validators.required, Validators.maxLength(80)]),
     phone:         new FormControl<string | null>(null, [Validators.maxLength(15)]),
     city:          new FormControl<string | null>(null, [Validators.maxLength(50)]),
-    role:          new FormControl<'Administrador' | 'Supervisor' | 'Empleado'>('Empleado', [Validators.required]),
+    role:          new FormControl<'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado'>('Empleado', [Validators.required]),
 
     // is_active: solo visible/relevante en modo EDITAR.
     // Al crear, el usuario nace activo por defecto (lo define el backend).

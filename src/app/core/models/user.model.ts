@@ -13,7 +13,7 @@ export interface User {
   phone:         string | null;
   email:         string;
   city:          string | null;
-  role:          'Administrador' | 'Supervisor' | 'Empleado';
+  role:          'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado';
   join_date:     string;
   is_active:     boolean;
   created_at:    string;
