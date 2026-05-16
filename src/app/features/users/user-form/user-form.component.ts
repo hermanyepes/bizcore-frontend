@@ -212,16 +212,24 @@ export class UserFormComponent implements OnInit {
   private saveUpdate(): void {
     const v = this.form.value;
 
+    // Construimos el payload SIN password primero.
+    // Solo añadimos password si el admin escribió algo explícitamente.
+    // Razón: el campo vacío en el formulario significa "no cambiar".
+    // Si siempre enviáramos password:null, un autocomplete del navegador
+    // podría llenar el campo silenciosamente y sobreescribir la contraseña
+    // sin que el admin lo note — incluso si puso autocomplete="new-password".
     const payload: UserUpdatePayload = {
       full_name: v.full_name || null,
       phone:     v.phone     || null,
       city:      v.city      || null,
       role:      v.role      ?? null,
       is_active: v.is_active ?? null,
-      // Si password está vacía, no la incluimos → la contraseña actual no cambia.
-      // Si el usuario escribió algo, la enviamos para que el backend la hashee.
-      password:  v.password  || null,
     };
+
+    // Incluir password SOLO si tiene contenido real
+    if (v.password) {
+      payload.password = v.password;
+    }
 
     this.usersService.update(this.documentId!, payload).subscribe({
       next:  () => {
