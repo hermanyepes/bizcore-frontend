@@ -17,17 +17,19 @@
     <!-- Navegación principal.
          routerLinkActive agrega la clase CSS cuando la ruta está activa. -->
     <nav class="sidebar__nav">
-      <!-- (click)="closeMobileSidebar()" cierra el drawer al navegar en mobile -->
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Dashboard"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">⊞</span>
-        <span class="sidebar__text">Dashboard</span>
-      </a>
+      <!-- Dashboard: solo roles con acceso a métricas del negocio -->
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Dashboard"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">⊞</span>
+          <span class="sidebar__text">Dashboard</span>
+        </a>
+      }
 
       @if (['Superadmin', 'Administrador'].includes(currentUser()?.role ?? '')) {
         <a
