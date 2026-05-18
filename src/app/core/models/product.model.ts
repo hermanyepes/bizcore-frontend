@@ -11,12 +11,15 @@ export interface Product {
   id:          number;          // autoincrement — lo genera PostgreSQL
   name:        string;
   description: string | null;
-  price:       number;          // entero COP — sin decimales
+  price:       number;          // entero COP — sin decimales (precio de venta)
   stock:       number;          // unidades disponibles
   category:    string | null;   // texto libre en el backend; select fijo en el frontend
   is_active:   boolean;
   created_at:  string;          // ISO 8601 — Date se construye al mostrar
   updated_at:  string | null;   // null si nunca fue actualizado
+  // Campos de column-level security (HU-022): ausentes para Empleado, presentes para Supervisor+
+  cost_price?: number | null;   // precio de costo — confidencial
+  margin?:     number | null;   // margen calculado — confidencial
 }
 
 // ─── Respuesta paginada — espejo de ProductPaginated ─────────────────────────
