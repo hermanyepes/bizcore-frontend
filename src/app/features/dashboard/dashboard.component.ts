@@ -32,6 +32,7 @@ import {
   computed,
 } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   Chart,
   ArcElement,
@@ -75,7 +76,7 @@ const CHART_COLORS: Record<string, string> = {
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -89,9 +90,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   private readonly cdr               = inject(ChangeDetectorRef);
 
   // --- Signals de estado ---
-  summary   = signal<DashboardSummary | null>(null);
-  isLoading = signal(true);
-  error     = signal<string | null>(null);
+  summary      = signal<DashboardSummary | null>(null);
+  isLoading    = signal(true);
+  error        = signal<string | null>(null);
+  accessDenied = signal(false);
 
   // ------------------------------------------------------------
   // chartColors — exposición pública de CHART_COLORS para el template.
@@ -178,9 +180,15 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         this.cdr.detectChanges();
         this.renderChart(data);
       },
-      error: () => {
-        this.error.set('No se pudo cargar el resumen del negocio.');
+      error: (err) => {
         this.isLoading.set(false);
+        // 403: el Empleado no tiene permiso (matriz-permisos.md sección 2.6).
+        // Mostramos mensaje específico en vez del error genérico.
+        if (err.status === 403) {
+          this.accessDenied.set(true);
+        } else {
+          this.error.set('No se pudo cargar el resumen del negocio.');
+        }
       },
     });
   }

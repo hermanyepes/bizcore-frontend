@@ -23,6 +23,15 @@
     <div class="loading-state">Cargando resumen…</div>
   }
 
+  <!-- ── Estado: acceso denegado (Empleado → 403) ──────────────────────── -->
+  @if (accessDenied()) {
+    <section class="access-denied">
+      <h2>Acceso restringido</h2>
+      <p>El resumen ejecutivo está disponible solo para Supervisores y Administradores.</p>
+      <a routerLink="/orders" class="btn btn-primary">Ver mis órdenes</a>
+    </section>
+  }
+
   <!-- ── Estado: error ─────────────────────────────────────────────────── -->
   @if (error()) {
     <div class="error-state">{{ error() }}</div>
