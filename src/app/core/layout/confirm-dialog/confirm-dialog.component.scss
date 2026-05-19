@@ -110,6 +110,55 @@
   }
 }
 
+// ── Type-to-confirm ────────────────────────────────────────────────────────
+// Sección visible solo cuando confirmService.state().requiredText está definido.
+// El botón Confirmar queda disabled hasta que el input coincida exactamente.
+.confirm-dialog__type-confirm {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;
+  width:          100%;
+  text-align:     left;
+}
+
+.confirm-dialog__type-label {
+  font-size:   0.8125rem;
+  color:       var(--color-text-secondary);
+
+  strong {
+    color:       var(--color-text-primary);
+    font-family: var(--font-mono, monospace);
+  }
+}
+
+.confirm-dialog__type-input {
+  width:         100%;
+  padding:       0.5rem 0.75rem;
+  border:        1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background:    var(--color-bg-surface);
+  color:         var(--color-text-primary);
+  font-family:   var(--font-mono, monospace);
+  font-size:     0.875rem;
+  transition:    border-color 0.15s ease;
+  box-sizing:    border-box;
+
+  &:focus {
+    outline:      none;
+    border-color: var(--color-primary, #6366f1);
+  }
+
+  &--match {
+    border-color: var(--color-success, #22c55e);
+  }
+}
+
+// ── Botón deshabilitado ────────────────────────────────────────────────────
+.btn--danger:disabled {
+  opacity: 0.4;
+  cursor:  not-allowed;
+}
+
 // ── Animaciones ────────────────────────────────────────────────────────────
 
 @keyframes overlay-in {

@@ -38,7 +38,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrdersService }    from '../orders.service';
 import { SuppliersService } from '../../suppliers/suppliers.service';
 import { ProductsService }  from '../../products/products.service';
-import { SnackbarService }  from '../../../core/services/snackbar.service';
+import { SnackbarService }      from '../../../core/services/snackbar.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { Order, OrderCreate, OrderStatus } from '../order.model';
 import { Supplier }         from '../../../core/models/supplier.model';
 import { Product }          from '../../../core/models/product.model';
@@ -64,6 +65,7 @@ export class OrderFormComponent implements OnInit {
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService  = inject(ProductsService);
   private readonly snackbarService  = inject(SnackbarService);
+  private readonly confirmService   = inject(ConfirmDialogService);
 
   // ----------------------------------------------------------
   // Detección de modo (crear vs editar)
@@ -258,10 +260,21 @@ export class OrderFormComponent implements OnInit {
   }
 
   // ----------------------------------------------------------
-  // save — punto de entrada único, delega según el modo
+  // save — punto de entrada único, delega según el modo.
+  // Si el usuario seleccionó CANCELADO, pide confirmación antes
+  // de ejecutar para evitar cancelaciones accidentales.
   // ----------------------------------------------------------
-  save(): void {
+  async save(): Promise<void> {
     if (this.form.invalid || this.isSaving()) return;
+
+    if (this.isEditMode && this.form.value.status === 'CANCELADO') {
+      const order = this.loadedOrder();
+      const orderLabel = order ? `pedido #${order.id}` : 'este pedido';
+      const confirmed = await this.confirmService.confirm(
+        `Vas a cancelar el ${orderLabel}. Esta acción no se puede deshacer. ¿Continuar?`
+      );
+      if (!confirmed) return;
+    }
 
     this.isSaving.set(true);
     this.serverError.set(null);

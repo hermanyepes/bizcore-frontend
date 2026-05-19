@@ -265,6 +265,15 @@ $transition-speed:        0.25s;
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-text-primary);
+
+    // Variante enlace: mismo aspecto visual pero navegable a /profile
+    &--link {
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s;
+
+      &:hover { color: var(--color-accent); }
+    }
   }
 
   &__role {

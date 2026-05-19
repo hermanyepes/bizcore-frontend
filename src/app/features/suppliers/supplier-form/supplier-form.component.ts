@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 import { SuppliersService, SupplierCreatePayload,
          SupplierUpdatePayload }                       from '../suppliers.service';
 import { SnackbarService }                            from '../../../core/services/snackbar.service';
+import { nitValidator }                               from '../../../shared/validators/nit.validator';
 
 // ---------------------------------------------------------------------------
 // SupplierFormComponent — mismo patrón dual que ProductFormComponent:
@@ -71,6 +72,7 @@ export class SupplierFormComponent implements OnInit {
     contact_email: new FormControl<string | null>(null,  [Validators.email,    Validators.maxLength(100)]),
     phone:         new FormControl<string | null>(null,  [Validators.maxLength(20)]),
     address:       new FormControl<string | null>(null,  [Validators.maxLength(255)]),
+    nit:           new FormControl<string | null>(null,  [Validators.maxLength(15), nitValidator()]),
     is_active:     new FormControl(true),
   });
 
@@ -95,6 +97,7 @@ export class SupplierFormComponent implements OnInit {
           contact_email: supplier.contact_email,
           phone:         supplier.phone,
           address:       supplier.address,
+          nit:           supplier.nit,
           is_active:     supplier.is_active,
         });
         this.isLoading.set(false);
@@ -132,6 +135,7 @@ export class SupplierFormComponent implements OnInit {
       contact_email: v.contact_email || null,
       phone:         v.phone         || null,
       address:       v.address       || null,
+      nit:           v.nit           || null,
     };
 
     this.suppliersService.create(payload).subscribe({
@@ -154,6 +158,7 @@ export class SupplierFormComponent implements OnInit {
       contact_email: v.contact_email || null,
       phone:         v.phone         || null,
       address:       v.address       || null,
+      nit:           v.nit           || null,
       is_active:     v.is_active     ?? null,
     };
 

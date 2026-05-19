@@ -85,4 +85,29 @@ export class UsersService extends GenericCrudService<User, UserCreatePayload, Us
   hardDelete(id: string): Observable<User> {
     return this.http.delete<User>(`${this.baseUrl}/${id}/permanent`);
   }
+
+  // -------------------------------------------------------------------------
+  // forceLogout — revoca todos los refresh tokens activos del usuario
+  // POST /api/v1/users/{id}/force-logout
+  // Solo Admin o Superadmin — el backend valida con require_admin.
+  // -------------------------------------------------------------------------
+  forceLogout(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/force-logout`, {});
+  }
+
+  // -------------------------------------------------------------------------
+  // getMe — perfil completo del usuario autenticado
+  // GET /api/v1/users/me
+  // -------------------------------------------------------------------------
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${this.baseUrl}/me`);
+  }
+
+  // -------------------------------------------------------------------------
+  // updateMe — actualiza solo full_name, phone, city del usuario autenticado
+  // PUT /api/v1/users/me
+  // -------------------------------------------------------------------------
+  updateMe(payload: { full_name?: string; phone?: string | null; city?: string | null }): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/me`, payload);
+  }
 }

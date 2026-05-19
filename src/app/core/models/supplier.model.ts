@@ -16,6 +16,7 @@ export interface Supplier {
   contact_email: string | null; // opcional — null si no tiene email registrado
   phone:         string | null; // opcional — string, no number (nadie suma teléfonos)
   address:       string | null; // opcional — dirección de la bodega del proveedor
+  nit:           string | null; // opcional — NIT colombiano con o sin DV (DIAN módulo 11)
   is_active:     boolean;       // false = soft delete; el registro no se borra
   created_at:    string;        // ISO 8601 — ej: "2026-01-15T10:30:00Z"
   updated_at:    string | null; // null hasta el primer PUT sobre este proveedor

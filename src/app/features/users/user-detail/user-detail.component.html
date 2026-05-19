@@ -10,6 +10,13 @@
         <a [routerLink]="['/users', user()!.document_id, 'edit']" class="btn-primary">
           Editar
         </a>
+        <!-- Force-logout: visible para Admin o Superadmin cuando el usuario está activo.
+             Revoca todos los refresh tokens — el usuario pierde sesión en todos sus dispositivos. -->
+        @if (isAdmin() && user()!.is_active) {
+          <button class="btn-secondary" (click)="forceLogoutUser()">
+            Forzar cierre de sesión
+          </button>
+        }
         <!-- Borrado físico: solo Superadmin y solo si el usuario ya está inactivo.
              El flujo de doble intención fuerza: primero desactivar, luego eliminar. -->
         @if (isSuperadmin() && !user()!.is_active) {

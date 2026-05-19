@@ -141,7 +141,7 @@ export class SuppliersListComponent implements OnInit {
   // de pedidos que lo referencian.
   deactivate(supplier: Supplier): void {
     this.confirmService
-      .confirm(`¿Desactivar a "${supplier.name}"?`)
+      .confirm(`Vas a desactivar al proveedor "${supplier.name}". No podrá seleccionarse en nuevos pedidos. ¿Continuar?`)
       .then(confirmed => {
         if (!confirmed) return;
 

@@ -74,19 +74,29 @@ export class UserDetailComponent {
     )
   );
 
+  // isAdmin: computed para mostrar el botón de force-logout
+  readonly isAdmin = computed(() => {
+    const role = this.authService.currentUser()?.role;
+    return role === 'Administrador' || role === 'Superadmin';
+  });
+
   // ---------------------------------------------------------------------------
   // hardDeleteUser — elimina físicamente el usuario tras confirmación explícita
   //
   // Solo visible si el usuario está inactivo: primero desactivar (soft delete),
   // luego eliminar permanentemente. Este doble paso es intencional para evitar
   // borrados accidentales.
+  //
+  // Usa type-to-confirm: el admin debe escribir el nombre del usuario para
+  // habilitar el botón. Patrón GitHub — impide borrados por accidente.
   // ---------------------------------------------------------------------------
   async hardDeleteUser(): Promise<void> {
     const u = this.user();
     if (!u) return;
 
     const confirmed = await this.confirmDialog.confirm(
-      `¿Eliminar a ${u.full_name} de forma permanente? Esta acción no se puede deshacer.`
+      `Vas a eliminar permanentemente a ${u.full_name}. Esta acción no se puede deshacer.`,
+      u.full_name,  // requiredText — el admin debe escribir el nombre exacto
     );
     if (!confirmed) return;
 
@@ -98,6 +108,26 @@ export class UserDetailComponent {
       error: (err) => {
         this.snackbar.show(err.error?.detail ?? 'Error al eliminar el usuario.');
       },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // forceLogoutUser — revoca todas las sesiones activas del usuario
+  //
+  // Solo visible para Administrador o Superadmin.
+  // ---------------------------------------------------------------------------
+  async forceLogoutUser(): Promise<void> {
+    const u = this.user();
+    if (!u) return;
+
+    const confirmed = await this.confirmDialog.confirm(
+      `Vas a cerrar todas las sesiones activas de ${u.full_name}. Tendrá que iniciar sesión de nuevo en todos sus dispositivos. ¿Continuar?`
+    );
+    if (!confirmed) return;
+
+    this.usersService.forceLogout(u.document_id).subscribe({
+      next: (res) => this.snackbar.show(res.message),
+      error: (err) => this.snackbar.show(err.error?.detail ?? 'Error al forzar el cierre de sesión.'),
     });
   }
 }

@@ -43,9 +43,13 @@ export function clearCache(): void {
 export const cacheInterceptor: HttpInterceptorFn = (req, next) => {
 
   // --- Paso 1: ignorar todo lo que no sea GET --------------------------
-  // next(req) delega el request al siguiente interceptor de la cadena
-  // sin que este interceptor haga nada más.
+  // Las mutaciones (POST, PUT, DELETE) no se cachean NUNCA, y además
+  // invalidan TODO el caché para que el siguiente GET traiga datos frescos.
+  // Sin esto, después de un PUT el usuario seguiría viendo datos viejos
+  // durante hasta 30 segundos — el servidor ya cambió pero el cliente
+  // sigue mostrando la respuesta guardada.
   if (req.method !== 'GET') {
+    cache.clear();
     return next(req);
   }
 

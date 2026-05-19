@@ -157,6 +157,13 @@ export const routes: Routes = [
           import('./features/orders/order-form/order-form.component').then(m => m.OrderFormComponent),
       },
 
+      // Perfil del usuario autenticado — accesible para cualquier rol
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(m => m.ProfileComponent),
+      },
+
       // Ruta raíz vacía — redirige al dashboard
       {
         path: '',

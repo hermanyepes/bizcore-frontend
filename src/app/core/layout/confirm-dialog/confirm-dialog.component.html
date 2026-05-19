@@ -19,7 +19,7 @@
     class="confirm-overlay"
     role="dialog"
     aria-modal="true"
-    (click)="confirmService.answer(false)"
+    (click)="cancel()"
   >
     <!-- Tarjeta del diálogo — stopPropagation evita cerrar al clicar adentro -->
     <div class="confirm-dialog" (click)="$event.stopPropagation()">
@@ -32,6 +32,26 @@
         {{ confirmService.state().message }}
       </p>
 
+      <!-- Type-to-confirm: visible solo cuando el servicio pasa requiredText.
+           El usuario debe escribir exactamente el texto indicado para habilitar
+           el botón Confirmar. Patrón GitHub para acciones destructivas críticas. -->
+      @if (confirmService.state().requiredText) {
+        <div class="confirm-dialog__type-confirm">
+          <label class="confirm-dialog__type-label">
+            Escribe <strong>{{ confirmService.state().requiredText }}</strong> para confirmar
+          </label>
+          <input
+            type="text"
+            class="confirm-dialog__type-input"
+            [class.confirm-dialog__type-input--match]="canConfirm()"
+            [ngModel]="typedText()"
+            (ngModelChange)="typedText.set($event)"
+            autocomplete="off"
+            aria-label="Escribir texto de confirmación"
+          />
+        </div>
+      }
+
       <!-- Botones de acción -->
       <div class="confirm-dialog__actions">
 
@@ -39,16 +59,18 @@
         <button
           type="button"
           class="btn btn--secondary"
-          (click)="confirmService.answer(false)"
+          (click)="cancel()"
         >
           Cancelar
         </button>
 
-        <!-- Confirmar — responde true → la acción SÍ se ejecuta -->
+        <!-- Confirmar — responde true → la acción SÍ se ejecuta.
+             Deshabilitado si hay requiredText y el usuario no lo ha escrito. -->
         <button
           type="button"
           class="btn btn--danger"
-          (click)="confirmService.answer(true)"
+          [disabled]="!canConfirm()"
+          (click)="confirm()"
         >
           Confirmar
         </button>

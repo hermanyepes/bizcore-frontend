@@ -3,13 +3,16 @@ import { Injectable, signal } from '@angular/core';
 // ---------------------------------------------------------------------------
 // ConfirmDialogState — lo que el componente necesita para renderizar el diálogo
 //
-// Solo dos campos: el mensaje a mostrar y si debe estar visible.
-// El resolver de la Promise NO entra aquí — es un detalle de implementación
-// interna, no algo que el template necesita saber.
+// message:      el mensaje a mostrar al usuario.
+// visible:      si el diálogo debe estar en el DOM.
+// requiredText: si está definido, el usuario debe escribir exactamente este
+//               texto para que el botón "Confirmar" se habilite.
+//               Patrón GitHub para borrar repos o desactivar usuarios activos.
 // ---------------------------------------------------------------------------
 interface ConfirmDialogState {
   message: string;
   visible: boolean;
+  requiredText?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +60,11 @@ export class ConfirmDialogService {
   // confirm() — muestra el diálogo y devuelve una Promise que se resolverá
   //             cuando el usuario haga clic en Confirmar o Cancelar.
   //
+  // requiredText (opcional): si se pasa, el botón "Confirmar" queda
+  //   deshabilitado hasta que el usuario escriba exactamente ese texto.
+  //   Patrón GitHub — usado en acciones destructivas críticas como
+  //   desactivar un usuario activo o eliminar permanentemente un recurso.
+  //
   // Cómo funciona la Promise con resolver externo:
   //
   //   new Promise(resolve => { this._resolve = resolve; })
@@ -69,8 +77,8 @@ export class ConfirmDialogService {
   //
   //   La Promise queda "en espera" hasta que alguien llame _resolve(true/false).
   // ---------------------------------------------------------------------------
-  confirm(message: string): Promise<boolean> {
-    this.state.set({ message, visible: true });
+  confirm(message: string, requiredText?: string): Promise<boolean> {
+    this.state.set({ message, visible: true, requiredText });
 
     return new Promise<boolean>(resolve => {
       this._resolve = resolve;
@@ -89,8 +97,8 @@ export class ConfirmDialogService {
   //   3. Limpia el resolver para evitar llamadas dobles
   // ---------------------------------------------------------------------------
   answer(confirmed: boolean): void {
-    // Paso 1: cierra el diálogo
-    this.state.update(s => ({ ...s, visible: false }));
+    // Paso 1: cierra el diálogo y limpia el texto requerido
+    this.state.update(s => ({ ...s, visible: false, requiredText: undefined }));
 
     // Paso 2: resuelve la Promise — el código que hizo 'await confirm()' continúa
     this._resolve?.(confirmed);

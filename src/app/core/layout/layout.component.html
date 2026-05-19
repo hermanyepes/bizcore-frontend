@@ -119,7 +119,9 @@
       <!-- Info del usuario logueado + botón de logout -->
       <div class="navbar__user">
         <div class="navbar__user-info">
-          <span class="navbar__username">{{ currentUser()?.sub }}</span>
+          <a routerLink="/profile" class="navbar__username navbar__username--link">
+            {{ currentUser()?.sub }}
+          </a>
           <span class="navbar__role">{{ currentUser()?.role }}</span>
         </div>
         <button class="navbar__logout" type="button" (click)="logout()">
