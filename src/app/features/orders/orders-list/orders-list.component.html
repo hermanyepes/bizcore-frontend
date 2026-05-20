@@ -78,15 +78,13 @@
               <!-- Nombre del proveedor buscado en memoria — no hace HTTP -->
               <td class="cell--name">{{ getSupplierName(order.supplier_id) }}</td>
 
-              <!-- Badge de estado con color según el valor.
-                   Se aceptan los nombres viejos (COMPLETADO/CANCELADO) y los nuevos
-                   (APROBADA/ENTREGADA/CANCELADA) para no romper datos existentes. -->
+              <!-- Badge de estado con color según el valor -->
               <td>
                 <span class="status-badge"
                       [class.status-badge--warning]="order.status === 'PENDIENTE'"
                       [class.status-badge--info]="order.status === 'APROBADA'"
-                      [class.status-badge--success]="order.status === 'ENTREGADA' || order.status === 'COMPLETADO'"
-                      [class.status-badge--danger]="order.status === 'CANCELADA' || order.status === 'CANCELADO'">
+                      [class.status-badge--success]="order.status === 'ENTREGADA'"
+                      [class.status-badge--danger]="order.status === 'CANCELADA'">
                   {{ order.status }}
                 </span>
               </td>
