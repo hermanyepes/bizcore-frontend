@@ -374,7 +374,7 @@ export class OrderFormComponent implements OnInit {
         },
       });
     } else {
-      // Solo notas — endpoint legacy (sin cambio de estado)
+      // Solo notas sin cambio de estado — endpoint de notas
       this.ordersService.updateOrder(this.orderId!, {
         notes: v.notes || null,
       }).subscribe({

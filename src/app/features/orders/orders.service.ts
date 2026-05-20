@@ -110,25 +110,13 @@ export class OrdersService {
   }
 
   // ----------------------------------------------------------
-  // updateOrder — actualiza solo las notas (endpoint legacy)
+  // updateOrder — actualiza las notas de un pedido
   // PUT /api/v1/orders/{id}
   //
-  // DEPRECADO para cambios de estado. Usar updateStatus() para
-  // cualquier transición de estado. Este método solo modifica
-  // el campo `notes` del pedido.
+  // Para cambios de estado usar updateStatus().
   // ----------------------------------------------------------
   updateOrder(id: number, payload: OrderUpdate): Observable<Order> {
     return this.http.put<Order>(`${this.baseUrl}/${id}`, payload);
   }
 
-  // ----------------------------------------------------------
-  // cancelOrder — cancela un pedido (soft delete vía DELETE)
-  // DELETE /api/v1/orders/{id}
-  //
-  // En el backend esto pone status = 'CANCELADO'.
-  // No borra el registro de la BD — el historial se conserva.
-  // ----------------------------------------------------------
-  cancelOrder(id: number): Observable<Order> {
-    return this.http.delete<Order>(`${this.baseUrl}/${id}`);
-  }
 }
