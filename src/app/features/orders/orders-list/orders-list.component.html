@@ -22,8 +22,9 @@
             (change)="onStatusChange(statusSelect.value)">
       <option value="">Todos los estados</option>
       <option value="PENDIENTE">Pendiente</option>
-      <option value="COMPLETADO">Completado</option>
-      <option value="CANCELADO">Cancelado</option>
+      <option value="APROBADA">Aprobada</option>
+      <option value="ENTREGADA">Entregada</option>
+      <option value="CANCELADA">Cancelada</option>
     </select>
 
     <select class="filter-select"
@@ -77,12 +78,15 @@
               <!-- Nombre del proveedor buscado en memoria — no hace HTTP -->
               <td class="cell--name">{{ getSupplierName(order.supplier_id) }}</td>
 
-              <!-- Badge de estado con color según el valor -->
+              <!-- Badge de estado con color según el valor.
+                   Se aceptan los nombres viejos (COMPLETADO/CANCELADO) y los nuevos
+                   (APROBADA/ENTREGADA/CANCELADA) para no romper datos existentes. -->
               <td>
                 <span class="status-badge"
                       [class.status-badge--warning]="order.status === 'PENDIENTE'"
-                      [class.status-badge--success]="order.status === 'COMPLETADO'"
-                      [class.status-badge--danger]="order.status === 'CANCELADO'">
+                      [class.status-badge--info]="order.status === 'APROBADA'"
+                      [class.status-badge--success]="order.status === 'ENTREGADA' || order.status === 'COMPLETADO'"
+                      [class.status-badge--danger]="order.status === 'CANCELADA' || order.status === 'CANCELADO'">
                   {{ order.status }}
                 </span>
               </td>

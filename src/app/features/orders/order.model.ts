@@ -48,12 +48,14 @@ export interface Order {
 
 
 // ------------------------------------------------------------
-// OrderStatus — los tres estados posibles de un pedido
+// OrderStatus — los cuatro estados de la máquina de estados
 // ------------------------------------------------------------
-// Se usa `type` en lugar de `interface` porque no es un objeto,
-// es simplemente un conjunto cerrado de strings válidos.
-// El compilador de TypeScript rechaza cualquier otro valor.
-export type OrderStatus = 'PENDIENTE' | 'COMPLETADO' | 'CANCELADO';
+// Alineado con el backend (HU-046). Transiciones válidas:
+//   PENDIENTE → APROBADA | CANCELADA
+//   APROBADA  → ENTREGADA | CANCELADA
+//   ENTREGADA → (terminal)
+//   CANCELADA → (terminal)
+export type OrderStatus = 'PENDIENTE' | 'APROBADA' | 'ENTREGADA' | 'CANCELADA';
 
 
 // ------------------------------------------------------------
@@ -80,14 +82,24 @@ export interface OrderCreate {
 
 
 // ------------------------------------------------------------
-// OrderUpdate — el body del PUT /api/v1/orders/{id}
+// OrderUpdate — el body del PUT /api/v1/orders/{id} (legacy)
 // ------------------------------------------------------------
-// Espeja OrderUpdate del backend.
-// Solo se puede cambiar el estado y las notas.
-// Los ítems son históricos e inmutables.
+// DEPRECADO para cambios de estado — usar OrderStatusUpdate.
+// Solo permite actualizar las notas del pedido.
 export interface OrderUpdate {
-  status: OrderStatus | null;
   notes: string | null;
+}
+
+
+// ------------------------------------------------------------
+// OrderStatusUpdate — el body del PUT /api/v1/orders/{id}/status
+// ------------------------------------------------------------
+// Endpoint de máquina de estados (HU-046).
+// `status` excluye PENDIENTE porque no existe ninguna transición
+// que vuelva a PENDIENTE desde otro estado.
+export interface OrderStatusUpdate {
+  status: Exclude<OrderStatus, 'PENDIENTE'>;
+  cancel_reason?: string | null;
 }
 
 

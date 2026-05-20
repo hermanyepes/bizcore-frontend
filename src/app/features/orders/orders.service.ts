@@ -7,11 +7,12 @@
 // El componente nunca escribe una URL — solo llama métodos aquí.
 //
 // Endpoints que cubre:
-//   GET    /api/v1/orders              → getOrders()
-//   GET    /api/v1/orders/{id}         → getOrder()
-//   POST   /api/v1/orders              → createOrder()
-//   PUT    /api/v1/orders/{id}         → updateOrder()
-//   DELETE /api/v1/orders/{id}         → cancelOrder()
+//   GET    /api/v1/orders                  → getOrders()
+//   GET    /api/v1/orders/{id}             → getOrder()
+//   POST   /api/v1/orders                  → createOrder()
+//   PUT    /api/v1/orders/{id}/status      → updateStatus()  ← máquina de estados
+//   PUT    /api/v1/orders/{id}             → updateOrder()   ← legacy, solo notas
+//   DELETE /api/v1/orders/{id}             → cancelOrder()
 // ============================================================
 
 import { Injectable, inject } from '@angular/core';
@@ -36,7 +37,7 @@ import {
 export interface OrderListParams {
   page?:        number;
   page_size?:   number;
-  status?:      string;  // 'PENDIENTE' | 'COMPLETADO' | 'CANCELADO'
+  status?:      string;  // 'PENDIENTE' | 'APROBADA' | 'ENTREGADA' | 'CANCELADA'
   supplier_id?: number;  // filtra pedidos de un proveedor específico
 }
 
@@ -93,11 +94,28 @@ export class OrdersService {
   }
 
   // ----------------------------------------------------------
-  // updateOrder — cambia el estado y/o las notas de un pedido
+  // updateStatus — cambia el estado usando la máquina de estados
+  // PUT /api/v1/orders/{id}/status
+  //
+  // Valida la transición en el backend:
+  //   PENDIENTE → APROBADA | CANCELADA
+  //   APROBADA  → ENTREGADA | CANCELADA
+  //   ENTREGADA | CANCELADA → (terminales, cualquier intento → 403)
+  //
+  // cancel_reason es obligatorio para Empleado al cancelar;
+  // opcional para Supervisor/Admin.
+  // ----------------------------------------------------------
+  updateStatus(id: number, status: string, cancel_reason?: string | null): Observable<Order> {
+    return this.http.put<Order>(`${this.baseUrl}/${id}/status`, { status, cancel_reason });
+  }
+
+  // ----------------------------------------------------------
+  // updateOrder — actualiza solo las notas (endpoint legacy)
   // PUT /api/v1/orders/{id}
   //
-  // Los ítems son inmutables: no se pueden cambiar después de
-  // crear el pedido. Solo status y notes son editables.
+  // DEPRECADO para cambios de estado. Usar updateStatus() para
+  // cualquier transición de estado. Este método solo modifica
+  // el campo `notes` del pedido.
   // ----------------------------------------------------------
   updateOrder(id: number, payload: OrderUpdate): Observable<Order> {
     return this.http.put<Order>(`${this.baseUrl}/${id}`, payload);

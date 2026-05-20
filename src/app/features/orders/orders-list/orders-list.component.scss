@@ -128,10 +128,12 @@
   font-size:    0.8rem;
 }
 
-// ── Badge de estado — tres variantes para Orders ──────────────────────────────
+// ── Badge de estado — cuatro variantes para Orders ───────────────────────────
 // PENDIENTE  → ámbar  (warning)
-// COMPLETADO → verde  (success)
-// CANCELADO  → rojo   (danger)
+// APROBADA   → azul   (info)
+// ENTREGADA  → verde  (success)
+// CANCELADA  → rojo   (danger)
+// COMPLETADO / CANCELADO → aliases del mapa anterior para datos legacy
 
 .status-badge {
   display:       inline-block;
@@ -144,6 +146,12 @@
     background: rgba(245, 158, 11, 0.15);
     color:      var(--color-warning);
     border:     1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  &--info {
+    background: rgba(59, 130, 246, 0.15);
+    color:      #3b82f6;
+    border:     1px solid rgba(59, 130, 246, 0.3);
   }
 
   &--success {
