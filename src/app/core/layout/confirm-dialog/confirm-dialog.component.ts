@@ -45,30 +45,46 @@ export class ConfirmDialogComponent {
   // Es un singleton: ambos apuntan al mismo objeto en memoria.
   protected readonly confirmService = inject(ConfirmDialogService);
 
-  // Texto que el usuario escribe en el input de type-to-confirm.
-  // Se reinicia cada vez que el diálogo se abre (lo hace el template con [ngModel]).
-  protected readonly typedText = signal('');
+  // Texto del input en modo type-to-confirm.
+  protected readonly typedText  = signal('');
 
-  // El botón "Confirmar" se habilita cuando:
-  //   - No hay requiredText (modo normal) → siempre habilitado
-  //   - Hay requiredText → solo cuando typedText coincide exactamente
+  // Texto del textarea en modo reason-input.
+  protected readonly reasonText = signal('');
+
+  // El botón "Confirmar" se habilita según el modo activo:
+  //   - Modo normal      → siempre habilitado
+  //   - type-to-confirm  → solo cuando typedText coincide exactamente
+  //   - reason-input     → solo cuando reasonText tiene al menos un carácter
   protected readonly canConfirm = computed(() => {
-    const required = this.confirmService.state().requiredText;
-    if (!required) return true;
-    return this.typedText() === required;
+    const state = this.confirmService.state();
+    if (state.requiredText) return this.typedText() === state.requiredText;
+    if (state.reasonInput)  return !!this.reasonText().trim();
+    return true;
   });
 
-  // Se llama desde el template cuando el diálogo se cierra (overlay o Cancelar).
-  // Reinicia el texto para que la próxima apertura empiece limpio.
+  // Cancelar — cierra el diálogo según el modo activo y limpia los campos.
   protected cancel(): void {
+    const hasReason = !!this.confirmService.state().reasonInput;
     this.typedText.set('');
-    this.confirmService.answer(false);
+    this.reasonText.set('');
+    if (hasReason) {
+      this.confirmService.answerWithReason(null);
+    } else {
+      this.confirmService.answer(false);
+    }
   }
 
-  // Se llama desde el botón "Confirmar".
+  // Confirmar — resuelve la Promise según el modo activo.
   protected confirm(): void {
     if (!this.canConfirm()) return;
+    const state  = this.confirmService.state();
+    const reason = this.reasonText();
     this.typedText.set('');
-    this.confirmService.answer(true);
+    this.reasonText.set('');
+    if (state.reasonInput) {
+      this.confirmService.answerWithReason(reason);
+    } else {
+      this.confirmService.answer(true);
+    }
   }
 }

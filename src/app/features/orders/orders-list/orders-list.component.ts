@@ -155,18 +155,18 @@ export class OrdersListComponent implements OnInit {
   }
 
   // ─── Cancelar un pedido ───────────────────────────────────────────────────
-  // Usa el endpoint de máquina de estados para mantener consistencia
-  // de status ("CANCELADA") y registro de audit_log.
-  // Nota: sin cancel_reason → falla con 403 para Empleados.
-  // El Empleado debe cancelar desde el formulario de edición donde
-  // puede proveer el motivo de cancelación requerido.
+  // Pide motivo de cancelación en el diálogo antes de ejecutar.
+  // El motivo queda registrado en el audit_log del backend.
   cancelOrder(order: Order): void {
     this.confirmService
-      .confirm(`¿Cancelar el pedido #${order.id}?`)
-      .then(confirmed => {
-        if (!confirmed) return;
+      .confirmWithReason(
+        `¿Cancelar el pedido #${order.id}? Esta acción no se puede deshacer.`,
+        'Ej: Pedido duplicado, proveedor no disponible, error de captura…',
+      )
+      .then(reason => {
+        if (reason === null) return;
 
-        this.ordersService.updateStatus(order.id, 'CANCELADA').subscribe({
+        this.ordersService.updateStatus(order.id, 'CANCELADA', reason).subscribe({
           next: () => {
             this.snackbarService.show('Pedido cancelado');
             this.loadPage(this.currentPage());

@@ -52,6 +52,25 @@
         </div>
       }
 
+      <!-- Reason-input: visible cuando el servicio pasa reasonInput.
+           El usuario debe escribir un motivo (mínimo un carácter) para habilitar
+           el botón Confirmar. Usado en cancelación de pedidos para trazabilidad. -->
+      @if (confirmService.state().reasonInput) {
+        <div class="confirm-dialog__reason">
+          <label class="confirm-dialog__reason-label">
+            Motivo de cancelación *
+          </label>
+          <textarea
+            class="confirm-dialog__reason-input"
+            [placeholder]="confirmService.state().reasonInput!.placeholder"
+            [ngModel]="reasonText()"
+            (ngModelChange)="reasonText.set($event)"
+            rows="3"
+            aria-label="Motivo de cancelación"
+          ></textarea>
+        </div>
+      }
+
       <!-- Botones de acción -->
       <div class="confirm-dialog__actions">
 
