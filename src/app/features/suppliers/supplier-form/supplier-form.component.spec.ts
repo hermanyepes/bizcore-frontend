@@ -15,6 +15,7 @@ function makeSupplier(overrides: Partial<Supplier> = {}): Supplier {
     contact_email: 'contacto@distcol.com',
     phone:         '3101234567',
     address:       'Calle 10 # 5-20, Bogotá',
+    nit:           null,
     is_active:     true,
     created_at:    '2026-01-15T10:00:00Z',
     updated_at:    null,
@@ -147,6 +148,7 @@ describe('SupplierFormComponent — modo CREAR', () => {
       contact_email: 'contacto@distcol.com',
       phone:         '3101234567',
       address:       'Calle 10 # 5-20',
+      nit:           null,
     });
   });
 

@@ -34,6 +34,7 @@ function makeSupplier(overrides: Partial<Supplier> = {}): Supplier {
     contact_email: null,
     phone:         null,
     address:       null,
+    nit:           null,
     is_active:     true,
     created_at:    '2026-01-01T00:00:00Z',
     updated_at:    null,
@@ -417,9 +418,17 @@ describe('OrderFormComponent — modo EDITAR', () => {
     snapshot: { paramMap: convertToParamMap({ id: '5' }) }, // id presente → modo editar
   };
 
+  const ordersServiceEditSpy = {
+    createOrder:  vi.fn(),
+    updateOrder:  vi.fn(),
+    updateStatus: vi.fn(),
+    getOrder:     vi.fn(),
+  };
+
   beforeEach(async () => {
-    ordersServiceSpy.getOrder.mockReturnValue(of(makeOrder()));
-    ordersServiceSpy.updateOrder.mockReturnValue(of(makeOrder({ status: 'COMPLETADO' })));
+    ordersServiceEditSpy.getOrder.mockReturnValue(of(makeOrder()));
+    ordersServiceEditSpy.updateOrder.mockReturnValue(of(makeOrder()));
+    ordersServiceEditSpy.updateStatus.mockReturnValue(of(makeOrder({ status: 'ENTREGADA' })));
     suppliersServiceSpy.getSuppliers.mockReturnValue(of(makeSupplierPaginated()));
     productsServiceSpy.getProducts.mockReturnValue(of(makeProductPaginated()));
 
@@ -427,7 +436,7 @@ describe('OrderFormComponent — modo EDITAR', () => {
       imports:   [OrderFormComponent],
       providers: [
         provideRouter([]),
-        { provide: OrdersService,    useValue: ordersServiceSpy },
+        { provide: OrdersService,    useValue: ordersServiceEditSpy },
         { provide: SuppliersService, useValue: suppliersServiceSpy },
         { provide: ProductsService,  useValue: productsServiceSpy },
         { provide: ActivatedRoute,   useValue: activatedRouteMock },
@@ -454,7 +463,7 @@ describe('OrderFormComponent — modo EDITAR', () => {
   });
 
   it('should call getOrder on init with the correct id', () => {
-    expect(ordersServiceSpy.getOrder).toHaveBeenCalledWith(5);
+    expect(ordersServiceEditSpy.getOrder).toHaveBeenCalledWith(5);
   });
 
   // ─── Grupo 12: Pre-población del formulario ───────────────────────────────
@@ -465,8 +474,11 @@ describe('OrderFormComponent — modo EDITAR', () => {
     expect(component.form.get('notes')!.value).toBe('Pedido mensual');
   });
 
-  it('should pre-populate status from the loaded order', () => {
-    expect(component.form.get('status')!.value).toBe('PENDIENTE');
+  it('should store the current status in loadedOrder (not in the form control)', () => {
+    // El control 'status' representa el NUEVO estado a aplicar (empieza en null).
+    // El estado actual del pedido vive en loadedOrder().status.
+    expect(component.form.get('status')!.value).toBeNull();
+    expect(component.loadedOrder()?.status).toBe('PENDIENTE');
   });
 
   it('should store the loaded order in the loadedOrder signal', () => {
@@ -502,22 +514,21 @@ describe('OrderFormComponent — modo EDITAR', () => {
   // ─── Grupo 15: saveUpdate — payload correcto ──────────────────────────────
   // Solo envía status y notes — nunca los ítems.
 
-  it('should call updateOrder with the correct id and payload', () => {
-    component.form.get('status')!.setValue('COMPLETADO');
+  it('should call updateStatus when a new status is selected', () => {
+    // Cuando se selecciona un nuevo estado, save() llama updateStatus(), no updateOrder().
+    component.form.get('status')!.setValue('ENTREGADA');
     component.form.get('notes')!.setValue('Entregado correctamente');
     component.save();
 
-    expect(ordersServiceSpy.updateOrder).toHaveBeenCalledWith(5, {
-      status: 'COMPLETADO',
-      notes:  'Entregado correctamente',
-    });
+    expect(ordersServiceEditSpy.updateStatus).toHaveBeenCalledWith(5, 'ENTREGADA', null);
+    expect(ordersServiceEditSpy.updateOrder).not.toHaveBeenCalled();
   });
 
   it('should send null notes when the field is empty on update', () => {
     component.form.get('notes')!.setValue('');
     component.save();
 
-    expect(ordersServiceSpy.updateOrder).toHaveBeenCalledWith(
+    expect(ordersServiceEditSpy.updateOrder).toHaveBeenCalledWith(
       5,
       expect.objectContaining({ notes: null })
     );
@@ -532,7 +543,7 @@ describe('OrderFormComponent — modo EDITAR', () => {
   });
 
   it('should set serverError when updateOrder fails', () => {
-    ordersServiceSpy.updateOrder.mockReturnValue(
+    ordersServiceEditSpy.updateOrder.mockReturnValue(
       throwError(() => ({ error: { detail: 'Estado inválido.' } }))
     );
     component.save();
@@ -542,7 +553,7 @@ describe('OrderFormComponent — modo EDITAR', () => {
   });
 
   it('should set serverError when getOrder fails on load', () => {
-    ordersServiceSpy.getOrder.mockReturnValue(
+    ordersServiceEditSpy.getOrder.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
     fixture   = TestBed.createComponent(OrderFormComponent);

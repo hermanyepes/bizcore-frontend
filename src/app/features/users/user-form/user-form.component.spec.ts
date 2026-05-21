@@ -5,6 +5,7 @@ import { of, throwError, Subject }                     from 'rxjs';
 
 import { UserFormComponent }                           from './user-form.component';
 import { UsersService }                                from '../users.service';
+import { AuthService }                                 from '../../../core/auth/auth.service';
 import { User }                                        from '../../../core/models/user.model';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -239,9 +240,14 @@ describe('UserFormComponent — modo EDITAR', () => {
   };
 
   const usersServiceSpy = {
-    getOne:    vi.fn(),
+    getOne: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+  };
+
+  // Superadmin puede gestionar cualquier usuario → canManageUser() retorna true
+  const authServiceSpy = {
+    currentUser: () => ({ sub: '9000000000', role: 'Superadmin', exp: 9999999999 }),
   };
 
   beforeEach(async () => {
@@ -252,7 +258,8 @@ describe('UserFormComponent — modo EDITAR', () => {
       imports:   [UserFormComponent],
       providers: [
         provideRouter([]),
-        { provide: UsersService,   useValue: usersServiceSpy    },
+        { provide: UsersService,   useValue: usersServiceSpy  },
+        { provide: AuthService,    useValue: authServiceSpy   },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
       ],
     }).compileComponents();
@@ -309,8 +316,10 @@ describe('UserFormComponent — modo EDITAR', () => {
     expect(component.form.get('document_type')!.disabled).toBe(true);
   });
 
-  it('email control should be disabled in edit mode', () => {
-    expect(component.form.get('email')!.disabled).toBe(true);
+  it('email control should be enabled in edit mode for Superadmin (can change emails)', () => {
+    // Superadmin puede corregir el email de cualquier usuario.
+    // Administrador no puede — su campo email queda disabled.
+    expect(component.form.get('email')!.disabled).toBe(false);
   });
 
   // ─── Renderizado del formulario ─────────────────────────────────────────────
