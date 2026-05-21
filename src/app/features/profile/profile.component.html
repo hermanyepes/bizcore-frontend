@@ -1,0 +1,213 @@
+<div class="profile-page animate-slide-in">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <h1 class="page-title">Mi perfil</h1>
+  </div>
+
+  <!-- ── Estado: cargando ──────────────────────────────────────────────────── -->
+  @if (isLoading()) {
+    <div class="state-card">
+      <div class="spinner" aria-label="Cargando perfil"></div>
+      <p class="state-text">Cargando tu perfil…</p>
+    </div>
+  }
+
+  <!-- ── Estado: error de carga ────────────────────────────────────────────── -->
+  @else if (loadError()) {
+    <div class="state-card state-card--error">
+      <span class="state-icon">⚠</span>
+      <p class="state-text">No se pudo cargar el perfil. Verifica tu conexión.</p>
+    </div>
+  }
+
+  <!-- ── Estado: datos listos ──────────────────────────────────────────────── -->
+  @else {
+    <!-- ─ Tarjeta de perfil ─────────────────────────────────────────────────── -->
+    <div class="profile-card">
+
+      <!-- Avatar + nombre + rol -->
+      <div class="profile-header">
+        <div class="profile-avatar">{{ initials() }}</div>
+        <div class="profile-identity">
+          <h2 class="profile-name">{{ userData()!.full_name }}</h2>
+          <span class="badge"
+                [class.badge--superadmin]="userData()!.role === 'Superadmin'"
+                [class.badge--admin]="userData()!.role === 'Administrador'"
+                [class.badge--supervisor]="userData()!.role === 'Supervisor'"
+                [class.badge--empleado]="userData()!.role === 'Empleado'">
+            {{ userData()!.role }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Campos del perfil — vista de solo lectura -->
+      @if (!isEditingProfile()) {
+        <div class="profile-body">
+
+          <div class="field-group">
+            <span class="field-label">Correo electrónico</span>
+            <span class="field-value">{{ userData()!.email }}</span>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Documento</span>
+            <span class="field-value mono">
+              {{ userData()!.document_type }} {{ userData()!.document_id }}
+            </span>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Teléfono</span>
+            <span class="field-value">{{ userData()!.phone ?? '—' }}</span>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Ciudad</span>
+            <span class="field-value">{{ userData()!.city ?? '—' }}</span>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Vinculación</span>
+            <span class="field-value mono">{{ userData()!.join_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+        </div>
+
+        <!-- Acciones sobre el perfil -->
+        <div class="profile-actions">
+          <button class="btn-primary" type="button" (click)="openEditProfile()">
+            Editar mi perfil
+          </button>
+          <button class="btn-secondary" type="button" (click)="openChangePassword()">
+            Cambiar contraseña
+          </button>
+        </div>
+      }
+
+      <!-- ─ Formulario de edición de perfil (inline) ─────────────────────────── -->
+      @if (isEditingProfile()) {
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-edit-form" novalidate>
+
+          @if (profileServerError()) {
+            <div class="server-error" role="alert">{{ profileServerError() }}</div>
+          }
+
+          <div class="field">
+            <label class="field__label" for="full_name">Nombre completo *</label>
+            <input id="full_name"
+                   type="text"
+                   class="field__input"
+                   formControlName="full_name"
+                   autocomplete="name"
+                   [class.field__input--error]="profileForm.get('full_name')!.invalid && profileForm.get('full_name')!.touched">
+            @if (profileForm.get('full_name')!.invalid && profileForm.get('full_name')!.touched) {
+              <span class="field__error">El nombre es obligatorio (máx. 80 caracteres).</span>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label class="field__label" for="phone">Teléfono</label>
+              <input id="phone"
+                     type="tel"
+                     class="field__input"
+                     formControlName="phone"
+                     autocomplete="tel"
+                     placeholder="Ej: 3001234567">
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="city">Ciudad</label>
+              <input id="city"
+                     type="text"
+                     class="field__input"
+                     formControlName="city"
+                     autocomplete="address-level2"
+                     placeholder="Ej: Bogotá">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn--secondary" (click)="cancelEditProfile()">
+              Cancelar
+            </button>
+            <button type="submit"
+                    class="btn btn--primary"
+                    [disabled]="profileForm.invalid || isSavingProfile()">
+              {{ isSavingProfile() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+          </div>
+
+        </form>
+      }
+
+    </div>
+
+    <!-- ─ Sección cambio de contraseña ──────────────────────────────────────── -->
+    @if (isChangingPassword()) {
+      <div class="profile-card profile-card--password">
+        <h3 class="section-title">Cambiar contraseña</h3>
+        <p class="section-hint">
+          Al guardar, se cerrarán todas tus sesiones activas y serás redirigido al login.
+        </p>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="profile-edit-form" novalidate>
+
+          @if (passwordServerError()) {
+            <div class="server-error" role="alert">{{ passwordServerError() }}</div>
+          }
+
+          <div class="field">
+            <label class="field__label" for="current_password">Contraseña actual *</label>
+            <input id="current_password"
+                   type="password"
+                   class="field__input"
+                   formControlName="current_password"
+                   autocomplete="current-password">
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="new_password">Nueva contraseña *</label>
+            <input id="new_password"
+                   type="password"
+                   class="field__input"
+                   formControlName="new_password"
+                   autocomplete="new-password"
+                   [class.field__input--error]="passwordForm.get('new_password')!.invalid && passwordForm.get('new_password')!.touched">
+            @if (passwordForm.get('new_password')!.invalid && passwordForm.get('new_password')!.touched) {
+              <span class="field__error">La nueva contraseña debe tener al menos 8 caracteres.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="confirm_password">Confirmar nueva contraseña *</label>
+            <input id="confirm_password"
+                   type="password"
+                   class="field__input"
+                   formControlName="confirm_password"
+                   autocomplete="new-password"
+                   [class.field__input--error]="passwordMismatch()">
+            @if (passwordMismatch()) {
+              <span class="field__error">Las contraseñas no coinciden.</span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn--secondary" (click)="cancelChangePassword()">
+              Cancelar
+            </button>
+            <button type="submit"
+                    class="btn btn--primary"
+                    [disabled]="passwordForm.invalid || isSavingPassword()">
+              {{ isSavingPassword() ? 'Guardando…' : 'Cambiar contraseña' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    }
+
+  }
+
+</div>

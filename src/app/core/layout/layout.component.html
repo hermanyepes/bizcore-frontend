@@ -17,28 +17,32 @@
     <!-- Navegación principal.
          routerLinkActive agrega la clase CSS cuando la ruta está activa. -->
     <nav class="sidebar__nav">
-      <!-- (click)="closeMobileSidebar()" cierra el drawer al navegar en mobile -->
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Dashboard"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">⊞</span>
-        <span class="sidebar__text">Dashboard</span>
-      </a>
+      <!-- Dashboard: solo roles con acceso a métricas del negocio -->
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Dashboard"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">⊞</span>
+          <span class="sidebar__text">Dashboard</span>
+        </a>
+      }
 
-      <a
-        routerLink="/users"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Usuarios"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">👤</span>
-        <span class="sidebar__text">Usuarios</span>
-      </a>
+      @if (['Superadmin', 'Administrador'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/users"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Usuarios"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">👤</span>
+          <span class="sidebar__text">Usuarios</span>
+        </a>
+      }
 
       <a
         routerLink="/products"
@@ -51,27 +55,31 @@
         <span class="sidebar__text">Productos</span>
       </a>
 
-      <a
-        routerLink="/inventory"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Inventario"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">🗃️</span>
-        <span class="sidebar__text">Inventario</span>
-      </a>
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/inventory"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Inventario"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">🗃️</span>
+          <span class="sidebar__text">Inventario</span>
+        </a>
+      }
 
-      <a
-        routerLink="/suppliers"
-        routerLinkActive="sidebar__link--active"
-        class="sidebar__link"
-        title="Proveedores"
-        (click)="closeMobileSidebar()"
-      >
-        <span class="sidebar__icon" aria-hidden="true">🚚</span>
-        <span class="sidebar__text">Proveedores</span>
-      </a>
+      @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+        <a
+          routerLink="/suppliers"
+          routerLinkActive="sidebar__link--active"
+          class="sidebar__link"
+          title="Proveedores"
+          (click)="closeMobileSidebar()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">🚚</span>
+          <span class="sidebar__text">Proveedores</span>
+        </a>
+      }
 
       <a
         routerLink="/orders"
@@ -111,7 +119,9 @@
       <!-- Info del usuario logueado + botón de logout -->
       <div class="navbar__user">
         <div class="navbar__user-info">
-          <span class="navbar__username">{{ currentUser()?.sub }}</span>
+          <a routerLink="/profile" class="navbar__username navbar__username--link">
+            {{ currentUser()?.sub }}
+          </a>
           <span class="navbar__role">{{ currentUser()?.role }}</span>
         </div>
         <button class="navbar__logout" type="button" (click)="logout()">

@@ -12,7 +12,7 @@ export interface UserListParams {
   page?:      number;
   page_size?: number;
   is_active?: boolean;
-  role?:      'Administrador' | 'Empleado';
+  role?:      'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado';
 }
 
 // Datos necesarios para crear un usuario nuevo.
@@ -25,22 +25,22 @@ export interface UserCreatePayload {
   phone?:        string | null;
   email:         string;
   city?:         string | null;
-  role:          'Administrador' | 'Empleado';
+  role:          'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado';
   password:      string;
 }
 
 // Datos actualizables de un usuario existente. Todos son opcionales:
 // el cliente puede enviar solo los campos que quiere cambiar.
-// Espejo de UserUpdate en app/schemas/user.py
-// Nota: document_id, document_type y email NO están aquí — el backend no
-// permite cambiarlos una vez creados.
+// Espejo de UserUpdateSuperadmin en app/schemas/user.py
+// email solo se envía cuando el llamador es Superadmin (el frontend lo controla).
 export interface UserUpdatePayload {
   full_name?: string | null;
   phone?:     string | null;
   city?:      string | null;
-  role?:      'Administrador' | 'Empleado' | null;
+  role?:      'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado' | null;
   password?:  string | null;
   is_active?: boolean | null;
+  email?:     string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -75,5 +75,39 @@ export class UsersService extends GenericCrudService<User, UserCreatePayload, Us
     // El interceptor agrega el Bearer token automáticamente — no hay que hacerlo aquí.
     // El tipo genérico <UserPaginated> le dice a Angular qué forma tiene la respuesta.
     return this.http.get<UserPaginated>(this.baseUrl + '/', { params: httpParams });
+  }
+
+  // -------------------------------------------------------------------------
+  // hardDelete — elimina físicamente un usuario sin actividad registrada
+  // DELETE /api/v1/users/{id}/permanent
+  // Solo disponible para Superadmin — el backend lo valida con require_superadmin.
+  // -------------------------------------------------------------------------
+  hardDelete(id: string): Observable<User> {
+    return this.http.delete<User>(`${this.baseUrl}/${id}/permanent`);
+  }
+
+  // -------------------------------------------------------------------------
+  // forceLogout — revoca todos los refresh tokens activos del usuario
+  // POST /api/v1/users/{id}/force-logout
+  // Solo Admin o Superadmin — el backend valida con require_admin.
+  // -------------------------------------------------------------------------
+  forceLogout(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/${id}/force-logout`, {});
+  }
+
+  // -------------------------------------------------------------------------
+  // getMe — perfil completo del usuario autenticado
+  // GET /api/v1/users/me
+  // -------------------------------------------------------------------------
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${this.baseUrl}/me`);
+  }
+
+  // -------------------------------------------------------------------------
+  // updateMe — actualiza solo full_name, phone, city del usuario autenticado
+  // PUT /api/v1/users/me
+  // -------------------------------------------------------------------------
+  updateMe(payload: { full_name?: string; phone?: string | null; city?: string | null }): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/me`, payload);
   }
 }

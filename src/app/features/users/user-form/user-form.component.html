@@ -90,6 +90,7 @@
               [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
               placeholder="usuario@empresa.com"
               autocomplete="email"
+              (input)="onEmailInput($event)"
             />
             @if (form.get('email')!.hasError('required') && form.get('email')!.touched) {
               <span class="form-error">El correo es obligatorio.</span>
@@ -105,6 +106,31 @@
       <!-- ── Sección: Datos personales (ambos modos) ──────────────────────── -->
       <div class="form-section">
         <p class="form-section__title">Datos personales</p>
+
+        <!-- Correo electrónico — visible en modo EDITAR (campo de creación está arriba) -->
+        @if (isEditMode) {
+          <div class="form-field">
+            <label class="form-label" for="email">
+              Correo electrónico
+              @if (!isSuperadmin()) {
+                <span class="form-label--optional">(solo editable por Superadmin)</span>
+              }
+            </label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.form-input--error]="form.get('email')!.invalid && form.get('email')!.touched"
+              placeholder="usuario@empresa.com"
+              autocomplete="email"
+              (input)="onEmailInput($event)"
+            />
+            @if (form.get('email')!.hasError('email') && form.get('email')!.touched) {
+              <span class="form-error">Ingresa un correo válido.</span>
+            }
+          </div>
+        }
 
         <!-- Nombre completo -->
         <div class="form-field">
@@ -140,6 +166,8 @@
               class="form-input"
               placeholder="Ej. 3001234567"
               autocomplete="tel"
+              inputmode="numeric"
+              (input)="onPhoneInput($event)"
             />
           </div>
 
@@ -168,17 +196,22 @@
 
         <div class="form-row">
 
-          <!-- Rol -->
-          <div class="form-field">
-            <label class="form-label" for="role">Rol</label>
-            <select id="role" formControlName="role" class="form-select">
-              <option value="Empleado">Empleado</option>
-              <option value="Administrador">Administrador</option>
-            </select>
-          </div>
+          <!-- Rol — oculto al editar el propio perfil (Separation of Duties) -->
+          @if (!isEditingSelf()) {
+            <div class="form-field">
+              <label class="form-label" for="role">Rol</label>
+              <select id="role" formControlName="role" class="form-select">
+                <option value="Empleado">Empleado</option>
+                <option value="Supervisor">Supervisor</option>
+                @if (isSuperadmin()) {
+                  <option value="Administrador">Administrador</option>
+                }
+              </select>
+            </div>
+          }
 
-          <!-- Estado activo/inactivo — solo en modo EDITAR -->
-          @if (isEditMode) {
+          <!-- Estado activo/inactivo — solo en modo EDITAR y nunca sobre el propio perfil -->
+          @if (isEditMode && !isEditingSelf()) {
             <div class="form-field">
               <label class="form-label" for="is_active">Estado</label>
               <select id="is_active" formControlName="is_active" class="form-select">
@@ -194,21 +227,44 @@
         <div class="form-field">
           <label class="form-label" for="password">
             Contraseña
-            @if (!isEditMode) {
-              <!-- En crear: obligatoria, lo indicamos visualmente -->
-            } @else {
+            @if (isEditMode) {
               <span class="form-label--optional">(dejar vacío para no cambiar)</span>
             }
           </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="form-input"
-            [class.form-input--error]="form.get('password')!.invalid && form.get('password')!.touched"
-            [placeholder]="isEditMode ? '••••••••' : 'Mínimo 8 caracteres'"
-            autocomplete="new-password"
-          />
+          <div class="password-wrapper">
+            <input
+              id="password"
+              [type]="isPasswordVisible() ? 'text' : 'password'"
+              formControlName="password"
+              class="form-input"
+              [class.form-input--error]="form.get('password')!.invalid && form.get('password')!.touched"
+              [placeholder]="isEditMode ? '••••••••' : 'Mínimo 8 caracteres'"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+              [attr.aria-label]="isPasswordVisible() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              @if (isPasswordVisible()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              }
+            </button>
+          </div>
           @if (form.get('password')!.hasError('required') && form.get('password')!.touched) {
             <span class="form-error">La contraseña es obligatoria.</span>
           }

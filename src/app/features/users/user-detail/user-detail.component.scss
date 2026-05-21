@@ -157,10 +157,22 @@
   border-radius: 999px;
   border:        1px solid transparent;
 
+  &--superadmin {
+    color:            #A855F7;
+    background-color: rgba(168, 85, 247, 0.12);
+    border-color:     #A855F7;
+  }
+
   &--admin {
     color:            var(--color-accent);
     background-color: var(--color-accent-dim);
     border-color:     var(--color-accent);
+  }
+
+  &--supervisor {
+    color:            #06B6D4;
+    background-color: rgba(6, 182, 212, 0.12);
+    border-color:     #06B6D4;
   }
 
   &--empleado {
@@ -225,7 +237,7 @@
   color:       var(--color-text-primary);
 }
 
-// ── Botón primario (estado de error) ────────────────────────────────────────
+// ── Botones de acción ────────────────────────────────────────────────────────
 
 .btn-primary {
   font-family:     var(--font-ui);
@@ -254,5 +266,23 @@
     box-shadow: var(--glow-accent);
 
     &::after { animation: shimmer 500ms ease-out forwards; }
+  }
+}
+
+.btn-danger {
+  font-family:  var(--font-ui);
+  font-size:    0.875rem;
+  font-weight:  600;
+  padding:      0.625rem 1.25rem;
+  border-radius: 8px;
+  border:       1px solid var(--color-danger);
+  background:   transparent;
+  color:        var(--color-danger);
+  cursor:       pointer;
+  transition:   background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--color-danger);
+    color:      #0F1117;
   }
 }

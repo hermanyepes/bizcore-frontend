@@ -55,6 +55,7 @@ function makeSupplier(overrides: Partial<Supplier> = {}): Supplier {
     contact_email: 'contacto@distcol.com',
     phone:         '3101234567',
     address:       'Calle 10 # 5-20',
+    nit:           null,
     is_active:     true,
     created_at:    '2026-01-15T10:00:00Z',
     updated_at:    null,
@@ -81,8 +82,8 @@ describe('OrdersListComponent', () => {
 
   // Spies — reemplazan los servicios reales: ninguna llamada HTTP real ocurre
   const ordersServiceSpy = {
-    getOrders:   vi.fn(),
-    cancelOrder: vi.fn(),
+    getOrders:    vi.fn(),
+    updateStatus: vi.fn(),
   };
 
   const suppliersServiceSpy = {
@@ -90,7 +91,8 @@ describe('OrdersListComponent', () => {
   };
 
   const confirmServiceSpy = {
-    confirm: vi.fn().mockResolvedValue(true),
+    confirm:           vi.fn().mockResolvedValue(true),
+    confirmWithReason: vi.fn().mockResolvedValue('Motivo de cancelación de prueba'),
   };
 
   const snackbarServiceSpy = {
@@ -100,7 +102,7 @@ describe('OrdersListComponent', () => {
   beforeEach(async () => {
     // Cada test parte de un estado limpio y con datos por defecto
     ordersServiceSpy.getOrders.mockReturnValue(of(makeOrderPaginated()));
-    ordersServiceSpy.cancelOrder.mockReturnValue(of(makeOrder({ status: 'CANCELADO' })));
+    ordersServiceSpy.updateStatus.mockReturnValue(of(makeOrder({ status: 'CANCELADA' })));
     suppliersServiceSpy.getSuppliers.mockReturnValue(of(makeSupplierPaginated()));
 
     await TestBed.configureTestingModule({
@@ -124,6 +126,7 @@ describe('OrdersListComponent', () => {
   afterEach(() => {
     vi.clearAllMocks();
     confirmServiceSpy.confirm.mockResolvedValue(true);
+    confirmServiceSpy.confirmWithReason.mockResolvedValue('Motivo de cancelación de prueba');
   });
 
   // ─── Grupo 1: Creación ────────────────────────────────────────────────────
@@ -247,27 +250,27 @@ describe('OrdersListComponent', () => {
     expect(badge.classList.contains('status-badge--warning')).toBe(true);
   });
 
-  it('should show COMPLETADO badge with success class', () => {
+  it('should show ENTREGADA badge with success class', () => {
     ordersServiceSpy.getOrders.mockReturnValue(
-      of(makeOrderPaginated({ items: [makeOrder({ status: 'COMPLETADO' })] }))
+      of(makeOrderPaginated({ items: [makeOrder({ status: 'ENTREGADA' })] }))
     );
     component.loadPage(1);
     fixture.detectChanges();
 
     const badge = fixture.nativeElement.querySelector('.status-badge') as HTMLElement;
-    expect(badge.textContent?.trim()).toBe('COMPLETADO');
+    expect(badge.textContent?.trim()).toBe('ENTREGADA');
     expect(badge.classList.contains('status-badge--success')).toBe(true);
   });
 
-  it('should show CANCELADO badge with danger class', () => {
+  it('should show CANCELADA badge with danger class', () => {
     ordersServiceSpy.getOrders.mockReturnValue(
-      of(makeOrderPaginated({ items: [makeOrder({ status: 'CANCELADO' })] }))
+      of(makeOrderPaginated({ items: [makeOrder({ status: 'CANCELADA' })] }))
     );
     component.loadPage(1);
     fixture.detectChanges();
 
     const badge = fixture.nativeElement.querySelector('.status-badge') as HTMLElement;
-    expect(badge.textContent?.trim()).toBe('CANCELADO');
+    expect(badge.textContent?.trim()).toBe('CANCELADA');
     expect(badge.classList.contains('status-badge--danger')).toBe(true);
   });
 
@@ -321,7 +324,7 @@ describe('OrdersListComponent', () => {
 
   // ─── Grupo 9: Botón Cancelar condicional ──────────────────────────────────
   // Solo aparece para pedidos PENDIENTE.
-  // Para COMPLETADO y CANCELADO, el botón no existe en el DOM.
+  // Para ENTREGADA y CANCELADA, el botón no existe en el DOM.
 
   it('should show Cancel button for PENDIENTE orders', () => {
     const btn = fixture.nativeElement.querySelector('.action-link--danger') as HTMLElement;
@@ -329,9 +332,9 @@ describe('OrdersListComponent', () => {
     expect(btn.textContent?.trim()).toBe('Cancelar');
   });
 
-  it('should NOT show Cancel button for COMPLETADO orders', () => {
+  it('should NOT show Cancel button for ENTREGADA orders', () => {
     ordersServiceSpy.getOrders.mockReturnValue(
-      of(makeOrderPaginated({ items: [makeOrder({ status: 'COMPLETADO' })] }))
+      of(makeOrderPaginated({ items: [makeOrder({ status: 'ENTREGADA' })] }))
     );
     component.loadPage(1);
     fixture.detectChanges();
@@ -340,9 +343,9 @@ describe('OrdersListComponent', () => {
     expect(btn).toBeNull();
   });
 
-  it('should NOT show Cancel button for CANCELADO orders', () => {
+  it('should NOT show Cancel button for CANCELADA orders', () => {
     ordersServiceSpy.getOrders.mockReturnValue(
-      of(makeOrderPaginated({ items: [makeOrder({ status: 'CANCELADO' })] }))
+      of(makeOrderPaginated({ items: [makeOrder({ status: 'CANCELADA' })] }))
     );
     component.loadPage(1);
     fixture.detectChanges();
@@ -356,17 +359,17 @@ describe('OrdersListComponent', () => {
   // Después recarga la página actual.
   // Si cancela el confirm, no se hace ninguna llamada.
 
-  it('should call cancelOrder service when user confirms', async () => {
-    confirmServiceSpy.confirm.mockResolvedValue(true);
+  it('should call updateStatus with CANCELADA when user confirms cancellation', async () => {
+    confirmServiceSpy.confirmWithReason.mockResolvedValue('Pedido duplicado');
 
     component.cancelOrder(makeOrder());
     await Promise.resolve();
 
-    expect(ordersServiceSpy.cancelOrder).toHaveBeenCalledWith(1);
+    expect(ordersServiceSpy.updateStatus).toHaveBeenCalledWith(1, 'CANCELADA', 'Pedido duplicado');
   });
 
   it('should reload current page after cancellation', async () => {
-    confirmServiceSpy.confirm.mockResolvedValue(true);
+    confirmServiceSpy.confirmWithReason.mockResolvedValue('Pedido duplicado');
     ordersServiceSpy.getOrders.mockClear();
 
     component.cancelOrder(makeOrder());
@@ -375,13 +378,13 @@ describe('OrdersListComponent', () => {
     expect(ordersServiceSpy.getOrders).toHaveBeenCalledTimes(1);
   });
 
-  it('should NOT call cancelOrder when user dismisses confirm', async () => {
-    confirmServiceSpy.confirm.mockResolvedValue(false);
+  it('should NOT call updateStatus when user dismisses the reason dialog', async () => {
+    confirmServiceSpy.confirmWithReason.mockResolvedValue(null);
 
     component.cancelOrder(makeOrder());
     await Promise.resolve();
 
-    expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
+    expect(ordersServiceSpy.updateStatus).not.toHaveBeenCalled();
   });
 
   // ─── Grupo 11: Filtro de estado ───────────────────────────────────────────

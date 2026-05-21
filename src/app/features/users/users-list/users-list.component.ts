@@ -6,6 +6,7 @@ import { toObservable }                        from '@angular/core/rxjs-interop'
 
 import { UsersService, UserListParams }      from '../users.service';
 import { User }                              from '../../../core/models/user.model';
+import { AuthService }                       from '../../../core/auth/auth.service';
 import { PaginatorComponent }               from '../../../shared/paginator/paginator.component';
 import { ModalComponent }                   from '../../../shared/modal/modal.component';
 import { UserCreateModalComponent }         from '../user-create-modal/user-create-modal.component';
@@ -25,6 +26,9 @@ export class UsersListComponent {
   private readonly usersService    = inject(UsersService);
   private readonly snackbarService = inject(SnackbarService);
   private readonly confirmService  = inject(ConfirmDialogService);
+  private readonly authService     = inject(AuthService);
+
+  readonly currentUser = this.authService.currentUser;
 
   // ── ViewChild al formulario dentro del modal ──────────────────────────────
   // Permite consultar form.dirty desde esta lista sin acoplar la lógica

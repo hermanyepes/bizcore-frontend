@@ -81,6 +81,23 @@
                  placeholder="Ej: Calle 10 # 5-20, Bogotá">
         </div>
 
+        <div class="field field--narrow">
+          <label class="field__label" for="nit">NIT</label>
+          <input id="nit"
+                 type="text"
+                 class="field__input"
+                 formControlName="nit"
+                 autocomplete="off"
+                 placeholder="Ej: 800123456 o 800123456-7"
+                 [class.field__input--error]="form.get('nit')!.invalid && form.get('nit')!.touched">
+          @if (form.get('nit')!.invalid && form.get('nit')!.touched) {
+            <span class="field__error">
+              {{ form.get('nit')!.errors?.['nit']?.message ?? 'NIT inválido.' }}
+            </span>
+          }
+          <span class="field__hint">9-11 dígitos. Con o sin dígito de verificación (DIAN módulo 11).</span>
+        </div>
+
       </div>
 
       <!-- ── Sección: estado (solo modo editar) ────────────────────────── -->

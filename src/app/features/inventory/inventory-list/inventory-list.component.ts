@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 
 import { InventoryService }                          from '../inventory.service';
 import { InventoryMovement, MovementType }           from '../../../core/models/inventory.model';
+import { AuthService }                               from '../../../core/auth/auth.service';
 import { PaginatorComponent }                        from '../../../shared/paginator/paginator.component';
 
 // ─── Estado de carga ──────────────────────────────────────────────────────────
@@ -28,6 +29,9 @@ export class InventoryListComponent implements OnInit {
 
   private readonly inventoryService = inject(InventoryService);
   private readonly router           = inject(Router);
+  private readonly authService      = inject(AuthService);
+
+  readonly currentUser = this.authService.currentUser;
 
   // ─── Estado de la pantalla ────────────────────────────────────────────────
   // Signal de estado: controla si mostramos el spinner, la tabla, o el error.

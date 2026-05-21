@@ -5,11 +5,25 @@
     <a [routerLink]="['/users']" class="back-link">← Volver a usuarios</a>
     <div class="page-header__row">
       <h1 class="page-title">Detalle de usuario</h1>
-      <!-- Botón de edición: solo visible cuando los datos ya cargaron -->
-      @if (!isLoading() && !isNotFound()) {
+      <!-- Botones: solo visibles cuando los datos ya cargaron -->
+      @if (!isLoading() && !isNotFound() && canEdit()) {
         <a [routerLink]="['/users', user()!.document_id, 'edit']" class="btn-primary">
           Editar
         </a>
+        <!-- Force-logout: visible para Admin o Superadmin cuando el usuario está activo.
+             Revoca todos los refresh tokens — el usuario pierde sesión en todos sus dispositivos. -->
+        @if (isAdmin() && user()!.is_active) {
+          <button class="btn-secondary" (click)="forceLogoutUser()">
+            Forzar cierre de sesión
+          </button>
+        }
+        <!-- Borrado físico: solo Superadmin y solo si el usuario ya está inactivo.
+             El flujo de doble intención fuerza: primero desactivar, luego eliminar. -->
+        @if (isSuperadmin() && !user()!.is_active) {
+          <button class="btn-danger" (click)="hardDeleteUser()">
+            Eliminar permanentemente
+          </button>
+        }
       }
     </div>
   </div>
@@ -54,7 +68,9 @@
           <div class="profile-badges">
             <!-- Badge de rol -->
             <span class="badge"
+                  [class.badge--superadmin]="user()!.role === 'Superadmin'"
                   [class.badge--admin]="user()!.role === 'Administrador'"
+                  [class.badge--supervisor]="user()!.role === 'Supervisor'"
                   [class.badge--empleado]="user()!.role === 'Empleado'">
               {{ user()!.role }}
             </span>

@@ -204,22 +204,63 @@
 
       <!-- ════════════════════════════════════════════════════════════════════
            SECCIÓN 3 — Estado (solo modo EDITAR)
-           En modo crear el backend siempre asigna PENDIENTE automáticamente.
+           Muestra las transiciones válidas desde el estado actual del pedido.
+           Si el pedido es terminal (ENTREGADA | CANCELADA), no hay acciones.
       ══════════════════════════════════════════════════════════════════════ -->
       @if (isEditMode) {
         <div class="form-section">
           <p class="form-section__title">Estado del pedido</p>
 
-          <div class="field field--narrow">
-            <label class="field__label" for="status">Estado</label>
-            <select id="status"
-                    class="field__input field__select"
-                    formControlName="status">
-              <option value="PENDIENTE">Pendiente</option>
-              <option value="COMPLETADO">Completado</option>
-              <option value="CANCELADO">Cancelado</option>
-            </select>
-          </div>
+          <!-- Estado actual — siempre visible en modo editar -->
+          @if (loadedOrder()) {
+            <div class="field">
+              <label class="field__label">Estado actual</label>
+              <p class="field__readonly">{{ loadedOrder()!.status }}</p>
+            </div>
+          }
+
+          <!-- Estados terminales: sin acciones posibles -->
+          @if (isTerminalState) {
+            <p class="terminal-state-msg">
+              @if (loadedOrder()?.status === 'ENTREGADA') {
+                Este pedido ya fue entregado. No se pueden hacer más cambios de estado.
+              } @else {
+                Este pedido fue cancelado. No se pueden hacer más cambios de estado.
+              }
+            </p>
+          }
+
+          <!-- Estados no terminales: selector de transición -->
+          @if (!isTerminalState && loadedOrder()) {
+            <div class="field field--narrow">
+              <label class="field__label" for="status">Mover a…</label>
+              <select id="status"
+                      class="field__input field__select"
+                      formControlName="status">
+                <option [value]="null" disabled selected>Selecciona una transición…</option>
+                @for (opt of availableStatusOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- cancel_reason: visible y obligatorio solo al cancelar -->
+            @if (form.get('status')?.value === 'CANCELADA') {
+              <div class="field">
+                <label class="field__label" for="cancel_reason">Motivo de cancelación *</label>
+                <textarea id="cancel_reason"
+                          class="field__input field__textarea"
+                          formControlName="cancel_reason"
+                          rows="2"
+                          placeholder="Ej: Stock recibido incompleto, proveedor no entregó a tiempo…"
+                          [class.field__input--error]="form.hasError('cancelReasonRequired') && form.get('cancel_reason')!.dirty">
+                </textarea>
+                @if (form.hasError('cancelReasonRequired') && form.get('cancel_reason')!.dirty) {
+                  <span class="field__error">El motivo de cancelación es obligatorio.</span>
+                }
+              </div>
+            }
+          }
 
         </div>
       }

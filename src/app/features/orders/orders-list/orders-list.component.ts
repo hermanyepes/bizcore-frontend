@@ -155,15 +155,18 @@ export class OrdersListComponent implements OnInit {
   }
 
   // ─── Cancelar un pedido ───────────────────────────────────────────────────
-  // Llama al DELETE, que en el backend cambia status a 'CANCELADO'.
-  // El historial se conserva — nunca se borra la fila de la BD.
+  // Pide motivo de cancelación en el diálogo antes de ejecutar.
+  // El motivo queda registrado en el audit_log del backend.
   cancelOrder(order: Order): void {
     this.confirmService
-      .confirm(`¿Cancelar el pedido #${order.id}?`)
-      .then(confirmed => {
-        if (!confirmed) return;
+      .confirmWithReason(
+        `¿Cancelar el pedido #${order.id}? Esta acción no se puede deshacer.`,
+        'Ej: Pedido duplicado, proveedor no disponible, error de captura…',
+      )
+      .then(reason => {
+        if (reason === null) return;
 
-        this.ordersService.cancelOrder(order.id).subscribe({
+        this.ordersService.updateStatus(order.id, 'CANCELADA', reason).subscribe({
           next: () => {
             this.snackbarService.show('Pedido cancelado');
             this.loadPage(this.currentPage());

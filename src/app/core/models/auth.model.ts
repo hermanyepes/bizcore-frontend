@@ -25,7 +25,7 @@ export interface RefreshRequest {
 // Los datos del usuario que podemos extraer del JWT (payload decodificado).
 // El JWT tiene estos campos embebidos — no necesitamos llamar al backend para leerlos.
 export interface TokenPayload {
-  sub: string;    // "subject" — el email del usuario (estándar JWT)
+  sub: string;    // "subject" — el document_id del usuario (definido en auth.py:102)
   role: string;   // 'Administrador' o 'Empleado'
   exp: number;    // "expiration" — timestamp Unix cuando expira el token
 }

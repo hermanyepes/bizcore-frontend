@@ -3,13 +3,21 @@ import { Injectable, signal } from '@angular/core';
 // ---------------------------------------------------------------------------
 // ConfirmDialogState — lo que el componente necesita para renderizar el diálogo
 //
-// Solo dos campos: el mensaje a mostrar y si debe estar visible.
-// El resolver de la Promise NO entra aquí — es un detalle de implementación
-// interna, no algo que el template necesita saber.
+// message:      el mensaje a mostrar al usuario.
+// visible:      si el diálogo debe estar en el DOM.
+// requiredText: si está definido, el usuario debe escribir exactamente este
+//               texto para que el botón "Confirmar" se habilite.
+//               Patrón GitHub para borrar repos o desactivar usuarios activos.
+// reasonInput:  si está definido, el diálogo muestra un textarea de motivo.
+//               El botón "Confirmar" queda disabled hasta que el usuario
+//               escriba al menos un carácter. Usado en cancelación de pedidos
+//               para capturar el motivo y dejarlo en el audit log.
 // ---------------------------------------------------------------------------
 interface ConfirmDialogState {
   message: string;
   visible: boolean;
+  requiredText?: string;
+  reasonInput?: { placeholder: string };
 }
 
 // ---------------------------------------------------------------------------
@@ -47,15 +55,21 @@ export class ConfirmDialogService {
     visible: false,
   });
 
-  // ── Resolver privado — la "firma pendiente" ────────────────────────────────
-  // Guardamos aquí la función resolve() de la Promise activa.
-  // answer() la llama cuando el usuario responde.
-  // null = no hay diálogo abierto ahora mismo.
-  private _resolve: ((confirmed: boolean) => void) | null = null;
+  // ── Resolvers privados — uno por tipo de diálogo ──────────────────────────
+  // _resolve:       diálogos normales y type-to-confirm → Promise<boolean>
+  // _resolveReason: diálogos de motivo → Promise<string | null>
+  //                 null = usuario canceló, string = motivo escrito
+  private _resolve:       ((confirmed: boolean)      => void) | null = null;
+  private _resolveReason: ((reason: string | null)   => void) | null = null;
 
   // ---------------------------------------------------------------------------
   // confirm() — muestra el diálogo y devuelve una Promise que se resolverá
   //             cuando el usuario haga clic en Confirmar o Cancelar.
+  //
+  // requiredText (opcional): si se pasa, el botón "Confirmar" queda
+  //   deshabilitado hasta que el usuario escriba exactamente ese texto.
+  //   Patrón GitHub — usado en acciones destructivas críticas como
+  //   desactivar un usuario activo o eliminar permanentemente un recurso.
   //
   // Cómo funciona la Promise con resolver externo:
   //
@@ -69,12 +83,40 @@ export class ConfirmDialogService {
   //
   //   La Promise queda "en espera" hasta que alguien llame _resolve(true/false).
   // ---------------------------------------------------------------------------
-  confirm(message: string): Promise<boolean> {
-    this.state.set({ message, visible: true });
+  confirm(message: string, requiredText?: string): Promise<boolean> {
+    this.state.set({ message, visible: true, requiredText });
 
     return new Promise<boolean>(resolve => {
       this._resolve = resolve;
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // confirmWithReason() — muestra el diálogo con textarea de motivo.
+  //
+  // Devuelve Promise<string | null>:
+  //   - null    → el usuario canceló sin confirmar
+  //   - string  → el motivo que escribió (garantizado no vacío por el componente)
+  //
+  // placeholder: texto gris dentro del textarea que guía al usuario.
+  // ---------------------------------------------------------------------------
+  confirmWithReason(message: string, placeholder = 'Escribe el motivo…'): Promise<string | null> {
+    this.state.set({ message, visible: true, reasonInput: { placeholder } });
+
+    return new Promise<string | null>(resolve => {
+      this._resolveReason = resolve;
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // answerWithReason() — cierra el diálogo de motivo y resuelve su Promise.
+  //
+  // reason: el texto escrito por el usuario, o null si canceló.
+  // ---------------------------------------------------------------------------
+  answerWithReason(reason: string | null): void {
+    this.state.update(s => ({ ...s, visible: false, reasonInput: undefined }));
+    this._resolveReason?.(reason);
+    this._resolveReason = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -89,8 +131,8 @@ export class ConfirmDialogService {
   //   3. Limpia el resolver para evitar llamadas dobles
   // ---------------------------------------------------------------------------
   answer(confirmed: boolean): void {
-    // Paso 1: cierra el diálogo
-    this.state.update(s => ({ ...s, visible: false }));
+    // Paso 1: cierra el diálogo y limpia el texto requerido
+    this.state.update(s => ({ ...s, visible: false, requiredText: undefined }));
 
     // Paso 2: resuelve la Promise — el código que hizo 'await confirm()' continúa
     this._resolve?.(confirmed);

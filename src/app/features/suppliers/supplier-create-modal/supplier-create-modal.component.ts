@@ -70,6 +70,7 @@ export class SupplierCreateModalComponent {
       contact_email: v.contact_email || null,
       phone:         v.phone         || null,
       address:       v.address       || null,
+      nit:           null,  // modal rápido no pide NIT — usar el formulario completo
     };
 
     this.suppliersService.create(payload).subscribe({

@@ -10,6 +10,7 @@ import { RouterLink } from '@angular/router';
 
 import { SuppliersService, SupplierListParams } from '../suppliers.service';
 import { Supplier }                             from '../../../core/models/supplier.model';
+import { AuthService }                          from '../../../core/auth/auth.service';
 import { SnackbarService }                      from '../../../core/services/snackbar.service';
 import { ConfirmDialogService }                 from '../../../core/services/confirm-dialog.service';
 import { PaginatorComponent }                   from '../../../shared/paginator/paginator.component';
@@ -34,6 +35,9 @@ export class SuppliersListComponent implements OnInit {
   private readonly suppliersService = inject(SuppliersService);
   private readonly snackbarService  = inject(SnackbarService);
   private readonly confirmService   = inject(ConfirmDialogService);
+  private readonly authService      = inject(AuthService);
+
+  readonly currentUser = this.authService.currentUser;
 
   @ViewChild(SupplierCreateModalComponent)
   private createModalRef?: SupplierCreateModalComponent;
@@ -137,7 +141,7 @@ export class SuppliersListComponent implements OnInit {
   // de pedidos que lo referencian.
   deactivate(supplier: Supplier): void {
     this.confirmService
-      .confirm(`¿Desactivar a "${supplier.name}"?`)
+      .confirm(`Vas a desactivar al proveedor "${supplier.name}". No podrá seleccionarse en nuevos pedidos. ¿Continuar?`)
       .then(confirmed => {
         if (!confirmed) return;
 

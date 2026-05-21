@@ -68,6 +68,18 @@ export class AuthService {
   }
 
   // -------------------------------------------------------------------------
+  // changePassword — cambia la contraseña del usuario autenticado
+  // POST /api/v1/auth/change-password
+  // El backend revoca todos los refresh tokens → el caller debe hacer logout.
+  // -------------------------------------------------------------------------
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/change-password`,
+      { current_password: currentPassword, new_password: newPassword }
+    );
+  }
+
+  // -------------------------------------------------------------------------
   // logout — borra tokens locales y redirige al login
   // -------------------------------------------------------------------------
   logout(): void {

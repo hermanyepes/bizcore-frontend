@@ -1,5 +1,6 @@
-import { Routes }   from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { Routes }    from '@angular/router';
+import { authGuard }  from './core/auth/auth.guard';
+import { roleGuard }  from './core/auth/role.guard';
 
 export const routes: Routes = [
   // Ruta pública — accesible sin sesión
@@ -24,9 +25,10 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
-      // Módulo de usuarios — lista
+      // Módulo de usuarios — restringido a Superadmin y Administrador
       {
         path: 'users',
+        canActivate: [roleGuard(['Superadmin', 'Administrador'])],
         loadComponent: () =>
           import('./features/users/users-list/users-list.component').then(m => m.UsersListComponent),
       },
@@ -36,6 +38,7 @@ export const routes: Routes = [
       // y se cargaría UserDetailComponent en vez del formulario.
       {
         path: 'users/new',
+        canActivate: [roleGuard(['Superadmin', 'Administrador'])],
         loadComponent: () =>
           import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent),
       },
@@ -43,6 +46,7 @@ export const routes: Routes = [
       // :id es el parámetro dinámico; ActivatedRoute lo lee en el componente
       {
         path: 'users/:id',
+        canActivate: [roleGuard(['Superadmin', 'Administrador'])],
         loadComponent: () =>
           import('./features/users/user-detail/user-detail.component').then(m => m.UserDetailComponent),
       },
@@ -51,6 +55,7 @@ export const routes: Routes = [
       // leyendo si existe el parámetro :id en la URL.
       {
         path: 'users/:id/edit',
+        canActivate: [roleGuard(['Superadmin', 'Administrador'])],
         loadComponent: () =>
           import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent),
       },
@@ -60,30 +65,33 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/products/products-list/products-list.component').then(m => m.ProductsListComponent),
       },
-      // Formulario de producto — modo CREAR
+      // Formulario de producto — modo CREAR — requiere rol de escritura
       // IMPORTANTE: debe estar ANTES de 'products/:id' por la misma razón
       // que 'users/new': si ':id' fuera primero, "new" se leería como el id.
       {
         path: 'products/new',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
       },
-      // Detalle de un producto por su id numérico
+      // Detalle de un producto — catálogo visible para todos los autenticados
       {
         path: 'products/:id',
         loadComponent: () =>
           import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent),
       },
-      // Formulario de producto — modo EDITAR
+      // Formulario de producto — modo EDITAR — requiere rol de escritura
       {
         path: 'products/:id/edit',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
       },
 
-      // Módulo de inventario — historial de movimientos
+      // Módulo de inventario — restringido a Superadmin, Administrador y Supervisor
       {
         path: 'inventory',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/inventory/inventory-list/inventory-list.component').then(m => m.InventoryListComponent),
       },
@@ -92,19 +100,22 @@ export const routes: Routes = [
       // que 'products/new': si ':id' fuera primero, "new" se leería como el id.
       {
         path: 'inventory/new',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/inventory/inventory-form/inventory-form.component').then(m => m.InventoryFormComponent),
       },
       // Detalle de un movimiento — solo lectura (inmutable)
       {
         path: 'inventory/:id',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/inventory/inventory-detail/inventory-detail.component').then(m => m.InventoryDetailComponent),
       },
 
-      // Módulo de proveedores — lista paginada
+      // Módulo de proveedores — restringido a Superadmin, Administrador y Supervisor
       {
         path: 'suppliers',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/suppliers/suppliers-list/suppliers-list.component').then(m => m.SuppliersListComponent),
       },
@@ -113,12 +124,14 @@ export const routes: Routes = [
       // que 'products/new': si ':id' fuera primero, "new" se leería como el id.
       {
         path: 'suppliers/new',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/suppliers/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
       },
       // Formulario de proveedor — modo EDITAR
       {
         path: 'suppliers/:id/edit',
+        canActivate: [roleGuard(['Superadmin', 'Administrador', 'Supervisor'])],
         loadComponent: () =>
           import('./features/suppliers/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
       },
@@ -142,6 +155,13 @@ export const routes: Routes = [
         path: 'orders/:id/edit',
         loadComponent: () =>
           import('./features/orders/order-form/order-form.component').then(m => m.OrderFormComponent),
+      },
+
+      // Perfil del usuario autenticado — accesible para cualquier rol
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(m => m.ProfileComponent),
       },
 
       // Ruta raíz vacía — redirige al dashboard

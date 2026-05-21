@@ -9,9 +9,11 @@
         Historial de movimientos de stock
       </p>
     </div>
-    <a routerLink="/inventory/new" class="btn btn--primary">
-      + Nuevo movimiento
-    </a>
+    @if (['Superadmin', 'Administrador', 'Supervisor'].includes(currentUser()?.role ?? '')) {
+      <a routerLink="/inventory/new" class="btn btn--primary">
+        + Nuevo movimiento
+      </a>
+    }
   </div>
 
   <!-- ===== FILTROS ========================================================= -->

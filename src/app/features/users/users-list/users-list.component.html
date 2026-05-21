@@ -11,10 +11,12 @@
         }
       </span>
     </div>
-    <!-- Botón para crear un nuevo usuario — abre el modal de creación -->
-    <button class="users-list__btn-new" (click)="isCreateModalOpen.set(true)">
-      + Nuevo usuario
-    </button>
+    <!-- Visible solo para roles con permiso de gestión de usuarios -->
+    @if (['Superadmin', 'Administrador'].includes(currentUser()?.role ?? '')) {
+      <button class="users-list__btn-new" (click)="isCreateModalOpen.set(true)">
+        + Nuevo usuario
+      </button>
+    }
   </div>
 
   <!-- Estado: cargando -->
@@ -55,7 +57,9 @@
               <td class="users-list__cell">
                 <span
                   class="users-list__badge"
+                  [class.users-list__badge--superadmin]="user.role === 'Superadmin'"
                   [class.users-list__badge--admin]="user.role === 'Administrador'"
+                  [class.users-list__badge--supervisor]="user.role === 'Supervisor'"
                   [class.users-list__badge--employee]="user.role === 'Empleado'"
                 >
                   {{ user.role }}

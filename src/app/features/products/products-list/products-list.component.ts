@@ -6,6 +6,7 @@ import { switchMap }                           from 'rxjs/operators';
 
 import { ProductsService, ProductListParams, PRODUCT_CATEGORIES } from '../products.service';
 import { Product }                                                 from '../../../core/models/product.model';
+import { AuthService }                                             from '../../../core/auth/auth.service';
 import { PaginatorComponent }                                      from '../../../shared/paginator/paginator.component';
 import { ModalComponent }                                          from '../../../shared/modal/modal.component';
 import { ProductCreateModalComponent }                             from '../product-create-modal/product-create-modal.component';
@@ -26,6 +27,9 @@ export class ProductsListComponent {
   private readonly productsService = inject(ProductsService);
   private readonly snackbarService = inject(SnackbarService);
   private readonly confirmService  = inject(ConfirmDialogService);
+  private readonly authService     = inject(AuthService);
+
+  readonly currentUser = this.authService.currentUser;
 
   @ViewChild(ProductCreateModalComponent)
   private createModalRef?: ProductCreateModalComponent;

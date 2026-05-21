@@ -22,8 +22,9 @@
             (change)="onStatusChange(statusSelect.value)">
       <option value="">Todos los estados</option>
       <option value="PENDIENTE">Pendiente</option>
-      <option value="COMPLETADO">Completado</option>
-      <option value="CANCELADO">Cancelado</option>
+      <option value="APROBADA">Aprobada</option>
+      <option value="ENTREGADA">Entregada</option>
+      <option value="CANCELADA">Cancelada</option>
     </select>
 
     <select class="filter-select"
@@ -81,8 +82,9 @@
               <td>
                 <span class="status-badge"
                       [class.status-badge--warning]="order.status === 'PENDIENTE'"
-                      [class.status-badge--success]="order.status === 'COMPLETADO'"
-                      [class.status-badge--danger]="order.status === 'CANCELADO'">
+                      [class.status-badge--info]="order.status === 'APROBADA'"
+                      [class.status-badge--success]="order.status === 'ENTREGADA'"
+                      [class.status-badge--danger]="order.status === 'CANCELADA'">
                   {{ order.status }}
                 </span>
               </td>

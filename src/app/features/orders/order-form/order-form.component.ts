@@ -17,7 +17,8 @@
 //   /orders/3/edit    → isEditMode = true  → EDITAR estado + notas
 //
 // En modo editar los ítems son inmutables (históricos).
-// Solo se pueden cambiar status y notes.
+// El campo `status` es un selector de transición: muestra solo
+// los estados válidos desde el estado actual (máquina de estados).
 // ============================================================
 
 import {
@@ -27,22 +28,40 @@ import {
   signal,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormControl,
+  AbstractControl,
   FormArray,
-  Validators,
+  FormControl,
+  FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { OrdersService }    from '../orders.service';
 import { SuppliersService } from '../../suppliers/suppliers.service';
 import { ProductsService }  from '../../products/products.service';
-import { SnackbarService }  from '../../../core/services/snackbar.service';
+import { SnackbarService }      from '../../../core/services/snackbar.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { Order, OrderCreate, OrderStatus } from '../order.model';
 import { Supplier }         from '../../../core/models/supplier.model';
 import { Product }          from '../../../core/models/product.model';
 import { CurrencyCopPipe }  from '../../../shared/pipes/currency-cop.pipe';
+
+
+// ------------------------------------------------------------
+// Validator a nivel de FormGroup:
+// cancel_reason es obligatorio cuando el nuevo status = CANCELADA.
+// Al estar fuera de la clase, no depende de `this` ni de Angular DI.
+// ------------------------------------------------------------
+function requireCancelReason(group: AbstractControl): ValidationErrors | null {
+  const status       = group.get('status')?.value;
+  const cancelReason = group.get('cancel_reason')?.value;
+  if (status === 'CANCELADA' && !cancelReason?.trim()) {
+    return { cancelReasonRequired: true };
+  }
+  return null;
+}
 
 
 @Component({
@@ -64,6 +83,7 @@ export class OrderFormComponent implements OnInit {
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService  = inject(ProductsService);
   private readonly snackbarService  = inject(SnackbarService);
+  private readonly confirmService   = inject(ConfirmDialogService);
 
   // ----------------------------------------------------------
   // Detección de modo (crear vs editar)
@@ -91,52 +111,73 @@ export class OrderFormComponent implements OnInit {
   readonly loadedOrder = signal<Order | null>(null);
 
   // ----------------------------------------------------------
-  // FormGroup principal — Parte 1: encabezado
+  // FormGroup principal
   // ----------------------------------------------------------
-  // En modo CREAR: supplier_id + notes + items (FormArray)
-  // En modo EDITAR: solo status + notes (ítems son inmutables)
+  // La segunda opción de FormGroup acepta validadores a nivel de grupo.
+  // requireCancelReason dispara error 'cancelReasonRequired' cuando
+  // el usuario elige CANCELADA sin llenar cancel_reason.
   readonly form = new FormGroup({
-    // Parte 1 — encabezado
-    supplier_id: new FormControl<number | null>(null, Validators.required),
-    notes:       new FormControl<string | null>(null, Validators.maxLength(300)),
-
-    // Parte 2 — tabla de ítems (solo en modo crear)
-    // FormArray: lista de FormGroups, uno por fila de producto.
-    // Empieza vacío — el usuario agrega filas con addItem().
-    items: new FormArray<FormGroup>([]),
-
-    // Solo en modo editar: cambiar el estado del pedido
-    status: new FormControl<OrderStatus | null>(null),
-  });
+    supplier_id:   new FormControl<number | null>(null, Validators.required),
+    notes:         new FormControl<string | null>(null, Validators.maxLength(300)),
+    items:         new FormArray<FormGroup>([]),
+    // Selector de transición en modo editar — empieza en null
+    // (el usuario debe elegir explícitamente adónde transitar)
+    status:        new FormControl<OrderStatus | null>(null),
+    cancel_reason: new FormControl<string | null>(null),
+  }, { validators: requireCancelReason });
 
   // ----------------------------------------------------------
   // Getter de conveniencia para el FormArray
   // ----------------------------------------------------------
-  // Cada vez que escribimos this.items en el .ts, Angular nos
-  // da el FormArray ya tipado — sin casteos manuales.
   get items(): FormArray<FormGroup> {
     return this.form.get('items') as FormArray<FormGroup>;
+  }
+
+  // ----------------------------------------------------------
+  // availableStatusOptions — transiciones válidas desde el estado actual
+  // ----------------------------------------------------------
+  // El usuario solo ve las opciones a las que puede ir desde el estado
+  // actual del pedido. Nunca aparece PENDIENTE (no hay retorno).
+  get availableStatusOptions(): { value: OrderStatus; label: string }[] {
+    const order = this.loadedOrder();
+    if (!order) return [];
+
+    const map: Partial<Record<OrderStatus, { value: OrderStatus; label: string }[]>> = {
+      'PENDIENTE': [
+        { value: 'APROBADA',  label: 'Aprobar pedido' },
+        { value: 'CANCELADA', label: 'Cancelar pedido' },
+      ],
+      'APROBADA': [
+        { value: 'ENTREGADA', label: 'Marcar como entregada' },
+        { value: 'CANCELADA', label: 'Cancelar pedido' },
+      ],
+    };
+    return map[order.status] ?? [];
+  }
+
+  // ----------------------------------------------------------
+  // isTerminalState — ENTREGADA y CANCELADA no admiten más cambios
+  // ----------------------------------------------------------
+  get isTerminalState(): boolean {
+    const order = this.loadedOrder();
+    return order?.status === 'ENTREGADA' || order?.status === 'CANCELADA';
   }
 
   // ----------------------------------------------------------
   // ngOnInit — carga de datos inicial
   // ----------------------------------------------------------
   ngOnInit(): void {
-    // Siempre cargamos proveedores y productos para los dropdowns
     this.loadSuppliers();
     this.loadProducts();
 
     if (this.isEditMode) {
-      // En modo editar: cargamos el pedido y ajustamos el form
       this.loadOrder();
     } else {
-      // En modo crear: empezamos con una fila vacía por defecto
-      // para que el usuario no vea la tabla completamente vacía
+      // En modo crear: fila vacía por defecto
       this.addItem();
-
-      // supplier_id y items son obligatorios en modo crear
-      // status no se usa en modo crear (el backend lo pone a PENDIENTE)
+      // status y cancel_reason no se usan al crear (el backend asigna PENDIENTE)
       this.form.get('status')!.disable();
+      this.form.get('cancel_reason')!.disable();
     }
   }
 
@@ -153,7 +194,7 @@ export class OrderFormComponent implements OnInit {
 
   // ----------------------------------------------------------
   // loadProducts — productos activos para el dropdown de ítems
-  // page_size=100 es el máximo que acepta el backend (le=100 en Query).
+  // page_size=100 es el máximo que acepta el backend.
   // ----------------------------------------------------------
   private loadProducts(): void {
     this.productsService.getProducts({ page: 1, page_size: 100, is_active: true })
@@ -171,18 +212,21 @@ export class OrderFormComponent implements OnInit {
 
     this.ordersService.getOrder(this.orderId!).subscribe({
       next: (order) => {
-        // Guardamos el pedido completo para mostrar los ítems históricos
         this.loadedOrder.set(order);
 
-        // Solo pre-poblamos status y notes — ítems son inmutables
-        this.form.patchValue({
-          notes:  order.notes,
-          status: order.status,
-        });
+        // Solo pre-poblamos notes. El campo status es un selector de
+        // TRANSICIÓN, no refleja el estado actual — el usuario elige
+        // adónde quiere moverse desde availableStatusOptions.
+        this.form.patchValue({ notes: order.notes });
 
-        // En modo editar: deshabilitamos supplier_id (no se puede cambiar)
-        // e items (no existen filas dinámicas — se muestran en modo lectura)
+        // supplier_id es inmutable en edición
         this.form.get('supplier_id')!.disable();
+
+        // En estado terminal deshabilitamos también el selector de transición
+        if (order.status === 'ENTREGADA' || order.status === 'CANCELADA') {
+          this.form.get('status')!.disable();
+          this.form.get('cancel_reason')!.disable();
+        }
 
         this.isLoading.set(false);
       },
@@ -196,8 +240,6 @@ export class OrderFormComponent implements OnInit {
   // ----------------------------------------------------------
   // addItem — agrega una fila vacía al FormArray
   // ----------------------------------------------------------
-  // Cada fila es un FormGroup con product_id y quantity.
-  // El usuario puede agregar tantas filas como quiera.
   addItem(): void {
     const itemGroup = new FormGroup({
       product_id: new FormControl<number | null>(null, Validators.required),
@@ -214,7 +256,6 @@ export class OrderFormComponent implements OnInit {
   // removeItem — elimina la fila en el índice dado
   // ----------------------------------------------------------
   // Protección: no permitimos eliminar la última fila.
-  // Un pedido debe tener al menos 1 ítem.
   removeItem(index: number): void {
     if (this.items.length <= 1) return;
     this.items.removeAt(index);
@@ -223,9 +264,6 @@ export class OrderFormComponent implements OnInit {
   // ----------------------------------------------------------
   // getProductPrice — precio del producto seleccionado en una fila
   // ----------------------------------------------------------
-  // Busca en la lista ya cargada en memoria — sin llamada HTTP.
-  // Se llama desde el template para mostrar el precio unitario
-  // en tiempo real cuando el usuario elige un producto.
   getProductPrice(index: number): number | null {
     const productId = this.items.at(index).get('product_id')?.value;
     if (!productId) return null;
@@ -237,7 +275,6 @@ export class OrderFormComponent implements OnInit {
   // ----------------------------------------------------------
   // getSubtotal — subtotal de una fila (precio × cantidad)
   // ----------------------------------------------------------
-  // También se calcula en memoria — el backend lo confirma al crear.
   getSubtotal(index: number): number | null {
     const price    = this.getProductPrice(index);
     const quantity = this.items.at(index).get('quantity')?.value;
@@ -258,10 +295,23 @@ export class OrderFormComponent implements OnInit {
   }
 
   // ----------------------------------------------------------
-  // save — punto de entrada único, delega según el modo
+  // save — punto de entrada único, delega según el modo.
+  // Si el nuevo estado es CANCELADA, pide confirmación antes
+  // de ejecutar para evitar cancelaciones accidentales.
   // ----------------------------------------------------------
-  save(): void {
+  async save(): Promise<void> {
     if (this.form.invalid || this.isSaving()) return;
+
+    const newStatus = this.form.value.status as OrderStatus | null | undefined;
+
+    if (this.isEditMode && newStatus === 'CANCELADA') {
+      const order = this.loadedOrder();
+      const orderLabel = order ? `pedido #${order.id}` : 'este pedido';
+      const confirmed = await this.confirmService.confirm(
+        `Vas a cancelar el ${orderLabel}. Esta acción no se puede deshacer. ¿Continuar?`
+      );
+      if (!confirmed) return;
+    }
 
     this.isSaving.set(true);
     this.serverError.set(null);
@@ -282,7 +332,6 @@ export class OrderFormComponent implements OnInit {
     const payload: OrderCreate = {
       supplier_id: v.supplier_id!,
       notes:       v.notes || null,
-      // Mapeamos cada FormGroup del array al formato que espera el backend
       items: (v.items as { product_id: number; quantity: number }[]).map(item => ({
         product_id: item.product_id,
         quantity:   item.quantity,
@@ -302,44 +351,59 @@ export class OrderFormComponent implements OnInit {
   }
 
   // ----------------------------------------------------------
-  // saveUpdate — PUT /api/v1/orders/{id}
+  // saveUpdate — modo editar
   // ----------------------------------------------------------
-  // Solo enviamos status y notes — ítems son inmutables.
+  // Si el usuario eligió una transición → PUT /{id}/status (máquina de estados).
+  // Si solo actualizó notas sin cambiar estado → PUT /{id} (legacy, solo notes).
   private saveUpdate(): void {
-    const v = this.form.value;
+    const v         = this.form.value;
+    const newStatus = v.status as OrderStatus | null | undefined;
 
-    this.ordersService.updateOrder(this.orderId!, {
-      status: v.status ?? null,
-      notes:  v.notes  || null,
-    }).subscribe({
-      next:  () => {
-        this.snackbarService.show('Pedido actualizado');
-        this.router.navigate(['/orders']);
-      },
-      error: (err) => {
-        this.serverError.set(err.error?.detail ?? 'Error al actualizar el pedido.');
-        this.isSaving.set(false);
-      },
-    });
+    if (newStatus) {
+      // Cambio de estado — endpoint de máquina de estados
+      const cancelReason = newStatus === 'CANCELADA' ? (v.cancel_reason || null) : null;
+
+      this.ordersService.updateStatus(this.orderId!, newStatus, cancelReason).subscribe({
+        next:  () => {
+          this.snackbarService.show('Pedido actualizado');
+          this.router.navigate(['/orders']);
+        },
+        error: (err) => {
+          this.serverError.set(err.error?.detail ?? 'Error al actualizar el pedido.');
+          this.isSaving.set(false);
+        },
+      });
+    } else {
+      // Solo notas sin cambio de estado — endpoint de notas
+      this.ordersService.updateOrder(this.orderId!, {
+        notes: v.notes || null,
+      }).subscribe({
+        next:  () => {
+          this.snackbarService.show('Notas actualizadas');
+          this.router.navigate(['/orders']);
+        },
+        error: (err) => {
+          this.serverError.set(err.error?.detail ?? 'Error al actualizar el pedido.');
+          this.isSaving.set(false);
+        },
+      });
+    }
   }
 
   // ----------------------------------------------------------
   // Helpers para el template
   // ----------------------------------------------------------
 
-  // Nombre del proveedor del pedido cargado (modo editar)
   getSupplierName(supplierId: number): string {
     const supplier = this.suppliers().find(s => s.id === supplierId);
     return supplier ? supplier.name : `#${supplierId}`;
   }
 
-  // Nombre del producto dado su id (para la tabla histórica en modo editar)
   getProductName(productId: number): string {
     const product = this.products().find(p => p.id === productId);
     return product ? product.name : `#${productId}`;
   }
 
-  // Total del pedido cargado en modo editar (suma de subtotales históricos)
   getLoadedOrderTotal(): number {
     const order = this.loadedOrder();
     if (!order) return 0;

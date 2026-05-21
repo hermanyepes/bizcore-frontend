@@ -1,11 +1,13 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators,
          ReactiveFormsModule }                         from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink }          from '@angular/router';
 
 import { UsersService, UserCreatePayload,
          UserUpdatePayload }                           from '../users.service';
+import { AuthService }                                from '../../../core/auth/auth.service';
 import { SnackbarService }                            from '../../../core/services/snackbar.service';
+import { canManageUser }                              from '../../../shared/utils/role-hierarchy';
 
 // ---------------------------------------------------------------------------
 // UserFormComponent
@@ -36,7 +38,12 @@ export class UserFormComponent implements OnInit {
   private readonly route           = inject(ActivatedRoute);
   private readonly router          = inject(Router);
   private readonly usersService    = inject(UsersService);
+  private readonly authService     = inject(AuthService);
   private readonly snackbarService = inject(SnackbarService);
+
+  readonly isSuperadmin  = computed(() => this.authService.currentUser()?.role === 'Superadmin');
+  // sub del JWT es document_id — coincide con la URL cuando el admin edita su propio perfil
+  readonly isEditingSelf = computed(() => this.authService.currentUser()?.sub === this.documentId);
 
   // ---------------------------------------------------------------------------
   // Detección de modo
@@ -59,9 +66,32 @@ export class UserFormComponent implements OnInit {
   // isSaving:  true mientras esperamos respuesta del servidor al guardar
   // serverError: mensaje de error del backend (null si no hay error)
   // ---------------------------------------------------------------------------
-  readonly isLoading   = signal(false);
-  readonly isSaving    = signal(false);
-  readonly serverError = signal<string | null>(null);
+  readonly isLoading          = signal(false);
+  readonly isSaving           = signal(false);
+  readonly serverError        = signal<string | null>(null);
+  readonly isPasswordVisible  = signal(false);
+
+  togglePassword(): void { this.isPasswordVisible.update(v => !v); }
+
+  onEmailInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const lower = input.value.toLowerCase();
+    if (input.value !== lower) {
+      const pos = input.selectionStart ?? lower.length;
+      this.form.get('email')!.setValue(lower, { emitEvent: false });
+      input.value = lower;
+      input.setSelectionRange(pos, pos);
+    }
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const numeric = input.value.replace(/\D/g, '');
+    if (input.value !== numeric) {
+      this.form.get('phone')!.setValue(numeric || null, { emitEvent: false });
+      input.value = numeric;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // FormGroup — la "carpeta" que agrupa todos los campos del formulario
@@ -88,7 +118,7 @@ export class UserFormComponent implements OnInit {
     full_name:     new FormControl('',       [Validators.required, Validators.maxLength(80)]),
     phone:         new FormControl<string | null>(null, [Validators.maxLength(15)]),
     city:          new FormControl<string | null>(null, [Validators.maxLength(50)]),
-    role:          new FormControl<'Administrador' | 'Empleado'>('Empleado', [Validators.required]),
+    role:          new FormControl<'Superadmin' | 'Administrador' | 'Supervisor' | 'Empleado'>('Empleado', [Validators.required]),
 
     // is_active: solo visible/relevante en modo EDITAR.
     // Al crear, el usuario nace activo por defecto (lo define el backend).
@@ -107,13 +137,14 @@ export class UserFormComponent implements OnInit {
   // ---------------------------------------------------------------------------
   ngOnInit(): void {
     if (this.isEditMode) {
-      // En modo editar: bloquear los campos que el backend no permite cambiar.
-      // disable() hace dos cosas:
-      //   1. El input queda como readonly visualmente
-      //   2. form.value NO incluye el campo (pero form.getRawValue() sí lo haría)
+      // En modo editar: bloquear los campos no editables.
       this.form.get('document_id')!.disable();
       this.form.get('document_type')!.disable();
-      this.form.get('email')!.disable();
+
+      // Email: editable solo para Superadmin; bloqueado para Admin
+      if (!this.isSuperadmin()) {
+        this.form.get('email')!.disable();
+      }
 
       // Cargar los datos actuales del usuario para pre-poblar el formulario
       this.loadUser();
@@ -138,6 +169,13 @@ export class UserFormComponent implements OnInit {
 
     this.usersService.getOne(this.documentId!).subscribe({
       next: (user) => {
+        // Protección contra acceso directo por URL (/users/CC-123/edit)
+        if (!canManageUser(this.authService.currentUser(), user.role, user.document_id)) {
+          this.snackbarService.show('No tienes permiso para editar este usuario.');
+          this.router.navigate(['/users', this.documentId]);
+          return;
+        }
+
         // patchValue llena solo los campos que existen en el objeto pasado.
         // A diferencia de setValue, no exige que estén TODOS los campos —
         // ideal para actualizar un subconjunto del FormGroup.
@@ -147,9 +185,9 @@ export class UserFormComponent implements OnInit {
           city:      user.city,
           role:      user.role,
           is_active: user.is_active,
-          // Nota: document_id, document_type, email no se patchean aquí
-          // porque están deshabilitados. Tampoco se patchea password —
-          // el usuario debe escribir una nueva si quiere cambiarla.
+          email:     user.email,   // visible y editable para Superadmin; disabled para Admin
+          // document_id y document_type están disabled y no se patchean.
+          // password no se patchea — el admin escribe una nueva si quiere cambiarla.
         });
         this.isLoading.set(false);
       },
@@ -212,16 +250,29 @@ export class UserFormComponent implements OnInit {
   private saveUpdate(): void {
     const v = this.form.value;
 
+    // Construimos el payload SIN password primero.
+    // Solo añadimos password si el admin escribió algo explícitamente.
+    // Razón: el campo vacío en el formulario significa "no cambiar".
+    // Si siempre enviáramos password:null, un autocomplete del navegador
+    // podría llenar el campo silenciosamente y sobreescribir la contraseña
+    // sin que el admin lo note — incluso si puso autocomplete="new-password".
     const payload: UserUpdatePayload = {
       full_name: v.full_name || null,
       phone:     v.phone     || null,
       city:      v.city      || null,
       role:      v.role      ?? null,
       is_active: v.is_active ?? null,
-      // Si password está vacía, no la incluimos → la contraseña actual no cambia.
-      // Si el usuario escribió algo, la enviamos para que el backend la hashee.
-      password:  v.password  || null,
     };
+
+    // Email solo para Superadmin — se incluye si el campo está habilitado y tiene valor
+    if (this.isSuperadmin() && v.email) {
+      payload.email = v.email;
+    }
+
+    // Incluir password SOLO si tiene contenido real
+    if (v.password) {
+      payload.password = v.password;
+    }
 
     this.usersService.update(this.documentId!, payload).subscribe({
       next:  () => {

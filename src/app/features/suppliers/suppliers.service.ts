@@ -26,6 +26,7 @@ export interface SupplierCreatePayload {
   contact_email: string | null; // null si el admin dejó el campo vacío
   phone:         string | null;
   address:       string | null;
+  nit:           string | null; // null si no se proporcionó NIT
 }
 
 // ─── Payload para actualizar un proveedor existente ──────────────────────────
@@ -38,6 +39,7 @@ export interface SupplierUpdatePayload {
   contact_email?: string | null;
   phone?:         string | null;
   address?:       string | null;
+  nit?:           string | null;
   is_active?:     boolean | null;
 }
 
